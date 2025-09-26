@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bot, Plus, Loader2, Play, Clock, CheckCircle, XCircle, Trash2, Import, ChevronDown, FileJson, Globe, Download } from 'lucide-react';
+import { Bot, Loader2, Play, Clock, CheckCircle, XCircle, Trash2, Download } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -8,12 +8,6 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -22,7 +16,7 @@ import { Toast } from '@/components/ui/toast';
 import { api, type Agent, type AgentRunWithMetrics } from '@/lib/api';
 import { useTabState } from '@/hooks/useTabState';
 import { formatISOTimestamp } from '@/lib/date-utils';
-import { open as openDialog, save } from '@tauri-apps/plugin-dialog';
+import { save } from '@tauri-apps/plugin-dialog';
 import { invoke } from '@tauri-apps/api/core';
 import { GitHubAgentBrowser } from '@/components/GitHubAgentBrowser';
 
@@ -40,7 +34,7 @@ export const AgentsModal: React.FC<AgentsModalProps> = ({ open, onOpenChange }) 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
   const [showGitHubBrowser, setShowGitHubBrowser] = useState(false);
-  const { createAgentTab, createCreateAgentTab } = useTabState();
+  const { createAgentTab } = useTabState();
 
   // Load agents when modal opens
   useEffect(() => {
@@ -148,36 +142,6 @@ export const AgentsModal: React.FC<AgentsModalProps> = ({ open, onOpenChange }) 
     onOpenChange(false);
   };
 
-  const handleCreateAgent = () => {
-    // Close modal and create new tab
-    onOpenChange(false);
-    createCreateAgentTab();
-  };
-
-  const handleImportFromFile = async () => {
-    try {
-      const filePath = await openDialog({
-        multiple: false,
-        filters: [{
-          name: 'JSON',
-          extensions: ['json']
-        }]
-      });
-      
-      if (filePath) {
-        const agent = await api.importAgentFromFile(filePath as string);
-        loadAgents(); // Refresh list
-        setToast({ message: `Agent "${agent.name}" imported successfully`, type: "success" });
-      }
-    } catch (error) {
-      console.error('Failed to import agent:', error);
-      setToast({ message: "Failed to import agent", type: "error" });
-    }
-  };
-
-  const handleImportFromGitHub = () => {
-    setShowGitHubBrowser(true);
-  };
 
   const handleExportAgent = async (agent: Agent) => {
     try {
@@ -243,32 +207,6 @@ export const AgentsModal: React.FC<AgentsModalProps> = ({ open, onOpenChange }) 
           <div className="flex-1 overflow-hidden">
             <TabsContent value="agents" className="h-full m-0">
               <ScrollArea className="h-full px-6 pb-6">
-                {/* Action buttons at the top */}
-                <div className="flex gap-2 mb-4 pt-4">
-                  <Button onClick={handleCreateAgent} className="flex-1">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Create Agent
-                  </Button>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" className="flex-1">
-                        <Import className="w-4 h-4 mr-2" />
-                        Import Agent
-                        <ChevronDown className="w-4 h-4 ml-2" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuItem onClick={handleImportFromFile}>
-                        <FileJson className="w-4 h-4 mr-2" />
-                        From File
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={handleImportFromGitHub}>
-                        <Globe className="w-4 h-4 mr-2" />
-                        From GitHub
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
                 {loading ? (
                   <div className="flex items-center justify-center h-full">
                     <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
@@ -278,15 +216,8 @@ export const AgentsModal: React.FC<AgentsModalProps> = ({ open, onOpenChange }) 
                     <Bot className="w-12 h-12 text-muted-foreground mb-4" />
                     <p className="text-lg font-medium mb-2">No agents available</p>
                     <p className="text-sm text-muted-foreground mb-4">
-                      Create your first agent to get started
+                      Use the existing agents provided
                     </p>
-                    <Button onClick={() => {
-                      onOpenChange(false);
-                      window.dispatchEvent(new CustomEvent('open-create-agent-tab'));
-                    }}>
-                      <Plus className="w-4 h-4 mr-2" />
-                      Create Agent
-                    </Button>
                   </div>
                 ) : (
                   <div className="grid gap-4 py-4">

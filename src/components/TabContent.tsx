@@ -13,7 +13,6 @@ import { Button } from '@/components/ui/button';
 const ClaudeCodeSession = lazy(() => import('@/components/ClaudeCodeSession').then(m => ({ default: m.ClaudeCodeSession })));
 const AgentRunOutputViewer = lazy(() => import('@/components/AgentRunOutputViewer'));
 const AgentExecution = lazy(() => import('@/components/AgentExecution').then(m => ({ default: m.AgentExecution })));
-const CreateAgent = lazy(() => import('@/components/CreateAgent').then(m => ({ default: m.CreateAgent })));
 const Agents = lazy(() => import('@/components/Agents').then(m => ({ default: m.Agents })));
 const UsageDashboard = lazy(() => import('@/components/UsageDashboard').then(m => ({ default: m.UsageDashboard })));
 const MCPManager = lazy(() => import('@/components/MCPManager').then(m => ({ default: m.MCPManager })));
@@ -342,22 +341,8 @@ const TabPanel: React.FC<TabPanelProps> = ({ tab, isActive }) => {
           />
         );
       
-      case 'create-agent':
-        return (
-          <CreateAgent
-            onAgentCreated={() => {
-              // Close this tab after agent is created
-              window.dispatchEvent(new CustomEvent('close-tab', { detail: { tabId: tab.id } }));
-            }}
-            onBack={() => {
-              // Close this tab when back is clicked
-              window.dispatchEvent(new CustomEvent('close-tab', { detail: { tabId: tab.id } }));
-            }}
-          />
-        );
       
       case 'import-agent':
-        // TODO: Implement import agent component
         return (
           <div className="h-full">
             <div className="p-4">Import agent functionality coming soon...</div>
@@ -398,7 +383,7 @@ const TabPanel: React.FC<TabPanelProps> = ({ tab, isActive }) => {
 };
 
 export const TabContent: React.FC = () => {
-  const { tabs, activeTabId, createChatTab, createProjectsTab, findTabBySessionId, createClaudeFileTab, createAgentExecutionTab, createCreateAgentTab, createImportAgentTab, closeTab, updateTab } = useTabState();
+  const { tabs, activeTabId, createChatTab, createProjectsTab, findTabBySessionId, createClaudeFileTab, createAgentExecutionTab, createImportAgentTab, closeTab, updateTab } = useTabState();
   
   // Listen for events to open sessions in tabs
   useEffect(() => {
@@ -436,9 +421,6 @@ export const TabContent: React.FC = () => {
       createAgentExecutionTab(agent, tabId, projectPath);
     };
 
-    const handleOpenCreateAgentTab = () => {
-      createCreateAgentTab();
-    };
 
     const handleOpenImportAgentTab = () => {
       createImportAgentTab();
@@ -486,7 +468,6 @@ export const TabContent: React.FC = () => {
     window.addEventListener('open-session-in-tab', handleOpenSessionInTab as EventListener);
     window.addEventListener('open-claude-file', handleOpenClaudeFile as EventListener);
     window.addEventListener('open-agent-execution', handleOpenAgentExecution as EventListener);
-    window.addEventListener('open-create-agent-tab', handleOpenCreateAgentTab);
     window.addEventListener('open-import-agent-tab', handleOpenImportAgentTab);
     window.addEventListener('close-tab', handleCloseTab as EventListener);
     window.addEventListener('claude-session-selected', handleClaudeSessionSelected as EventListener);
@@ -494,12 +475,11 @@ export const TabContent: React.FC = () => {
       window.removeEventListener('open-session-in-tab', handleOpenSessionInTab as EventListener);
       window.removeEventListener('open-claude-file', handleOpenClaudeFile as EventListener);
       window.removeEventListener('open-agent-execution', handleOpenAgentExecution as EventListener);
-      window.removeEventListener('open-create-agent-tab', handleOpenCreateAgentTab);
       window.removeEventListener('open-import-agent-tab', handleOpenImportAgentTab);
       window.removeEventListener('close-tab', handleCloseTab as EventListener);
       window.removeEventListener('claude-session-selected', handleClaudeSessionSelected as EventListener);
     };
-  }, [createChatTab, findTabBySessionId, createClaudeFileTab, createAgentExecutionTab, createCreateAgentTab, createImportAgentTab, closeTab, updateTab]);
+  }, [createChatTab, findTabBySessionId, createClaudeFileTab, createAgentExecutionTab, createImportAgentTab, closeTab, updateTab]);
   
   return (
     <div className="flex-1 h-full relative">

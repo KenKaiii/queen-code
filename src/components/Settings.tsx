@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Plus, 
-  Trash2, 
-  Save, 
-  AlertCircle,
-  Loader2,
-  Shield,
+import {
+  Plus,
+  TrashSimple,
+  FloppyDisk,
+  Warning,
+  CircleNotch,
   Check,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,12 +22,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Toast, ToastContainer } from "@/components/ui/toast";
 import { ClaudeVersionSelector } from "./ClaudeVersionSelector";
-import { StorageTab } from "./StorageTab";
-import { HooksEditor } from "./HooksEditor";
-import { SlashCommandsManager } from "./SlashCommandsManager";
-import { ProxySettings } from "./ProxySettings";
-import { useTheme, useTrackEvent } from "@/hooks";
-import { analytics } from "@/lib/analytics";
+import { useTheme } from "@/hooks";
 import { TabPersistenceService } from "@/services/tabPersistence";
 
 interface SettingsProps {
@@ -42,10 +36,6 @@ interface SettingsProps {
   className?: string;
 }
 
-interface PermissionRule {
-  id: string;
-  value: string;
-}
 
 interface EnvironmentVariable {
   id: string;
@@ -70,27 +60,14 @@ export const Settings: React.FC<SettingsProps> = ({
   const [binaryPathChanged, setBinaryPathChanged] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   
-  // Permission rules state
-  const [allowRules, setAllowRules] = useState<PermissionRule[]>([]);
-  const [denyRules, setDenyRules] = useState<PermissionRule[]>([]);
-  
   // Environment variables state
   const [envVars, setEnvVars] = useState<EnvironmentVariable[]>([]);
   
-  // Hooks state
-  const [userHooksChanged, setUserHooksChanged] = useState(false);
-  const getUserHooks = React.useRef<(() => any) | null>(null);
   
   // Theme hook
-  const { theme, setTheme, customColors, setCustomColors } = useTheme();
+  const { theme, setTheme } = useTheme();
   
-  // Proxy state
-  const [proxySettingsChanged, setProxySettingsChanged] = useState(false);
-  const saveProxySettings = React.useRef<(() => Promise<void>) | null>(null);
   
-  // Analytics state
-  const [analyticsEnabled, setAnalyticsEnabled] = useState(false);
-  const trackEvent = useTrackEvent();
   
   // Tab persistence state
   const [tabPersistenceEnabled, setTabPersistenceEnabled] = useState(true);
@@ -101,7 +78,6 @@ export const Settings: React.FC<SettingsProps> = ({
   useEffect(() => {
     loadSettings();
     loadClaudeBinaryPath();
-    loadAnalyticsSettings();
     // Load tab persistence setting
     setTabPersistenceEnabled(TabPersistenceService.isEnabled());
     // Load startup intro setting (default to true if not set)
@@ -111,15 +87,6 @@ export const Settings: React.FC<SettingsProps> = ({
     })();
   }, []);
 
-  /**
-   * Loads analytics settings
-   */
-  const loadAnalyticsSettings = async () => {
-    const settings = analytics.getSettings();
-    if (settings) {
-      setAnalyticsEnabled(settings.enabled);
-    }
-  };
 
   /**
    * Loads the current Claude binary path
@@ -150,26 +117,6 @@ export const Settings: React.FC<SettingsProps> = ({
       }
       
       setSettings(loadedSettings);
-
-      // Parse permissions
-      if (loadedSettings.permissions && typeof loadedSettings.permissions === 'object') {
-        if (Array.isArray(loadedSettings.permissions.allow)) {
-          setAllowRules(
-            loadedSettings.permissions.allow.map((rule: string, index: number) => ({
-              id: `allow-${index}`,
-              value: rule,
-            }))
-          );
-        }
-        if (Array.isArray(loadedSettings.permissions.deny)) {
-          setDenyRules(
-            loadedSettings.permissions.deny.map((rule: string, index: number) => ({
-              id: `deny-${index}`,
-              value: rule,
-            }))
-          );
-        }
-      }
 
       // Parse environment variables
       if (loadedSettings.env && typeof loadedSettings.env === 'object' && !Array.isArray(loadedSettings.env)) {
@@ -202,10 +149,6 @@ export const Settings: React.FC<SettingsProps> = ({
       // Build the settings object
       const updatedSettings: ClaudeSettings = {
         ...settings,
-        permissions: {
-          allow: allowRules.map(rule => rule.value).filter(v => v && String(v).trim()),
-          deny: denyRules.map(rule => rule.value).filter(v => v && String(v).trim()),
-        },
         env: envVars.reduce((acc, { key, value }) => {
           if (key && String(key).trim() && value && String(value).trim()) {
             acc[key] = String(value);
@@ -224,18 +167,6 @@ export const Settings: React.FC<SettingsProps> = ({
         setBinaryPathChanged(false);
       }
 
-      // Save user hooks if changed
-      if (userHooksChanged && getUserHooks.current) {
-        const hooks = getUserHooks.current();
-        await api.updateHooksConfig('user', hooks);
-        setUserHooksChanged(false);
-      }
-
-      // Save proxy settings if changed
-      if (proxySettingsChanged && saveProxySettings.current) {
-        await saveProxySettings.current();
-        setProxySettingsChanged(false);
-      }
 
       setToast({ message: "Settings saved successfully!", type: "success" });
     } catch (err) {
@@ -254,47 +185,6 @@ export const Settings: React.FC<SettingsProps> = ({
     setSettings(prev => ({ ...prev, [key]: value }));
   };
 
-  /**
-   * Adds a new permission rule
-   */
-  const addPermissionRule = (type: "allow" | "deny") => {
-    const newRule: PermissionRule = {
-      id: `${type}-${Date.now()}`,
-      value: "",
-    };
-    
-    if (type === "allow") {
-      setAllowRules(prev => [...prev, newRule]);
-    } else {
-      setDenyRules(prev => [...prev, newRule]);
-    }
-  };
-
-  /**
-   * Updates a permission rule
-   */
-  const updatePermissionRule = (type: "allow" | "deny", id: string, value: string) => {
-    if (type === "allow") {
-      setAllowRules(prev => prev.map(rule => 
-        rule.id === id ? { ...rule, value } : rule
-      ));
-    } else {
-      setDenyRules(prev => prev.map(rule => 
-        rule.id === id ? { ...rule, value } : rule
-      ));
-    }
-  };
-
-  /**
-   * Removes a permission rule
-   */
-  const removePermissionRule = (type: "allow" | "deny", id: string) => {
-    if (type === "allow") {
-      setAllowRules(prev => prev.filter(rule => rule.id !== id));
-    } else {
-      setDenyRules(prev => prev.filter(rule => rule.id !== id));
-    }
-  };
 
   /**
    * Adds a new environment variable
@@ -355,12 +245,12 @@ export const Settings: React.FC<SettingsProps> = ({
               >
                 {saving ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <CircleNotch className="mr-2 h-4 w-4 animate-spin" weight="bold" />
                     Saving...
                   </>
                 ) : (
                   <>
-                    <Save className="mr-2 h-4 w-4" />
+                    <FloppyDisk className="mr-2 h-4 w-4" weight="duotone" />
                     Save Settings
                   </>
                 )}
@@ -379,7 +269,7 @@ export const Settings: React.FC<SettingsProps> = ({
             transition={{ duration: 0.15 }}
             className="mx-4 mt-4 p-3 rounded-lg bg-destructive/10 border border-destructive/50 flex items-center gap-2 text-body-small text-destructive"
           >
-            <AlertCircle className="h-4 w-4" />
+            <Warning className="h-4 w-4" weight="duotone" />
             {error}
           </motion.div>
         )}
@@ -388,20 +278,14 @@ export const Settings: React.FC<SettingsProps> = ({
       {/* Content */}
       {loading ? (
         <div className="flex-1 flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <CircleNotch className="h-8 w-8 animate-spin text-muted-foreground" weight="bold" />
         </div>
       ) : (
         <div className="flex-1 overflow-y-auto p-6">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid grid-cols-8 w-full mb-6 h-auto p-1">
+            <TabsList className="grid grid-cols-2 w-full mb-6 h-auto p-1">
               <TabsTrigger value="general" className="py-2.5 px-3">General</TabsTrigger>
-              <TabsTrigger value="permissions" className="py-2.5 px-3">Permissions</TabsTrigger>
               <TabsTrigger value="environment" className="py-2.5 px-3">Environment</TabsTrigger>
-              <TabsTrigger value="advanced" className="py-2.5 px-3">Advanced</TabsTrigger>
-              <TabsTrigger value="hooks" className="py-2.5 px-3">Hooks</TabsTrigger>
-              <TabsTrigger value="commands" className="py-2.5 px-3">Commands</TabsTrigger>
-              <TabsTrigger value="storage" className="py-2.5 px-3">Storage</TabsTrigger>
-              <TabsTrigger value="proxy" className="py-2.5 px-3">Proxy</TabsTrigger>
             </TabsList>
             
             {/* General Settings */}
@@ -429,8 +313,8 @@ export const Settings: React.FC<SettingsProps> = ({
                               : "hover:bg-background/50"
                           )}
                         >
-                          {theme === 'dark' && <Check className="h-3 w-3" />}
-                          Dark
+                          {theme === 'dark' && <Check className="h-3 w-3" weight="bold" />}
+                          Queen
                         </button>
                         <button
                           onClick={() => setTheme('gray')}
@@ -441,192 +325,25 @@ export const Settings: React.FC<SettingsProps> = ({
                               : "hover:bg-background/50"
                           )}
                         >
-                          {theme === 'gray' && <Check className="h-3 w-3" />}
+                          {theme === 'gray' && <Check className="h-3 w-3" weight="bold" />}
                           Gray
                         </button>
                         <button
                           onClick={() => setTheme('light')}
                           className={cn(
                             "flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-all",
-                            theme === 'light' 
-                              ? "bg-background shadow-sm" 
+                            theme === 'light'
+                              ? "bg-background shadow-sm"
                               : "hover:bg-background/50"
                           )}
                         >
-                          {theme === 'light' && <Check className="h-3 w-3" />}
+                          {theme === 'light' && <Check className="h-3 w-3" weight="bold" />}
                           Light
                         </button>
-                        <button
-                          onClick={() => setTheme('custom')}
-                          className={cn(
-                            "flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-all",
-                            theme === 'custom' 
-                              ? "bg-background shadow-sm" 
-                              : "hover:bg-background/50"
-                          )}
-                        >
-                          {theme === 'custom' && <Check className="h-3 w-3" />}
-                          Custom
-                        </button>
                       </div>
                     </div>
                     
-                    {/* Custom Color Editor */}
-                    {theme === 'custom' && (
-                      <div className="space-y-4 p-4 border rounded-lg bg-muted/20">
-                        <h4 className="text-label">Custom Theme Colors</h4>
-                        
-                        <div className="grid grid-cols-2 gap-4">
-                          {/* Background Color */}
-                          <div className="space-y-2">
-                            <Label htmlFor="color-background" className="text-caption">Background</Label>
-                            <div className="flex gap-2">
-                              <Input
-                                id="color-background"
-                                type="text"
-                                value={customColors.background}
-                                onChange={(e) => setCustomColors({ background: e.target.value })}
-                                placeholder="oklch(0.12 0.01 240)"
-                                className="font-mono text-xs"
-                              />
-                              <div 
-                                className="w-10 h-10 rounded border"
-                                style={{ backgroundColor: customColors.background }}
-                              />
-                            </div>
-                          </div>
-                          
-                          {/* Foreground Color */}
-                          <div className="space-y-2">
-                            <Label htmlFor="color-foreground" className="text-caption">Foreground</Label>
-                            <div className="flex gap-2">
-                              <Input
-                                id="color-foreground"
-                                type="text"
-                                value={customColors.foreground}
-                                onChange={(e) => setCustomColors({ foreground: e.target.value })}
-                                placeholder="oklch(0.98 0.01 240)"
-                                className="font-mono text-xs"
-                              />
-                              <div 
-                                className="w-10 h-10 rounded border"
-                                style={{ backgroundColor: customColors.foreground }}
-                              />
-                            </div>
-                          </div>
-                          
-                          {/* Primary Color */}
-                          <div className="space-y-2">
-                            <Label htmlFor="color-primary" className="text-caption">Primary</Label>
-                            <div className="flex gap-2">
-                              <Input
-                                id="color-primary"
-                                type="text"
-                                value={customColors.primary}
-                                onChange={(e) => setCustomColors({ primary: e.target.value })}
-                                placeholder="oklch(0.98 0.01 240)"
-                                className="font-mono text-xs"
-                              />
-                              <div 
-                                className="w-10 h-10 rounded border"
-                                style={{ backgroundColor: customColors.primary }}
-                              />
-                            </div>
-                          </div>
-                          
-                          {/* Card Color */}
-                          <div className="space-y-2">
-                            <Label htmlFor="color-card" className="text-caption">Card</Label>
-                            <div className="flex gap-2">
-                              <Input
-                                id="color-card"
-                                type="text"
-                                value={customColors.card}
-                                onChange={(e) => setCustomColors({ card: e.target.value })}
-                                placeholder="oklch(0.14 0.01 240)"
-                                className="font-mono text-xs"
-                              />
-                              <div 
-                                className="w-10 h-10 rounded border"
-                                style={{ backgroundColor: customColors.card }}
-                              />
-                            </div>
-                          </div>
-                          
-                          {/* Accent Color */}
-                          <div className="space-y-2">
-                            <Label htmlFor="color-accent" className="text-caption">Accent</Label>
-                            <div className="flex gap-2">
-                              <Input
-                                id="color-accent"
-                                type="text"
-                                value={customColors.accent}
-                                onChange={(e) => setCustomColors({ accent: e.target.value })}
-                                placeholder="oklch(0.16 0.01 240)"
-                                className="font-mono text-xs"
-                              />
-                              <div 
-                                className="w-10 h-10 rounded border"
-                                style={{ backgroundColor: customColors.accent }}
-                              />
-                            </div>
-                          </div>
-                          
-                          {/* Destructive Color */}
-                          <div className="space-y-2">
-                            <Label htmlFor="color-destructive" className="text-caption">Destructive</Label>
-                            <div className="flex gap-2">
-                              <Input
-                                id="color-destructive"
-                                type="text"
-                                value={customColors.destructive}
-                                onChange={(e) => setCustomColors({ destructive: e.target.value })}
-                                placeholder="oklch(0.6 0.2 25)"
-                                className="font-mono text-xs"
-                              />
-                              <div 
-                                className="w-10 h-10 rounded border"
-                                style={{ backgroundColor: customColors.destructive }}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <p className="text-caption text-muted-foreground">
-                          Use CSS color values (hex, rgb, oklch, etc.). Changes apply immediately.
-                        </p>
-                      </div>
-                    )}
                     
-                    {/* Include Co-authored By */}
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5 flex-1">
-                        <Label htmlFor="coauthored">Include "Co-authored by Claude"</Label>
-                        <p className="text-caption text-muted-foreground">
-                          Add Claude attribution to git commits and pull requests
-                        </p>
-                      </div>
-                      <Switch
-                        id="coauthored"
-                        checked={settings?.includeCoAuthoredBy !== false}
-                        onCheckedChange={(checked) => updateSetting("includeCoAuthoredBy", checked)}
-                      />
-                    </div>
-                    
-                    {/* Verbose Output */}
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5 flex-1">
-                        <Label htmlFor="verbose">Verbose Output</Label>
-                        <p className="text-caption text-muted-foreground">
-                          Show full bash and command outputs
-                        </p>
-                      </div>
-                      <Switch
-                        id="verbose"
-                        checked={settings?.verbose === true}
-                        onCheckedChange={(checked) => updateSetting("verbose", checked)}
-                      />
-                    </div>
                     
                     {/* Cleanup Period */}
                     <div className="space-y-2">
@@ -661,59 +378,12 @@ export const Settings: React.FC<SettingsProps> = ({
                       />
                       {binaryPathChanged && (
                         <p className="text-caption text-amber-600 dark:text-amber-400 flex items-center gap-1">
-                          <AlertCircle className="h-3 w-3" />
+                          <Warning className="h-3 w-3" weight="duotone" />
                           Changes will be applied when you save settings.
                         </p>
                       )}
                     </div>
 
-                    {/* Separator */}
-                    <div className="border-t border-border pt-4 mt-6" />
-                    
-                    {/* Analytics Toggle */}
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-1">
-                        <Label htmlFor="analytics-enabled">Enable Analytics</Label>
-                        <p className="text-caption text-muted-foreground">
-                          Help improve opcode by sharing anonymous usage data
-                        </p>
-                      </div>
-                      <Switch
-                        id="analytics-enabled"
-                        checked={analyticsEnabled}
-                        onCheckedChange={async (checked) => {
-                          if (checked) {
-                            await analytics.enable();
-                            setAnalyticsEnabled(true);
-                            trackEvent.settingsChanged('analytics_enabled', true);
-                            setToast({ message: "Analytics enabled", type: "success" });
-                          } else {
-                            await analytics.disable();
-                            setAnalyticsEnabled(false);
-                            trackEvent.settingsChanged('analytics_enabled', false);
-                            setToast({ message: "Analytics disabled", type: "success" });
-                          }
-                        }}
-                      />
-                    </div>
-                    
-                    {/* Privacy Info */}
-                    {analyticsEnabled && (
-                      <div className="rounded-lg border border-border bg-muted/50 p-3">
-                        <div className="flex gap-2">
-                          <Shield className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
-                          <div className="space-y-1">
-                            <p className="text-xs font-medium text-foreground">Your privacy is protected</p>
-                            <ul className="text-xs text-muted-foreground space-y-0.5">
-                              <li>• No personal information or file contents collected</li>
-                              <li>• All data is anonymous with random IDs</li>
-                              <li>• You can disable analytics at any time</li>
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                    
                     {/* Tab Persistence Toggle */}
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
@@ -728,7 +398,6 @@ export const Settings: React.FC<SettingsProps> = ({
                         onCheckedChange={(checked) => {
                           TabPersistenceService.setEnabled(checked);
                           setTabPersistenceEnabled(checked);
-                          trackEvent.settingsChanged('tab_persistence_enabled', checked);
                           setToast({ 
                             message: checked 
                               ? "Tab persistence enabled - your tabs will be restored on restart" 
@@ -754,7 +423,6 @@ export const Settings: React.FC<SettingsProps> = ({
                           setStartupIntroEnabled(checked);
                           try {
                             await api.saveSetting('startup_intro_enabled', checked ? 'true' : 'false');
-                            trackEvent.settingsChanged('startup_intro_enabled', checked);
                             setToast({ 
                               message: checked 
                                 ? 'Welcome intro enabled' 
@@ -772,128 +440,6 @@ export const Settings: React.FC<SettingsProps> = ({
               </Card>
             </TabsContent>
             
-            {/* Permissions Settings */}
-            <TabsContent value="permissions" className="space-y-6">
-              <Card className="p-6">
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-heading-4 mb-2">Permission Rules</h3>
-                    <p className="text-body-small text-muted-foreground mb-4">
-                      Control which tools Claude Code can use without manual approval
-                    </p>
-                  </div>
-                  
-                  {/* Allow Rules */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-label text-green-500">Allow Rules</Label>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => addPermissionRule("allow")}
-                        className="gap-2 hover:border-green-500/50 hover:text-green-500"
-                      >
-                        <Plus className="h-3 w-3" />
-                        Add Rule
-                      </Button>
-                    </div>
-                    <div className="space-y-2">
-                      {allowRules.length === 0 ? (
-                        <p className="text-xs text-muted-foreground py-2">
-                          No allow rules configured. Claude will ask for approval for all tools.
-                        </p>
-                      ) : (
-                        allowRules.map((rule) => (
-                          <motion.div
-                            key={rule.id}
-                            initial={{ opacity: 0, x: -8 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.15 }}
-                            className="flex items-center gap-2"
-                          >
-                            <Input
-                              placeholder="e.g., Bash(npm run test:*)"
-                              value={rule.value}
-                              onChange={(e) => updatePermissionRule("allow", rule.id, e.target.value)}
-                              className="flex-1"
-                            />
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => removePermissionRule("allow", rule.id)}
-                              className="h-8 w-8"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </motion.div>
-                        ))
-                      )}
-                    </div>
-                  </div>
-                  
-                  {/* Deny Rules */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-label text-red-500">Deny Rules</Label>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => addPermissionRule("deny")}
-                        className="gap-2 hover:border-red-500/50 hover:text-red-500"
-                      >
-                        <Plus className="h-3 w-3" />
-                        Add Rule
-                      </Button>
-                    </div>
-                    <div className="space-y-2">
-                      {denyRules.length === 0 ? (
-                        <p className="text-xs text-muted-foreground py-2">
-                          No deny rules configured.
-                        </p>
-                      ) : (
-                        denyRules.map((rule) => (
-                          <motion.div
-                            key={rule.id}
-                            initial={{ opacity: 0, x: -8 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.15 }}
-                            className="flex items-center gap-2"
-                          >
-                            <Input
-                              placeholder="e.g., Bash(curl:*)"
-                              value={rule.value}
-                              onChange={(e) => updatePermissionRule("deny", rule.id, e.target.value)}
-                              className="flex-1"
-                            />
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => removePermissionRule("deny", rule.id)}
-                              className="h-8 w-8"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </motion.div>
-                        ))
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="pt-2 space-y-2">
-                    <p className="text-xs text-muted-foreground">
-                      <strong>Examples:</strong>
-                    </p>
-                    <ul className="text-caption text-muted-foreground space-y-1 ml-4">
-                      <li>• <code className="px-1 py-0.5 rounded bg-green-500/10 text-green-600 dark:text-green-400">Bash</code> - Allow all bash commands</li>
-                      <li>• <code className="px-1 py-0.5 rounded bg-green-500/10 text-green-600 dark:text-green-400">Bash(npm run build)</code> - Allow exact command</li>
-                      <li>• <code className="px-1 py-0.5 rounded bg-green-500/10 text-green-600 dark:text-green-400">Bash(npm run test:*)</code> - Allow commands with prefix</li>
-                      <li>• <code className="px-1 py-0.5 rounded bg-green-500/10 text-green-600 dark:text-green-400">Read(~/.zshrc)</code> - Allow reading specific file</li>
-                      <li>• <code className="px-1 py-0.5 rounded bg-green-500/10 text-green-600 dark:text-green-400">Edit(docs/**)</code> - Allow editing files in docs directory</li>
-                    </ul>
-                  </div>
-                </div>
-              </Card>
-            </TabsContent>
             
             {/* Environment Variables */}
             <TabsContent value="environment" className="space-y-6">
@@ -912,7 +458,7 @@ export const Settings: React.FC<SettingsProps> = ({
                       onClick={addEnvVar}
                       className="gap-2"
                     >
-                      <Plus className="h-3 w-3" />
+                      <Plus className="h-3 w-3" weight="bold" />
                       Add Variable
                     </Button>
                   </div>
@@ -949,7 +495,7 @@ export const Settings: React.FC<SettingsProps> = ({
                             onClick={() => removeEnvVar(envVar.id)}
                             className="h-8 w-8 hover:text-destructive"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <TrashSimple className="h-4 w-4" weight="duotone" />
                           </Button>
                         </motion.div>
                       ))
@@ -969,95 +515,9 @@ export const Settings: React.FC<SettingsProps> = ({
                 </div>
               </Card>
             </TabsContent>
-            {/* Advanced Settings */}
-            <TabsContent value="advanced" className="space-y-6">
-              <Card className="p-6">
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-base font-semibold mb-4">Advanced Settings</h3>
-                    <p className="text-sm text-muted-foreground mb-6">
-                      Additional configuration options for advanced users
-                    </p>
-                  </div>
-                  
-                  {/* API Key Helper */}
-                  <div className="space-y-2">
-                    <Label htmlFor="apiKeyHelper">API Key Helper Script</Label>
-                    <Input
-                      id="apiKeyHelper"
-                      placeholder="/path/to/generate_api_key.sh"
-                      value={settings?.apiKeyHelper || ""}
-                      onChange={(e) => updateSetting("apiKeyHelper", e.target.value || undefined)}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Custom script to generate auth values for API requests
-                    </p>
-                  </div>
-                  
-                  {/* Raw JSON Editor */}
-                  <div className="space-y-2">
-                    <Label>Raw Settings (JSON)</Label>
-                    <div className="p-3 rounded-md bg-muted font-mono text-xs overflow-x-auto whitespace-pre-wrap">
-                      <pre>{JSON.stringify(settings, null, 2)}</pre>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      This shows the raw JSON that will be saved to ~/.claude/settings.json
-                    </p>
-                  </div>
-                </div>
-              </Card>
-            </TabsContent>
             
-            {/* Hooks Settings */}
-            <TabsContent value="hooks" className="space-y-6">
-              <Card className="p-6">
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-base font-semibold mb-2">User Hooks</h3>
-                    <p className="text-body-small text-muted-foreground mb-4">
-                      Configure hooks that apply to all Claude Code sessions for your user account.
-                      These are stored in <code className="mx-1 px-2 py-1 bg-muted rounded text-xs">~/.claude/settings.json</code>
-                    </p>
-                  </div>
-                  
-                  <HooksEditor
-                    key={activeTab}
-                    scope="user"
-                    className="border-0"
-                    hideActions={true}
-                    onChange={(hasChanges, getHooks) => {
-                      setUserHooksChanged(hasChanges);
-                      getUserHooks.current = getHooks;
-                    }}
-                  />
-                </div>
-              </Card>
-            </TabsContent>
             
-            {/* Commands Tab */}
-            <TabsContent value="commands">
-              <Card className="p-6">
-                <SlashCommandsManager className="p-0" />
-              </Card>
-            </TabsContent>
             
-            {/* Storage Tab */}
-            <TabsContent value="storage">
-              <StorageTab />
-            </TabsContent>
-            
-            {/* Proxy Settings */}
-            <TabsContent value="proxy">
-              <Card className="p-6">
-                <ProxySettings 
-                  setToast={setToast}
-                  onChange={(hasChanges, _getSettings, save) => {
-                    setProxySettingsChanged(hasChanges);
-                    saveProxySettings.current = save;
-                  }}
-                />
-              </Card>
-            </TabsContent>
             
           </Tabs>
         </div>

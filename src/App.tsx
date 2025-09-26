@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Bot, FolderCode } from "lucide-react";
+import { Robot, FolderOpen } from "@phosphor-icons/react";
 import { api, type Project, type Session, type ClaudeMdFile } from "@/lib/api";
 import { OutputCacheProvider } from "@/lib/outputCache";
 import { TabProvider } from "@/contexts/TabContext";
@@ -23,17 +23,16 @@ import { ProjectSettings } from '@/components/ProjectSettings';
 import { TabManager } from "@/components/TabManager";
 import { TabContent } from "@/components/TabContent";
 import { useTabState } from "@/hooks/useTabState";
-import { useAppLifecycle, useTrackEvent } from "@/hooks";
+import { useAppLifecycle } from "@/hooks";
 import { StartupIntro } from "@/components/StartupIntro";
 
-type View = 
-  | "welcome" 
-  | "projects" 
-  | "editor" 
-  | "claude-file-editor" 
+type View =
+  | "welcome"
+  | "projects"
+  | "editor"
+  | "claude-file-editor"
   | "settings"
   | "cc-agents"
-  | "create-agent"
   | "github-agents"
   | "agent-execution"
   | "agent-run-view"
@@ -47,7 +46,7 @@ type View =
  */
 function AppContent() {
   const [view, setView] = useState<View>("tabs");
-  const { createClaudeMdTab, createSettingsTab, createUsageTab, createMCPTab, createAgentsTab } = useTabState();
+  const { createClaudeMdTab, createSettingsTab, createUsageTab, createMCPTab } = useTabState();
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [sessions, setSessions] = useState<Session[]>([]);
@@ -62,25 +61,16 @@ function AppContent() {
   const [projectForSettings, setProjectForSettings] = useState<Project | null>(null);
   const [previousView] = useState<View>("welcome");
   
-  // Initialize analytics lifecycle tracking
+  // Initialize app lifecycle tracking
   useAppLifecycle();
-  const trackEvent = useTrackEvent();
-  
-  // Track user journey milestones
-  const [hasTrackedFirstChat] = useState(false);
-  // const [hasTrackedFirstAgent] = useState(false);
-  
+
   // Track when user reaches different journey stages
   useEffect(() => {
-    if (view === "projects" && projects.length > 0 && !hasTrackedFirstChat) {
+    if (view === "projects" && projects.length > 0) {
       // User has projects - they're past onboarding
-      trackEvent.journeyMilestone({
-        journey_stage: 'onboarding',
-        milestone_reached: 'projects_created',
-        time_to_milestone_ms: Date.now() - performance.timing.navigationStart
-      });
+      console.log('User has reached projects view with data');
     }
-  }, [view, projects.length, hasTrackedFirstChat, trackEvent]);
+  }, [view, projects.length]);
 
   // Load projects on mount when in projects view
   useEffect(() => {
@@ -258,7 +248,7 @@ function AppContent() {
                     onClick={() => handleViewChange("cc-agents")}
                   >
                     <div className="h-full flex flex-col items-center justify-center p-8">
-                      <Bot className="h-16 w-16 mb-4 text-primary" />
+                      <Robot className="h-16 w-16 mb-4 text-primary" weight="duotone" />
                       <h2 className="text-xl font-semibold">CC Agents</h2>
                     </div>
                   </Card>
@@ -275,7 +265,7 @@ function AppContent() {
                     onClick={() => handleViewChange("projects")}
                   >
                     <div className="h-full flex flex-col items-center justify-center p-8">
-                      <FolderCode className="h-16 w-16 mb-4 text-primary" />
+                      <FolderOpen className="h-16 w-16 mb-4 text-primary" weight="duotone" />
                       <h2 className="text-xl font-semibold">Projects</h2>
                     </div>
                   </Card>
@@ -373,7 +363,6 @@ function AppContent() {
     <div className="h-screen flex flex-col">
       {/* Custom Titlebar */}
       <CustomTitlebar
-        onAgentsClick={() => createAgentsTab()}
         onUsageClick={() => createUsageTab()}
         onClaudeClick={() => createClaudeMdTab()}
         onMCPClick={() => createMCPTab()}
@@ -388,7 +377,6 @@ function AppContent() {
         onUsageClick={() => createUsageTab()}
         onMCPClick={() => createMCPTab()}
         onInfoClick={() => setShowNFO(true)}
-        onAgentsClick={() => setShowAgentsModal(true)}
       /> */}
       
       

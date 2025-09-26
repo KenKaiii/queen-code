@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { 
-  Terminal, 
-  User, 
-  Bot, 
-  AlertCircle, 
-  CheckCircle2
-} from "lucide-react";
+import {
+  Terminal,
+  Crown,
+  Sparkle,
+  Warning,
+  CheckCircle
+} from "@phosphor-icons/react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
@@ -116,15 +116,32 @@ const StreamMessageComponent: React.FC<StreamMessageProps> = ({ message, classNa
         <Card className={cn("border-primary/20 bg-primary/5", className)}>
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
-              <Bot className="h-5 w-5 text-primary mt-0.5" />
+              <Sparkle className="h-5 w-5 text-primary mt-0.5" weight="duotone" />
               <div className="flex-1 space-y-2 min-w-0">
                 {msg.content && Array.isArray(msg.content) && msg.content.map((content: any, idx: number) => {
                   // Text content - render as markdown
                   if (content.type === "text") {
                     // Ensure we have a string to render
-                    const textContent = typeof content.text === 'string' 
-                      ? content.text 
+                    let textContent = typeof content.text === 'string'
+                      ? content.text
                       : (content.text?.text || JSON.stringify(content.text || content));
+
+                    // Clean up hook feedback messages for better UI display
+                    // Extract only the actual hook message, removing operation type and path
+                    const cleanHookFeedback = (text: string) => {
+                      // Match various hook feedback patterns and strip ANSI color codes
+                      return text
+                        .replace(/^.*operation feedback:\s*-\s*\[.*?\]:\s*(.*)$/gm, '$1')
+                        .replace(/^.*operation feedback:\s*(.*)$/gm, '$1')
+                        .replace(/^Edit operation feedback:\s*-\s*\[.*?\]:\s*(.*)$/gm, '$1')
+                        .replace(/^MultiEdit operation feedback:\s*-\s*\[.*?\]:\s*(.*)$/gm, '$1')
+                        // Strip ANSI color codes (like [0;32m and [0m)
+                        .replace(/\x1b\[[0-9;]*m/g, '')
+                        .replace(/\[0;?[0-9;]*m/g, '')
+                        .replace(/\[[0-9;]*m/g, '');
+                    };
+
+                    textContent = cleanHookFeedback(textContent);
                     
                     renderedSomething = true;
                     return (
@@ -329,12 +346,28 @@ const StreamMessageComponent: React.FC<StreamMessageProps> = ({ message, classNa
         <Card className={cn("border-muted-foreground/20 bg-muted/20", className)}>
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
-              <User className="h-5 w-5 text-muted-foreground mt-0.5" />
+              <Crown className="h-5 w-5 text-primary mt-0.5" />
               <div className="flex-1 space-y-2 min-w-0">
                 {/* Handle content that is a simple string (e.g. from user commands) */}
                 {(typeof msg.content === 'string' || (msg.content && !Array.isArray(msg.content))) && (
                   (() => {
-                    const contentStr = typeof msg.content === 'string' ? msg.content : String(msg.content);
+                    let contentStr = typeof msg.content === 'string' ? msg.content : String(msg.content);
+
+                    // Clean up hook feedback messages for user messages too
+                    const cleanUserHookFeedback = (text: string) => {
+                      return text
+                        .replace(/^.*operation feedback:\s*-\s*\[.*?\]:\s*(.*)$/gm, '$1')
+                        .replace(/^.*operation feedback:\s*(.*)$/gm, '$1')
+                        .replace(/^Edit operation feedback:\s*-\s*\[.*?\]:\s*(.*)$/gm, '$1')
+                        .replace(/^MultiEdit operation feedback:\s*-\s*\[.*?\]:\s*(.*)$/gm, '$1')
+                        // Strip ANSI color codes (like [0;32m and [0m)
+                        .replace(/\x1b\[[0-9;]*m/g, '')
+                        .replace(/\[0;?[0-9;]*m/g, '')
+                        .replace(/\[[0-9;]*m/g, '');
+                    };
+
+                    contentStr = cleanUserHookFeedback(contentStr);
+
                     if (contentStr.trim() === '') return null;
                     renderedSomething = true;
                     
@@ -423,7 +456,7 @@ const StreamMessageComponent: React.FC<StreamMessageProps> = ({ message, classNa
                       return (
                         <div key={idx} className="space-y-2">
                           <div className="flex items-center gap-2">
-                            <CheckCircle2 className="h-4 w-4 text-green-500" />
+                            <CheckCircle className="h-4 w-4 text-green-500" weight="duotone" />
                             <span className="text-sm font-medium">Tool Result</span>
                           </div>
                           
@@ -458,7 +491,7 @@ const StreamMessageComponent: React.FC<StreamMessageProps> = ({ message, classNa
                       return (
                         <div key={idx} className="space-y-2">
                           <div className="flex items-center gap-2">
-                            <CheckCircle2 className="h-4 w-4 text-green-500" />
+                            <CheckCircle className="h-4 w-4 text-green-500" weight="duotone" />
                             <span className="text-sm font-medium">Edit Result</span>
                           </div>
                           <EditResultWidget content={contentText} />
@@ -476,7 +509,7 @@ const StreamMessageComponent: React.FC<StreamMessageProps> = ({ message, classNa
                       return (
                         <div key={idx} className="space-y-2">
                           <div className="flex items-center gap-2">
-                            <CheckCircle2 className="h-4 w-4 text-green-500" />
+                            <CheckCircle className="h-4 w-4 text-green-500" weight="duotone" />
                             <span className="text-sm font-medium">MultiEdit Result</span>
                           </div>
                           <MultiEditResultWidget content={contentText} />
@@ -516,7 +549,7 @@ const StreamMessageComponent: React.FC<StreamMessageProps> = ({ message, classNa
                       // Additional validation: check for tree structure pattern
                       const lines = contentText.split('\n');
                       const hasTreeStructure = lines.some(line => /^\s*-\s+/.test(line));
-                      const hasNoteAtEnd = lines.some(line => line.trim().startsWith('NOTE: do any of the files'));
+                      const hasNoteAtEnd = lines.some(line => line.trim().startsWith('Info: do any of the files'));
                       
                       return hasTreeStructure || hasNoteAtEnd;
                     })();
@@ -526,7 +559,7 @@ const StreamMessageComponent: React.FC<StreamMessageProps> = ({ message, classNa
                       return (
                         <div key={idx} className="space-y-2">
                           <div className="flex items-center gap-2">
-                            <CheckCircle2 className="h-4 w-4 text-green-500" />
+                            <CheckCircle className="h-4 w-4 text-green-500" weight="duotone" />
                             <span className="text-sm font-medium">Directory Contents</span>
                           </div>
                           <LSResultWidget content={contentText} />
@@ -565,7 +598,7 @@ const StreamMessageComponent: React.FC<StreamMessageProps> = ({ message, classNa
                       return (
                         <div key={idx} className="space-y-2">
                           <div className="flex items-center gap-2">
-                            <CheckCircle2 className="h-4 w-4 text-green-500" />
+                            <CheckCircle className="h-4 w-4 text-green-500" weight="duotone" />
                             <span className="text-sm font-medium">Read Result</span>
                           </div>
                           <ReadResultWidget content={contentText} filePath={filePath} />
@@ -579,7 +612,7 @@ const StreamMessageComponent: React.FC<StreamMessageProps> = ({ message, classNa
                       return (
                         <div key={idx} className="space-y-2">
                           <div className="flex items-center gap-2">
-                            <CheckCircle2 className="h-4 w-4 text-green-500" />
+                            <CheckCircle className="h-4 w-4 text-green-500" weight="duotone" />
                             <span className="text-sm font-medium">Tool Result</span>
                           </div>
                           <div className="ml-6 p-3 bg-muted/50 rounded-md border text-sm text-muted-foreground italic">
@@ -594,9 +627,9 @@ const StreamMessageComponent: React.FC<StreamMessageProps> = ({ message, classNa
                       <div key={idx} className="space-y-2">
                         <div className="flex items-center gap-2">
                           {content.is_error ? (
-                            <AlertCircle className="h-4 w-4 text-destructive" />
+                            <Warning className="h-4 w-4 text-destructive" weight="duotone" />
                           ) : (
-                            <CheckCircle2 className="h-4 w-4 text-green-500" />
+                            <CheckCircle className="h-4 w-4 text-green-500" weight="duotone" />
                           )}
                           <span className="text-sm font-medium">Tool Result</span>
                         </div>
@@ -647,9 +680,9 @@ const StreamMessageComponent: React.FC<StreamMessageProps> = ({ message, classNa
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
               {isError ? (
-                <AlertCircle className="h-5 w-5 text-destructive mt-0.5" />
+                <Warning className="h-5 w-5 text-destructive mt-0.5" weight="duotone" />
               ) : (
-                <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />
+                <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" weight="duotone" />
               )}
               <div className="flex-1 space-y-2">
                 <h4 className="font-semibold text-sm">
@@ -722,7 +755,7 @@ const StreamMessageComponent: React.FC<StreamMessageProps> = ({ message, classNa
       <Card className={cn("border-destructive/20 bg-destructive/5", className)}>
         <CardContent className="p-4">
           <div className="flex items-start gap-3">
-            <AlertCircle className="h-5 w-5 text-destructive mt-0.5" />
+            <Warning className="h-5 w-5 text-destructive mt-0.5" weight="duotone" />
             <div className="flex-1">
               <p className="text-sm font-medium">Error rendering message</p>
               <p className="text-xs text-muted-foreground mt-1">

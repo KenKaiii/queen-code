@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bot, Loader2, Play, Clock, CheckCircle, XCircle, Trash2, Import, ChevronDown, ChevronRight, FileJson, Globe, Download, Plus, History, Edit } from 'lucide-react';
+import { Bot, Loader2, Play, Clock, CheckCircle, XCircle, Trash2, ChevronDown, ChevronRight, Download, History, Edit } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Toast } from '@/components/ui/toast';
 import { api, type Agent, type AgentRunWithMetrics } from '@/lib/api';
-import { open as openDialog, save } from '@tauri-apps/plugin-dialog';
+import { save } from '@tauri-apps/plugin-dialog';
 import { invoke } from '@tauri-apps/api/core';
 import { GitHubAgentBrowser } from '@/components/GitHubAgentBrowser';
 import { CreateAgent } from '@/components/CreateAgent';
@@ -119,26 +119,6 @@ export const Agents: React.FC = () => {
     }
   };
 
-  const handleImportFromFile = async () => {
-    try {
-      const selected = await openDialog({
-        filters: [
-          { name: 'opcode Agent', extensions: ['opcode.json', 'json'] },
-          { name: 'All Files', extensions: ['*'] }
-        ],
-        multiple: false,
-      });
-
-      if (selected) {
-        const importedAgent = await api.importAgentFromFile(selected as string);
-        setToast({ message: `Imported agent: ${importedAgent.name}`, type: 'success' });
-        loadAgents();
-      }
-    } catch (error) {
-      console.error('Failed to import agent:', error);
-      setToast({ message: 'Failed to import agent', type: 'error' });
-    }
-  };
 
   const handleExportAgent = async (agent: Agent) => {
     try {
@@ -212,30 +192,7 @@ export const Agents: React.FC = () => {
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline">
-                    <Import className="w-4 h-4 mr-2" />
-                    Import
-                    <ChevronDown className="w-4 h-4 ml-2" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={handleImportFromFile}>
-                    <FileJson className="w-4 h-4 mr-2" />
-                    From File
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setShowGitHubBrowser(true)}>
-                    <Globe className="w-4 h-4 mr-2" />
-                    From GitHub
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
 
-              <Button onClick={() => setShowCreateAgent(true)}>
-                <Plus className="w-4 h-4 mr-2" />
-                Create Agent
-              </Button>
             </div>
           </div>
         </div>
@@ -333,12 +290,8 @@ export const Agents: React.FC = () => {
                   <Bot className="w-12 h-12 text-muted-foreground mb-4" />
                   <h3 className="text-lg font-semibold mb-2">No Agents Yet</h3>
                   <p className="text-muted-foreground mb-4">
-                    Create your first agent to get started
+                    Use the existing agents provided
                   </p>
-                  <Button onClick={() => setShowCreateAgent(true)}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Create Agent
-                  </Button>
                 </div>
               ) : (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

@@ -120,7 +120,6 @@ function AppContent() {
             // Open settings tab or modal
             window.dispatchEvent(new CustomEvent('create-settings-tab'));
           }}
-          onAgentsClick={() => {}}
         />
         
         {/* Tab-based interface */}

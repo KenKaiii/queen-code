@@ -1,19 +1,19 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Send,
-  Maximize2,
-  Minimize2,
-  ChevronUp,
-  Sparkles,
-  Zap,
+  PaperPlaneTilt,
+  ArrowsOutSimple,
+  ArrowsInSimple,
+  CaretUp,
+  Sparkle,
+  Lightning,
   Square,
   Brain,
   Lightbulb,
   Cpu,
   Rocket,
-  
-} from "lucide-react";
+
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Popover } from "@/components/ui/popover";
@@ -89,7 +89,7 @@ const THINKING_MODES: ThinkingModeConfig[] = [
     name: "Auto",
     description: "Let Claude decide",
     level: 0,
-    icon: <Sparkles className="h-3.5 w-3.5" />,
+    icon: <Sparkle className="h-3.5 w-3.5" weight="duotone" />,
     color: "text-muted-foreground",
     shortName: "A"
   },
@@ -99,7 +99,7 @@ const THINKING_MODES: ThinkingModeConfig[] = [
     description: "Basic reasoning",
     level: 1,
     phrase: "think",
-    icon: <Lightbulb className="h-3.5 w-3.5" />,
+    icon: <Lightbulb className="h-3.5 w-3.5" weight="duotone" />,
     color: "text-primary",
     shortName: "T"
   },
@@ -109,7 +109,7 @@ const THINKING_MODES: ThinkingModeConfig[] = [
     description: "Deeper analysis",
     level: 2,
     phrase: "think hard",
-    icon: <Brain className="h-3.5 w-3.5" />,
+    icon: <Brain className="h-3.5 w-3.5" weight="duotone" />,
     color: "text-primary",
     shortName: "T+"
   },
@@ -119,7 +119,7 @@ const THINKING_MODES: ThinkingModeConfig[] = [
     description: "Extensive reasoning",
     level: 3,
     phrase: "think harder",
-    icon: <Cpu className="h-3.5 w-3.5" />,
+    icon: <Cpu className="h-3.5 w-3.5" weight="duotone" />,
     color: "text-primary",
     shortName: "T++"
   },
@@ -129,7 +129,7 @@ const THINKING_MODES: ThinkingModeConfig[] = [
     description: "Maximum computation",
     level: 4,
     phrase: "ultrathink",
-    icon: <Rocket className="h-3.5 w-3.5" />,
+    icon: <Rocket className="h-3.5 w-3.5" weight="duotone" />,
     color: "text-primary",
     shortName: "Ultra"
   }
@@ -174,7 +174,7 @@ const MODELS: Model[] = [
     id: "sonnet",
     name: "Claude 4 Sonnet",
     description: "Faster, efficient for most tasks",
-    icon: <Zap className="h-3.5 w-3.5" />,
+    icon: <Lightning className="h-3.5 w-3.5" weight="duotone" />,
     shortName: "S",
     color: "text-primary"
   },
@@ -182,7 +182,7 @@ const MODELS: Model[] = [
     id: "opus",
     name: "Claude 4 Opus",
     description: "More capable, better for complex tasks",
-    icon: <Zap className="h-3.5 w-3.5" />,
+    icon: <Lightning className="h-3.5 w-3.5" weight="duotone" />,
     shortName: "O",
     color: "text-primary"
   }
@@ -815,7 +815,7 @@ const FloatingPromptInputInner = (
                       onClick={() => setIsExpanded(false)}
                       className="h-8 w-8"
                     >
-                      <Minimize2 className="h-4 w-4" />
+                      <ArrowsInSimple className="h-4 w-4" weight="duotone" />
                     </Button>
                   </motion.div>
                 </TooltipSimple>
@@ -978,7 +978,7 @@ const FloatingPromptInputInner = (
                       {isLoading ? (
                         <div className="rotating-symbol text-primary-foreground" />
                       ) : (
-                        <Send className="h-4 w-4" />
+                        <PaperPlaneTilt className="h-4 w-4" weight="duotone" />
                       )}
                     </Button>
                   </motion.div>
@@ -1035,7 +1035,7 @@ const FloatingPromptInputInner = (
                               <span className="text-[10px] font-bold opacity-70">
                                 {selectedModelData.shortName}
                               </span>
-                              <ChevronUp className="h-3 w-3 ml-0.5 opacity-50" />
+                              <CaretUp className="h-3 w-3 ml-0.5 opacity-50" weight="bold" />
                             </Button>
                           </motion.div>
                         </TooltipTrigger>
@@ -1101,7 +1101,7 @@ const FloatingPromptInputInner = (
                               <span className="text-[10px] font-semibold opacity-70">
                                 {THINKING_MODES.find(m => m.id === selectedThinkingMode)?.shortName}
                               </span>
-                              <ChevronUp className="h-3 w-3 ml-0.5 opacity-50" />
+                              <CaretUp className="h-3 w-3 ml-0.5 opacity-50" weight="bold" />
                             </Button>
                           </motion.div>
                         </TooltipTrigger>
@@ -1185,7 +1185,7 @@ const FloatingPromptInputInner = (
                         disabled={disabled}
                         className="h-8 w-8 hover:bg-accent/50 transition-colors"
                       >
-                        <Maximize2 className="h-3.5 w-3.5" />
+                        <ArrowsOutSimple className="h-3.5 w-3.5" weight="duotone" />
                       </Button>
                     </motion.div>
                   </TooltipSimple>
@@ -1208,7 +1208,7 @@ const FloatingPromptInputInner = (
                         {isLoading ? (
                           <Square className="h-4 w-4" />
                         ) : (
-                          <Send className="h-4 w-4" />
+                          <PaperPlaneTilt className="h-4 w-4" weight="duotone" />
                         )}
                       </Button>
                     </motion.div>

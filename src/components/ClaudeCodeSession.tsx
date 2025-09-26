@@ -1,14 +1,13 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
+import {
   Copy,
-  ChevronDown,
+  CaretDown,
   GitBranch,
-  ChevronUp,
+  CaretUp,
   X,
-  Hash,
-  Wrench
-} from "lucide-react";
+  Hash
+} from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,7 +19,6 @@ import { StreamMessage } from "./StreamMessage";
 import { FloatingPromptInput, type FloatingPromptInputRef } from "./FloatingPromptInput";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { TimelineNavigator } from "./TimelineNavigator";
-import { CheckpointSettings } from "./CheckpointSettings";
 import { SlashCommandsManager } from "./SlashCommandsManager";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { TooltipProvider, TooltipSimple } from "@/components/ui/tooltip-modern";
@@ -28,7 +26,6 @@ import { SplitPane } from "@/components/ui/split-pane";
 import { WebviewPreview } from "./WebviewPreview";
 import type { ClaudeStreamMessage } from "./AgentExecution";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { useTrackEvent, useComponentMetrics, useWorkflowTracking } from "@/hooks";
 import { SessionPersistenceService } from "@/services/sessionPersistence";
 
 interface ClaudeCodeSessionProps {
@@ -87,7 +84,6 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
   const [claudeSessionId, setClaudeSessionId] = useState<string | null>(null);
   const [showTimeline, setShowTimeline] = useState(false);
   const [timelineVersion, setTimelineVersion] = useState(0);
-  const [showSettings, setShowSettings] = useState(false);
   const [showForkDialog, setShowForkDialog] = useState(false);
   const [showSlashCommandsSettings, setShowSlashCommandsSettings] = useState(false);
   const [forkCheckpointId, setForkCheckpointId] = useState<string | null>(null);
@@ -133,11 +129,6 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
     modelChanges: [] as Array<{ from: string; to: string; timestamp: number }>,
   });
 
-  // Analytics tracking
-  const trackEvent = useTrackEvent();
-  useComponentMetrics('ClaudeCodeSession');
-  // const aiTracking = useAIInteractionTracking('sonnet'); // Default model
-  const workflowTracking = useWorkflowTracking('claude_session');
   
   // Call onProjectPathChange when component mounts with initial path
   useEffect(() => {
@@ -573,8 +564,8 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
                   sessionMetrics.current.filesDeleted += 1;
                 }
                 
-                // Track tool start - we'll track completion when we get the result
-                workflowTracking.trackStep(toolUse.name);
+                // Track tool start
+                console.log('Tool started:', toolUse.name);
               });
             }
             
@@ -587,18 +578,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
                 if (isError) {
                   sessionMetrics.current.toolsFailed += 1;
                   sessionMetrics.current.errorsEncountered += 1;
-                  
-                  trackEvent.enhancedError({
-                    error_type: 'tool_execution',
-                    error_code: 'tool_failed',
-                    error_message: result.content,
-                    context: `Tool execution failed`,
-                    user_action_before_error: 'executing_tool',
-                    recovery_attempted: false,
-                    recovery_successful: false,
-                    error_frequency: 1,
-                    stack_trace_hash: undefined
-                  });
+                  console.log('Tool execution failed:', result.content);
                 }
               });
             }
@@ -639,81 +619,20 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
             const sessionStartTimeValue = messages.length > 0 ? messages[0].timestamp || Date.now() : Date.now();
             const duration = Date.now() - sessionStartTimeValue;
             const metrics = sessionMetrics.current;
-            const timeToFirstMessage = metrics.firstMessageTime 
-              ? metrics.firstMessageTime - sessionStartTime.current 
-              : undefined;
-            const idleTime = Date.now() - metrics.lastActivityTime;
-            const avgResponseTime = metrics.toolExecutionTimes.length > 0
-              ? metrics.toolExecutionTimes.reduce((a, b) => a + b, 0) / metrics.toolExecutionTimes.length
-              : undefined;
             
-            trackEvent.enhancedSessionStopped({
-              // Basic metrics
-              duration_ms: duration,
-              messages_count: messages.length,
-              reason: success ? 'completed' : 'error',
-              
-              // Timing metrics
-              time_to_first_message_ms: timeToFirstMessage,
-              average_response_time_ms: avgResponseTime,
-              idle_time_ms: idleTime,
-              
-              // Interaction metrics
-              prompts_sent: metrics.promptsSent,
-              tools_executed: metrics.toolsExecuted,
-              tools_failed: metrics.toolsFailed,
-              files_created: metrics.filesCreated,
-              files_modified: metrics.filesModified,
-              files_deleted: metrics.filesDeleted,
-              
-              // Content metrics
-              total_tokens_used: totalTokens,
-              code_blocks_generated: metrics.codeBlocksGenerated,
-              errors_encountered: metrics.errorsEncountered,
-              
-              // Session context
-              model: metrics.modelChanges.length > 0 
-                ? metrics.modelChanges[metrics.modelChanges.length - 1].to 
-                : 'sonnet',
-              has_checkpoints: metrics.checkpointCount > 0,
-              checkpoint_count: metrics.checkpointCount,
-              was_resumed: metrics.wasResumed,
-              
-              // Agent context (if applicable)
-              agent_type: undefined, // TODO: Pass from agent execution
-              agent_name: undefined, // TODO: Pass from agent execution
-              agent_success: success,
-              
-              // Stop context
-              stop_source: 'completed',
-              final_state: success ? 'success' : 'failed',
-              has_pending_prompts: queuedPrompts.length > 0,
-              pending_prompts_count: queuedPrompts.length,
+            // Session stopped
+            console.log('Session completed:', {
+              duration,
+              success,
+              messageCount: messages.length,
+              tools: {
+                executed: metrics.toolsExecuted,
+                failed: metrics.toolsFailed
+              }
             });
           }
 
-          if (effectiveSession && success) {
-            try {
-              const settings = await api.getCheckpointSettings(
-                effectiveSession.id,
-                effectiveSession.project_id,
-                projectPath
-              );
-
-              if (settings.auto_checkpoint_enabled) {
-                await api.checkAutoCheckpoint(
-                  effectiveSession.id,
-                  effectiveSession.project_id,
-                  projectPath,
-                  prompt
-                );
-                // Reload timeline to show new checkpoint
-                setTimelineVersion((v) => v + 1);
-              }
-            } catch (err) {
-              console.error('Failed to check auto checkpoint:', err);
-            }
-          }
+          // Session completed successfully
 
           // Process queued prompts after completion
           if (queuedPromptsRef.current.length > 0) {
@@ -785,30 +704,23 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
         const sessionAge = sessionStartTime.current ? Date.now() - sessionStartTime.current : 0;
         const wordCount = prompt.split(/\s+/).filter(word => word.length > 0).length;
         
-        trackEvent.enhancedPromptSubmitted({
-          prompt_length: prompt.length,
-          model: model,
-          has_attachments: false, // TODO: Add attachment support when implemented
-          source: 'keyboard', // TODO: Track actual source (keyboard vs button)
-          word_count: wordCount,
-          conversation_depth: conversationDepth,
-          prompt_complexity: wordCount < 20 ? 'simple' : wordCount < 100 ? 'moderate' : 'complex',
-          contains_code: hasCode,
-          language_detected: hasCode ? codeBlockMatches?.[0]?.match(/```(\w+)/)?.[1] : undefined,
-          session_age_ms: sessionAge
+        // Prompt submitted
+        console.log('Prompt submitted:', {
+          wordCount,
+          conversationDepth,
+          hasCode,
+          sessionAge
         });
 
         // Execute the appropriate command
         if (effectiveSession && !isFirstPrompt) {
           console.log('[ClaudeCodeSession] Resuming session:', effectiveSession.id);
-          trackEvent.sessionResumed(effectiveSession.id);
-          trackEvent.modelSelected(model);
+          // Session resumed
           await api.resumeClaudeCode(projectPath, effectiveSession.id, prompt, model);
         } else {
           console.log('[ClaudeCodeSession] Starting new session');
           setIsFirstPrompt(false);
-          trackEvent.sessionCreated(model, 'prompt_input');
-          trackEvent.modelSelected(model);
+          // Session created
           await api.executeClaudeCode(projectPath, prompt, model);
         }
       }
@@ -921,57 +833,16 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
       
       // Calculate metrics for enhanced analytics
       const metrics = sessionMetrics.current;
-      const timeToFirstMessage = metrics.firstMessageTime 
-        ? metrics.firstMessageTime - sessionStartTime.current 
-        : undefined;
-      const idleTime = Date.now() - metrics.lastActivityTime;
-      const avgResponseTime = metrics.toolExecutionTimes.length > 0
-        ? metrics.toolExecutionTimes.reduce((a, b) => a + b, 0) / metrics.toolExecutionTimes.length
-        : undefined;
       
-      // Track enhanced session stopped
-      trackEvent.enhancedSessionStopped({
-        // Basic metrics
-        duration_ms: duration,
-        messages_count: messages.length,
-        reason: 'user_stopped',
-        
-        // Timing metrics
-        time_to_first_message_ms: timeToFirstMessage,
-        average_response_time_ms: avgResponseTime,
-        idle_time_ms: idleTime,
-        
-        // Interaction metrics
-        prompts_sent: metrics.promptsSent,
-        tools_executed: metrics.toolsExecuted,
-        tools_failed: metrics.toolsFailed,
-        files_created: metrics.filesCreated,
-        files_modified: metrics.filesModified,
-        files_deleted: metrics.filesDeleted,
-        
-        // Content metrics
-        total_tokens_used: totalTokens,
-        code_blocks_generated: metrics.codeBlocksGenerated,
-        errors_encountered: metrics.errorsEncountered,
-        
-        // Session context
-        model: metrics.modelChanges.length > 0 
-          ? metrics.modelChanges[metrics.modelChanges.length - 1].to 
-          : 'sonnet', // Default to sonnet
-        has_checkpoints: metrics.checkpointCount > 0,
-        checkpoint_count: metrics.checkpointCount,
-        was_resumed: metrics.wasResumed,
-        
-        // Agent context (if applicable)
-        agent_type: undefined, // TODO: Pass from agent execution
-        agent_name: undefined, // TODO: Pass from agent execution
-        agent_success: undefined, // TODO: Pass from agent execution
-        
-        // Stop context
-        stop_source: 'user_button',
-        final_state: 'cancelled',
-        has_pending_prompts: queuedPrompts.length > 0,
-        pending_prompts_count: queuedPrompts.length,
+      // Session stopped with duration
+      console.log('Session stopped by user:', {
+        duration,
+        messageCount: messages.length,
+        tools: {
+          executed: metrics.toolsExecuted,
+          failed: metrics.toolsFailed
+        },
+        pendingPrompts: queuedPrompts.length
       });
       
       // Clean up listeners
@@ -1096,9 +967,9 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
       
       // Track session completion with engagement metrics
       if (effectiveSession) {
-        trackEvent.sessionCompleted();
-        
-        // Track session engagement
+        // Session completed
+
+        // Session engagement metrics
         const sessionDuration = sessionStartTime.current ? Date.now() - sessionStartTime.current : 0;
         const messageCount = messages.filter(m => m.user_message).length;
         const toolsUsed = new Set<string>();
@@ -1116,12 +987,12 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
           (sessionDuration > 300000 ? 20 : sessionDuration / 15000) // 5+ min session gets 20 points
         );
         
-        trackEvent.sessionEngagement({
-          session_duration_ms: sessionDuration,
-          messages_sent: messageCount,
-          tools_used: Array.from(toolsUsed),
-          files_modified: 0, // TODO: Track file modifications
-          engagement_score: Math.round(engagementScore)
+        // Track engagement metrics locally
+        console.log('Session engagement:', {
+          toolsUsed: Array.from(toolsUsed),
+          engagementScore: Math.round(engagementScore),
+          duration: sessionDuration,
+          messageCount
         });
       }
       
@@ -1309,7 +1180,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
                         transition={{ duration: 0.15 }}
                       >
                         <Button variant="ghost" size="icon" onClick={() => setQueuedPromptsCollapsed(prev => !prev)}>
-                          {queuedPromptsCollapsed ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                          {queuedPromptsCollapsed ? <CaretUp className="h-3 w-3" weight="bold" /> : <CaretDown className="h-3 w-3" weight="bold" />}
                         </Button>
                       </motion.div>
                     </TooltipSimple>
@@ -1342,7 +1213,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
                           className="h-6 w-6 flex-shrink-0"
                           onClick={() => setQueuedPrompts(prev => prev.filter(p => p.id !== queuedPrompt.id))}
                         >
-                          <X className="h-3 w-3" />
+                          <X className="h-3 w-3" weight="bold" />
                         </Button>
                       </motion.div>
                     </motion.div>
@@ -1395,7 +1266,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
                     }}
                       className="px-3 py-2 hover:bg-accent rounded-none"
                     >
-                      <ChevronUp className="h-4 w-4" />
+                      <CaretUp className="h-4 w-4" weight="bold" />
                     </Button>
                   </motion.div>
                 </TooltipSimple>
@@ -1423,7 +1294,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
                     }}
                       className="px-3 py-2 hover:bg-accent rounded-none"
                     >
-                      <ChevronDown className="h-4 w-4" />
+                      <CaretDown className="h-4 w-4" weight="bold" />
                     </Button>
                   </motion.div>
                 </TooltipSimple>
@@ -1474,7 +1345,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
                               size="icon"
                               className="h-9 w-9 text-muted-foreground hover:text-foreground"
                             >
-                              <Copy className="h-3.5 w-3.5" />
+                              <Copy className="h-3.5 w-3.5" weight="duotone" />
                             </Button>
                           </motion.div>
                         </TooltipSimple>
@@ -1505,21 +1376,6 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
                       align="end"
                     />
                   )}
-                  <TooltipSimple content="Checkpoint Settings" side="top">
-                    <motion.div
-                      whileTap={{ scale: 0.97 }}
-                      transition={{ duration: 0.15 }}
-                    >
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setShowSettings(!showSettings)}
-                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                      >
-                        <Wrench className={cn("h-3.5 w-3.5", showSettings && "text-primary")} />
-                      </Button>
-                    </motion.div>
-                  </TooltipSimple>
                 </>
               }
             />
@@ -1537,7 +1393,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
                     className="bg-background/95 backdrop-blur-md border rounded-full px-3 py-1 shadow-lg pointer-events-auto"
                   >
                     <div className="flex items-center gap-1.5 text-xs">
-                      <Hash className="h-3 w-3 text-muted-foreground" />
+                      <Hash className="h-3 w-3 text-muted-foreground" weight="duotone" />
                       <span className="font-mono">{totalTokens.toLocaleString()}</span>
                       <span className="text-muted-foreground">tokens</span>
                     </div>
@@ -1568,7 +1424,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
                     onClick={() => setShowTimeline(false)}
                     className="h-8 w-8"
                   >
-                    <X className="h-4 w-4" />
+                    <X className="h-4 w-4" weight="bold" />
                   </Button>
                 </div>
                 
@@ -1636,19 +1492,6 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
         </DialogContent>
       </Dialog>
 
-      {/* Settings Dialog */}
-      {showSettings && effectiveSession && (
-        <Dialog open={showSettings} onOpenChange={setShowSettings}>
-          <DialogContent className="max-w-2xl">
-            <CheckpointSettings
-              sessionId={effectiveSession.id}
-              projectId={effectiveSession.project_id}
-              projectPath={projectPath}
-              onClose={() => setShowSettings(false)}
-            />
-          </DialogContent>
-        </Dialog>
-      )}
 
       {/* Slash Commands Settings Dialog */}
       {showSlashCommandsSettings && (

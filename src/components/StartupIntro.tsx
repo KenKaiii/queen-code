@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import opcodeLogo from "../../src-tauri/icons/icon.png";
+import { Crown } from "@phosphor-icons/react";
 import type { CSSProperties } from "react";
 
 /**
@@ -65,11 +65,9 @@ export function StartupIntro({ visible }: { visible: boolean }) {
                   animate={{ opacity: [0, 1, 0.9] }}
                   transition={{ duration: 0.9, ease: "easeOut" }}
                 />
-                <motion.img
-                  src={opcodeLogo}
-                  alt="opcode"
-                  className="h-20 w-20 rounded-lg shadow-sm"
-                  transition={{ repeat: Infinity, repeatType: "loop", ease: "linear", duration: 0.5 }}
+                <Crown
+                  className="h-20 w-20 text-primary drop-shadow-lg"
+                  weight="duotone"
                 />
               </motion.div>
 
@@ -96,9 +94,11 @@ export default StartupIntro;
 
 function BrandText() {
   return (
-    <div className="text-5xl font-extrabold tracking-tight brand-text">
-      <span className="brand-text-solid">opcode</span>
-      <span aria-hidden="true" className="brand-text-shimmer">opcode</span>
+    <div className="text-5xl font-black tracking-tighter brand-text">
+      <span className="brand-text-solid bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+        Queen Code
+      </span>
+      <span aria-hidden="true" className="brand-text-shimmer">Queen Code</span>
     </div>
   );
 }

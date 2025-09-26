@@ -1,12 +1,22 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Settings, Minus, Square, X, Bot, BarChart3, FileText, Network, Info, MoreVertical } from 'lucide-react';
+import {
+  Gear,
+  Minus,
+  Square,
+  X,
+  ChartBar,
+  FileText,
+  Globe,
+  Info,
+  DotsThreeVertical,
+  Crown
+} from '@phosphor-icons/react';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { TooltipProvider, TooltipSimple } from '@/components/ui/tooltip-modern';
 
 interface CustomTitlebarProps {
   onSettingsClick?: () => void;
-  onAgentsClick?: () => void;
   onUsageClick?: () => void;
   onClaudeClick?: () => void;
   onMCPClick?: () => void;
@@ -15,7 +25,6 @@ interface CustomTitlebarProps {
 
 export const CustomTitlebar: React.FC<CustomTitlebarProps> = ({
   onSettingsClick,
-  onAgentsClick,
   onUsageClick,
   onClaudeClick,
   onMCPClick,
@@ -127,30 +136,21 @@ export const CustomTitlebar: React.FC<CustomTitlebarProps> = ({
         </div>
       </div>
 
-      {/* Center - Title (hidden) */}
-      {/* <div 
-        className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+      {/* Center - Queen Claude Brand */}
+      <div
+        className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none flex items-center gap-2"
         data-tauri-drag-region
       >
-        <span className="text-sm font-medium text-foreground/80">{title}</span>
-      </div> */}
+        <Crown size={16} className="text-primary" weight="duotone" />
+        <span className="text-sm font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+          Queen Code
+        </span>
+      </div>
 
       {/* Right side - Navigation icons with improved spacing */}
       <div className="flex items-center pr-5 gap-3 tauri-no-drag">
         {/* Primary actions group */}
         <div className="flex items-center gap-1">
-          {onAgentsClick && (
-            <TooltipSimple content="Agents" side="bottom">
-              <motion.button
-                onClick={onAgentsClick}
-                whileTap={{ scale: 0.97 }}
-                transition={{ duration: 0.15 }}
-                className="p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors tauri-no-drag"
-              >
-                <Bot size={16} />
-              </motion.button>
-            </TooltipSimple>
-          )}
           
           {onUsageClick && (
             <TooltipSimple content="Usage Dashboard" side="bottom">
@@ -160,7 +160,7 @@ export const CustomTitlebar: React.FC<CustomTitlebarProps> = ({
                 transition={{ duration: 0.15 }}
                 className="p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors tauri-no-drag"
               >
-                <BarChart3 size={16} />
+                <ChartBar size={16} weight="duotone" />
               </motion.button>
             </TooltipSimple>
           )}
@@ -179,7 +179,7 @@ export const CustomTitlebar: React.FC<CustomTitlebarProps> = ({
                 transition={{ duration: 0.15 }}
                 className="p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors tauri-no-drag"
               >
-                <Settings size={16} />
+                <Gear size={16} weight="duotone" />
               </motion.button>
             </TooltipSimple>
           )}
@@ -193,7 +193,7 @@ export const CustomTitlebar: React.FC<CustomTitlebarProps> = ({
                 transition={{ duration: 0.15 }}
                 className="p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors flex items-center gap-1"
               >
-                <MoreVertical size={16} />
+                <DotsThreeVertical size={16} weight="duotone" />
               </motion.button>
             </TooltipSimple>
 
@@ -208,7 +208,7 @@ export const CustomTitlebar: React.FC<CustomTitlebarProps> = ({
                       }}
                       className="w-full px-4 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground transition-colors flex items-center gap-3"
                     >
-                      <FileText size={14} />
+                      <FileText size={14} weight="duotone" />
                       <span>CLAUDE.md</span>
                     </button>
                   )}
@@ -221,7 +221,7 @@ export const CustomTitlebar: React.FC<CustomTitlebarProps> = ({
                       }}
                       className="w-full px-4 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground transition-colors flex items-center gap-3"
                     >
-                      <Network size={14} />
+                      <Globe size={14} weight="duotone" />
                       <span>MCP Servers</span>
                     </button>
                   )}
@@ -234,7 +234,7 @@ export const CustomTitlebar: React.FC<CustomTitlebarProps> = ({
                       }}
                       className="w-full px-4 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground transition-colors flex items-center gap-3"
                     >
-                      <Info size={14} />
+                      <Info size={14} weight="duotone" />
                       <span>About</span>
                     </button>
                   )}
