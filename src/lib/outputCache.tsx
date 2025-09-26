@@ -114,6 +114,11 @@ export function OutputCacheProvider({ children }: OutputCacheProviderProps) {
 
   const updateSessionCache = useCallback(async (sessionId: number, status: string) => {
     try {
+      // Skip in browser (Tauri commands only work in Tauri app)
+      if (typeof window !== 'undefined' && !(window as any).__TAURI__) {
+        return;
+      }
+
       const rawOutput = await api.getSessionOutput(sessionId);
       const messages = parseOutput(rawOutput);
       
@@ -130,6 +135,11 @@ export function OutputCacheProvider({ children }: OutputCacheProviderProps) {
 
   const pollRunningSessions = useCallback(async () => {
     try {
+      // Skip polling in browser (Tauri commands only work in Tauri app)
+      if (typeof window !== 'undefined' && !(window as any).__TAURI__) {
+        return;
+      }
+
       const runningSessions = await api.listRunningAgentSessions();
       
       // Update cache for all running sessions

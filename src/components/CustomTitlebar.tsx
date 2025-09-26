@@ -12,7 +12,8 @@ import {
   Crown,
   Monitor,
   Radio,
-  GraduationCap
+  GraduationCap,
+  ChatsCircle
 } from '@phosphor-icons/react';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { TooltipProvider, TooltipSimple } from '@/components/ui/tooltip-modern';
@@ -22,6 +23,7 @@ interface CustomTitlebarProps {
   onServerDashboardClick?: () => void;
   onCodeRadioClick?: () => void;
   onLearnWithKenClick?: () => void;
+  onCommunityChatClick?: () => void;
   onClaudeClick?: () => void;
   onMCPClick?: () => void;
   onInfoClick?: () => void;
@@ -32,6 +34,7 @@ export const CustomTitlebar: React.FC<CustomTitlebarProps> = ({
   onServerDashboardClick,
   onCodeRadioClick,
   onLearnWithKenClick,
+  onCommunityChatClick,
   onClaudeClick,
   onMCPClick,
   onInfoClick
@@ -157,6 +160,19 @@ export const CustomTitlebar: React.FC<CustomTitlebarProps> = ({
       <div className="flex items-center pr-5 gap-3 tauri-no-drag">
         {/* Primary actions group */}
         <div className="flex items-center gap-1">
+          {onCommunityChatClick && (
+            <TooltipSimple content="Community Chat" side="bottom">
+              <motion.button
+                onClick={onCommunityChatClick}
+                whileTap={{ scale: 0.97 }}
+                transition={{ duration: 0.15 }}
+                className="p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors tauri-no-drag"
+              >
+                <ChatsCircle size={16} weight="duotone" />
+              </motion.button>
+            </TooltipSimple>
+          )}
+
           {onServerDashboardClick && (
             <TooltipSimple content="Server Dashboard" side="bottom">
               <motion.button

@@ -22,6 +22,7 @@ interface UseTabStateReturn {
   createServerDashboardTab: () => string | null;
   createCodeRadioTab: () => string | null;
   createLearnWithKenTab: () => string | null;
+  createCommunityChatTab: () => string | null;
   createClaudeMdTab: () => string | null;
   createClaudeFileTab: (fileId: string, fileName: string) => string;
   createCreateAgentTab: () => string;
@@ -224,6 +225,23 @@ export const useTabState = (): UseTabStateReturn => {
     });
   }, [addTab, tabs, setActiveTab]);
 
+  const createCommunityChatTab = useCallback((): string | null => {
+    // Check if community chat tab already exists (singleton)
+    const existingTab = tabs.find(tab => tab.type === 'community-chat');
+    if (existingTab) {
+      setActiveTab(existingTab.id);
+      return existingTab.id;
+    }
+
+    return addTab({
+      type: 'community-chat',
+      title: 'Community Chat',
+      status: 'idle',
+      hasUnsavedChanges: false,
+      icon: 'chat'
+    });
+  }, [addTab, tabs, setActiveTab]);
+
   const createClaudeMdTab = useCallback((): string | null => {
     // Check if claude-md tab already exists (singleton)
     const existingTab = tabs.find(tab => tab.type === 'claude-md');
@@ -396,6 +414,7 @@ export const useTabState = (): UseTabStateReturn => {
     createServerDashboardTab,
     createCodeRadioTab,
     createLearnWithKenTab,
+    createCommunityChatTab,
     createClaudeMdTab,
     createClaudeFileTab,
     createCreateAgentTab,

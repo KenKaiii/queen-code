@@ -332,7 +332,7 @@ Proper context setup takes 10 minutes once but saves hours on every request. You
   if (selectedTile && selectedTileData) {
     return (
       <div className={cn("h-full overflow-y-auto", className)}>
-        <div className="max-w-4xl mx-auto flex flex-col h-full">
+        <div className="max-w-6xl mx-auto flex flex-col h-full">
           {/* Header */}
           <div className="p-6">
             <div className="flex items-center justify-between">
@@ -374,7 +374,7 @@ Proper context setup takes 10 minutes once but saves hours on every request. You
   // Main tile grid view
   return (
     <div className={cn("h-full overflow-y-auto", className)}>
-      <div className="max-w-4xl mx-auto flex flex-col h-full">
+      <div className="max-w-6xl mx-auto flex flex-col h-full">
         {/* Header */}
         <div className="p-6">
           <div className="flex items-center justify-between">

@@ -24,7 +24,6 @@ import { SplitPane } from "@/components/ui/split-pane";
 import { WebviewPreview } from "./WebviewPreview";
 import type { ClaudeStreamMessage } from "./AgentExecution";
 import { SessionPersistenceService } from "@/services/sessionPersistence";
-import { useScrollToBottom } from "@/hooks/useScrollToBottom";
 
 interface ClaudeCodeSessionProps {
   /**
@@ -214,11 +213,25 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
     });
   }, [messages]);
 
-  // Proven auto-scroll solution
-  const { messagesContainerRef } = useScrollToBottom({
-    threshold: 100,
-    dependencies: [displayableMessages.length]
-  });
+  // Ref for messages container
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    if (displayableMessages.length > 0) {
+      setTimeout(() => {
+        const scrollElement = messagesContainerRef.current;
+        if (scrollElement) {
+          requestAnimationFrame(() => {
+            scrollElement.scrollTo({
+              top: scrollElement.scrollHeight,
+              behavior: 'smooth'
+            });
+          });
+        }
+      }, 150);
+    }
+  }, [displayableMessages.length]);
 
   // Debug logging
   useEffect(() => {
@@ -987,7 +1000,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
   const messagesList = (
     <div
       ref={messagesContainerRef}
-      className="flex-1 overflow-y-auto relative pb-40"
+      className="flex-1 overflow-y-auto relative pb-32"
     >
       <div className="relative w-full px-6 pt-6 pb-4">
         <AnimatePresence>
@@ -1018,7 +1031,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.15 }}
-          className="flex items-center justify-center py-4 mb-40"
+          className="flex items-center justify-center py-4 mb-3"
         >
           <div className="rotating-symbol text-primary" />
         </motion.div>
@@ -1030,7 +1043,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.15 }}
-          className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive mb-40 w-full max-w-6xl mx-auto"
+          className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive mb-6 w-full max-w-6xl mx-auto"
         >
           {error}
         </motion.div>

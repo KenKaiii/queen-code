@@ -23,6 +23,8 @@ export const useScrollToBottom = ({
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
+  const userHasScrolledUpRef = useRef(false);
+  const lastScrollHeightRef = useRef(0);
 
   // Handle scroll events to determine if user scrolled up
   const handleScroll = useCallback(() => {
@@ -33,6 +35,20 @@ export const useScrollToBottom = ({
     const isNearBottom = scrollHeight - scrollTop - clientHeight < threshold;
 
     setShowScrollToBottom(!isNearBottom);
+
+    // If scroll height changed (new content) but user didn't cause it, don't mark as user scroll
+    if (scrollHeight !== lastScrollHeightRef.current) {
+      lastScrollHeightRef.current = scrollHeight;
+      return;
+    }
+
+    // User manually scrolled up
+    if (!isNearBottom) {
+      userHasScrolledUpRef.current = true;
+    } else {
+      // User scrolled back to bottom
+      userHasScrolledUpRef.current = false;
+    }
   }, [threshold]);
 
   // Smooth scroll to bottom function
@@ -44,6 +60,7 @@ export const useScrollToBottom = ({
       top: container.scrollHeight,
       behavior: 'smooth',
     });
+    userHasScrolledUpRef.current = false;
   }, []);
 
   // Auto-scroll when dependencies change (new messages)
@@ -51,18 +68,18 @@ export const useScrollToBottom = ({
     const container = messagesContainerRef.current;
     if (!container) return;
 
-    // Check if we're already near the bottom
-    const { scrollTop, scrollHeight, clientHeight } = container;
-    const isNearBottom = scrollHeight - scrollTop - clientHeight < threshold;
-
-    // Only auto-scroll if user hasn't manually scrolled up
-    if (isNearBottom) {
-      // Small delay to ensure DOM is updated
-      const timer = setTimeout(() => {
-        scrollToBottom();
-      }, 50);
-
-      return () => clearTimeout(timer);
+    // Always scroll to bottom unless user has explicitly scrolled up
+    if (!userHasScrolledUpRef.current) {
+      // Use requestAnimationFrame for better timing with DOM updates
+      requestAnimationFrame(() => {
+        if (container) {
+          container.scrollTo({
+            top: container.scrollHeight,
+            behavior: 'smooth',
+          });
+          lastScrollHeightRef.current = container.scrollHeight;
+        }
+      });
     }
   }, dependencies);
 

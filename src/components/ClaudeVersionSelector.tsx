@@ -79,6 +79,12 @@ export const ClaudeVersionSelector: React.FC<ClaudeVersionSelectorProps> = ({
 
   const loadInstallations = async () => {
     try {
+      // Skip in browser (Tauri commands only work in Tauri app)
+      if (typeof window !== 'undefined' && !(window as any).__TAURI__) {
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       setError(null);
       const foundInstallations = await api.listClaudeInstallations();
@@ -96,8 +102,11 @@ export const ClaudeVersionSelector: React.FC<ClaudeVersionSelectorProps> = ({
         onSelect(foundInstallations[0]);
       }
     } catch (err) {
-      console.error("Failed to load Claude installations:", err);
-      setError(err instanceof Error ? err.message : "Failed to load Claude installations");
+      // Only log error if we're in Tauri (not browser)
+      if (typeof window !== 'undefined' && (window as any).__TAURI__) {
+        console.error("Failed to load Claude installations:", err);
+        setError(err instanceof Error ? err.message : "Failed to load Claude installations");
+      }
     } finally {
       setLoading(false);
     }

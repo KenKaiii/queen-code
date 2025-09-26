@@ -108,7 +108,7 @@ export const ServerDashboard: React.FC<ServerDashboardProps> = ({
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 300); // 300ms timeout
 
-        await fetch(`http://localhost:${port}`, {
+        const response = await fetch(`http://localhost:${port}`, {
           signal: controller.signal,
           mode: 'no-cors' // Avoid CORS issues
         });
@@ -210,7 +210,7 @@ export const ServerDashboard: React.FC<ServerDashboardProps> = ({
 
   return (
     <div className={cn("h-full overflow-y-auto", className)}>
-      <div className="max-w-4xl mx-auto flex flex-col h-full">
+      <div className="max-w-6xl mx-auto flex flex-col h-full">
         {/* Header */}
         <div className="p-6">
           <div className="flex items-center justify-between">

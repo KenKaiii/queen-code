@@ -4,7 +4,7 @@ import { SessionPersistenceService } from '@/services/sessionPersistence';
 
 export interface Tab {
   id: string;
-  type: 'chat' | 'agent' | 'agents' | 'projects' | 'usage' | 'mcp' | 'settings' | 'server-dashboard' | 'code-radio' | 'learn-with-ken' | 'claude-md' | 'claude-file' | 'agent-execution' | 'create-agent' | 'import-agent';
+  type: 'chat' | 'agent' | 'agents' | 'projects' | 'usage' | 'mcp' | 'settings' | 'server-dashboard' | 'code-radio' | 'learn-with-ken' | 'community-chat' | 'claude-md' | 'claude-file' | 'agent-execution' | 'create-agent' | 'import-agent';
   title: string;
   sessionId?: string;  // for chat tabs
   sessionData?: any; // for chat tabs - stores full session object

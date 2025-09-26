@@ -20,6 +20,7 @@ const Settings = lazy(() => import('@/components/Settings').then(m => ({ default
 const ServerDashboard = lazy(() => import('@/components/ServerDashboard').then(m => ({ default: m.ServerDashboard })));
 const CodeRadio = lazy(() => import('@/components/CodeRadio').then(m => ({ default: m.CodeRadio })));
 const LearnWithKen = lazy(() => import('@/components/LearnWithKen').then(m => ({ default: m.LearnWithKen })));
+const CommunityChat = lazy(() => import('@/components/CommunityChat').then(m => ({ default: m.CommunityChat })));
 const MarkdownEditor = lazy(() => import('@/components/MarkdownEditor').then(m => ({ default: m.MarkdownEditor })));
 // const ClaudeFileEditor = lazy(() => import('@/components/ClaudeFileEditor').then(m => ({ default: m.ClaudeFileEditor })));
 
@@ -334,6 +335,13 @@ const TabPanel: React.FC<TabPanelProps> = ({ tab, isActive }) => {
         return (
           <div className="h-full">
             <LearnWithKen />
+          </div>
+        );
+
+      case 'community-chat':
+        return (
+          <div className="h-full">
+            <CommunityChat />
           </div>
         );
 

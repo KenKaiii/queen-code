@@ -210,7 +210,7 @@ export const CodeRadio: React.FC<CodeRadioProps> = ({
 
   return (
     <div className={cn("h-full overflow-y-auto", className)}>
-      <div className="max-w-4xl mx-auto flex flex-col h-full">
+      <div className="max-w-6xl mx-auto flex flex-col h-full">
         {/* Header */}
         <div className="p-6">
           <div className="flex items-center justify-between">
@@ -232,7 +232,8 @@ export const CodeRadio: React.FC<CodeRadioProps> = ({
           <Card className="p-6">
             <div className="space-y-4">
               {/* Station Selector */}
-              <div className="flex items-center justify-center gap-2 p-1 bg-muted/30 rounded-lg">
+              <div className="flex items-center justify-center">
+                <div className="inline-flex items-center gap-2 p-1 bg-muted/30 rounded-lg">
                 {radioSources.map((source) => (
                   <button
                     key={source.id}
@@ -248,6 +249,7 @@ export const CodeRadio: React.FC<CodeRadioProps> = ({
                     {source.name}
                   </button>
                 ))}
+                </div>
               </div>
 
               {/* Status */}
