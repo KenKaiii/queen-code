@@ -23,8 +23,8 @@ import { TooltipProvider, TooltipSimple } from "@/components/ui/tooltip-modern";
 import { SplitPane } from "@/components/ui/split-pane";
 import { WebviewPreview } from "./WebviewPreview";
 import type { ClaudeStreamMessage } from "./AgentExecution";
-import { useVirtualizer } from "@tanstack/react-virtual";
 import { SessionPersistenceService } from "@/services/sessionPersistence";
+import { useScrollToBottom } from "@/hooks/useScrollToBottom";
 
 interface ClaudeCodeSessionProps {
   /**
@@ -98,7 +98,6 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
   // Add collapsed state for queued prompts
   const [queuedPromptsCollapsed, setQueuedPromptsCollapsed] = useState(false);
   
-  const parentRef = useRef<HTMLDivElement>(null);
   const unlistenRefs = useRef<UnlistenFn[]>([]);
   const hasActiveSessionRef = useRef(false);
   const floatingPromptRef = useRef<FloatingPromptInputRef>(null);
@@ -215,11 +214,10 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
     });
   }, [messages]);
 
-  const rowVirtualizer = useVirtualizer({
-    count: displayableMessages.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 150, // Estimate, will be dynamically measured
-    overscan: 5,
+  // Proven auto-scroll solution
+  const { messagesContainerRef } = useScrollToBottom({
+    threshold: 100,
+    dependencies: [displayableMessages.length]
   });
 
   // Debug logging
@@ -258,12 +256,6 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
     onStreamingChange?.(isLoading, claudeSessionId);
   }, [isLoading, claudeSessionId, onStreamingChange]);
 
-  // Auto-scroll to bottom when new messages arrive
-  useEffect(() => {
-    if (displayableMessages.length > 0) {
-      rowVirtualizer.scrollToIndex(displayableMessages.length - 1, { align: 'end', behavior: 'smooth' });
-    }
-  }, [displayableMessages.length, rowVirtualizer]);
 
   // Calculate total tokens from messages
   useEffect(() => {
@@ -312,8 +304,11 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
       
       // Scroll to bottom after loading history
       setTimeout(() => {
-        if (loadedMessages.length > 0) {
-          rowVirtualizer.scrollToIndex(loadedMessages.length - 1, { align: 'end', behavior: 'auto' });
+        if (loadedMessages.length > 0 && messagesContainerRef.current) {
+          messagesContainerRef.current.scrollTo({
+            top: messagesContainerRef.current.scrollHeight,
+            behavior: 'auto'
+          });
         }
       }, 100);
     } catch (err) {
@@ -991,38 +986,23 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
 
   const messagesList = (
     <div
-      ref={parentRef}
+      ref={messagesContainerRef}
       className="flex-1 overflow-y-auto relative pb-40"
-      style={{
-        contain: 'strict',
-      }}
     >
-      <div
-        className="relative w-full px-6 pt-6 pb-4"
-        style={{
-          height: `${Math.max(rowVirtualizer.getTotalSize(), 100)}px`,
-          minHeight: '100px',
-        }}
-      >
+      <div className="relative w-full px-6 pt-6 pb-4">
         <AnimatePresence>
-          {rowVirtualizer.getVirtualItems().map((virtualItem) => {
-            const message = displayableMessages[virtualItem.index];
+          {displayableMessages.map((message, index) => {
             return (
               <motion.div
-                key={virtualItem.key}
-                data-index={virtualItem.index}
-                ref={(el) => el && rowVirtualizer.measureElement(el)}
+                key={`message-${index}`}
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.3 }}
-                className="absolute inset-x-4 pb-4"
-                style={{
-                  top: virtualItem.start,
-                }}
+                className="mb-4"
               >
-                <StreamMessage 
-                  message={message} 
+                <StreamMessage
+                  message={message}
                   streamMessages={messages}
                   onLinkDetected={handleLinkDetected}
                 />
@@ -1222,19 +1202,19 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
                       // Use virtualizer to scroll to the first item
                       if (displayableMessages.length > 0) {
                         // Scroll to top of the container
-                        parentRef.current?.scrollTo({
+                        messagesContainerRef.current?.scrollTo({
                           top: 0,
                           behavior: 'smooth'
                         });
                         
                         // After smooth scroll completes, trigger a small scroll to ensure rendering
                         setTimeout(() => {
-                          if (parentRef.current) {
+                          if (messagesContainerRef.current) {
                             // Scroll down 1px then back to 0 to trigger virtualizer update
-                            parentRef.current.scrollTop = 1;
+                            messagesContainerRef.current.scrollTop = 1;
                             requestAnimationFrame(() => {
-                              if (parentRef.current) {
-                                parentRef.current.scrollTop = 0;
+                              if (messagesContainerRef.current) {
+                                messagesContainerRef.current.scrollTop = 0;
                               }
                             });
                           }
@@ -1260,7 +1240,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
                       // Use virtualizer to scroll to the last item
                       if (displayableMessages.length > 0) {
                         // Scroll to bottom of the container
-                        const scrollElement = parentRef.current;
+                        const scrollElement = messagesContainerRef.current;
                         if (scrollElement) {
                           scrollElement.scrollTo({
                             top: scrollElement.scrollHeight,
