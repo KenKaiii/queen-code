@@ -1,15 +1,33 @@
+import { useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Crown } from "@phosphor-icons/react";
 import queenBgImage from "../assets/queen-code-bg.jpg";
+import openSound from "../assets/opensound.mp3";
 import type { CSSProperties } from "react";
 
 /**
  * StartupIntro - a lightweight startup overlay shown on app launch.
- * - Non-interactive; auto-fades after parent hides it via the `visible` prop.
+ * - Non-interactive; auto-fades after minimum duration.
  * - Uses existing shimmer/rotating-symbol styles from shimmer.css.
  */
 export function StartupIntro({ visible }: { visible: boolean }) {
-  // Simple entrance animations only
+  // Play sound and auto-hide after 3 seconds
+  useEffect(() => {
+    if (visible) {
+      // Play startup sound
+      const audio = new Audio(openSound);
+      audio.volume = 0.3; // Gentle volume
+      audio.play().catch(console.error);
+
+      // Auto-hide after 3 seconds
+      const timer = setTimeout(() => {
+        // Trigger parent to hide preloader
+        window.dispatchEvent(new CustomEvent('hide-startup-intro'));
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [visible]);
+
   return (
     <AnimatePresence>
       {visible && (
@@ -61,31 +79,12 @@ export function StartupIntro({ visible }: { visible: boolean }) {
 
             {/* opcode logo slides left; brand text reveals to the right */}
             <div className="relative flex items-center justify-center">
-              {/* Logo wrapper that gently slides left */}
+              {/* Brand text centered */}
               <motion.div
-                className="relative z-10"
-                initial={{ opacity: 0, scale: 0.8, x: 0 }}
-                animate={{ opacity: 1, scale: 1, x: -14 }}
-                transition={{ duration: 0.8, ease: "easeOut", delay: 0.3 }}
-              >
-                <motion.div
-                  className="absolute inset-0 rounded-full bg-primary/20 blur-2xl"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: [0, 1, 0.8] }}
-                  transition={{ duration: 1.5, ease: "easeOut" }}
-                />
-                <Crown
-                  className="h-20 w-20 text-primary drop-shadow-lg"
-                  weight="duotone"
-                />
-              </motion.div>
-
-              {/* Brand text reveals left-to-right in the freed space */}
-              <motion.div
-                initial={{ x: -35, opacity: 0, clipPath: "inset(0 100% 0 0)" }}
-                animate={{ x: 2, opacity: 1, clipPath: "inset(0 0% 0 0)" }}
-                transition={{ duration: 1.0, ease: "easeOut", delay: 0.5 }}
-                style={{ willChange: "transform, opacity, clip-path" }}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 1.0, ease: "easeOut", delay: 0.3 }}
+                className="text-center"
               >
                 <BrandText />
               </motion.div>

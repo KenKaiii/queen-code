@@ -873,8 +873,8 @@ const FloatingPromptInputInner = (
                               }}
                               className={cn(
                                 "w-full flex items-start gap-3 p-3 rounded-md transition-colors text-left",
-                                "hover:bg-accent",
-                                selectedModel === model.id && "bg-accent"
+                                "hover:bg-accent/20 hover:text-foreground",
+                                selectedModel === model.id && "bg-accent/20"
                               )}
                             >
                               <div className="mt-0.5">
@@ -936,8 +936,8 @@ const FloatingPromptInputInner = (
                               }}
                               className={cn(
                                 "w-full flex items-start gap-3 p-3 rounded-md transition-colors text-left",
-                                "hover:bg-accent",
-                                selectedThinkingMode === mode.id && "bg-accent"
+                                "hover:bg-accent/20 hover:text-foreground",
+                                selectedThinkingMode === mode.id && "bg-accent/20"
                               )}
                             >
                               <span className={cn("mt-0.5", mode.color)}>
@@ -1056,8 +1056,8 @@ const FloatingPromptInputInner = (
                         }}
                         className={cn(
                           "w-full flex items-start gap-3 p-3 rounded-md transition-colors text-left",
-                          "hover:bg-accent",
-                          selectedModel === model.id && "bg-accent"
+                          "hover:bg-accent/20 hover:text-foreground",
+                          selectedModel === model.id && "bg-accent/20"
                         )}
                       >
                         <div className="mt-0.5">
@@ -1122,8 +1122,8 @@ const FloatingPromptInputInner = (
                         }}
                         className={cn(
                           "w-full flex items-start gap-3 p-3 rounded-md transition-colors text-left",
-                          "hover:bg-accent",
-                          selectedThinkingMode === mode.id && "bg-accent"
+                          "hover:bg-accent/20 hover:text-foreground",
+                          selectedThinkingMode === mode.id && "bg-accent/20"
                         )}
                       >
                         <span className={cn("mt-0.5", mode.color)}>

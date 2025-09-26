@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Copy,
   CaretDown,
-  GitBranch,
   CaretUp,
   X,
   Hash
@@ -18,7 +17,6 @@ import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { StreamMessage } from "./StreamMessage";
 import { FloatingPromptInput, type FloatingPromptInputRef } from "./FloatingPromptInput";
 import { ErrorBoundary } from "./ErrorBoundary";
-import { TimelineNavigator } from "./TimelineNavigator";
 import { SlashCommandsManager } from "./SlashCommandsManager";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { TooltipProvider, TooltipSimple } from "@/components/ui/tooltip-modern";
@@ -82,8 +80,6 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
   const [totalTokens, setTotalTokens] = useState(0);
   const [extractedSessionInfo, setExtractedSessionInfo] = useState<{ sessionId: string; projectId: string } | null>(null);
   const [claudeSessionId, setClaudeSessionId] = useState<string | null>(null);
-  const [showTimeline, setShowTimeline] = useState(false);
-  const [timelineVersion, setTimelineVersion] = useState(0);
   const [showForkDialog, setShowForkDialog] = useState(false);
   const [showSlashCommandsSettings, setShowSlashCommandsSettings] = useState(false);
   const [forkCheckpointId, setForkCheckpointId] = useState<string | null>(null);
@@ -810,17 +806,6 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
     setCopyPopoverOpen(false);
   };
 
-  const handleCheckpointSelect = async () => {
-    // Reload messages from the checkpoint
-    await loadSessionHistory();
-    // Ensure timeline reloads to highlight current checkpoint
-    setTimelineVersion((v) => v + 1);
-  };
-  
-  const handleCheckpointCreated = () => {
-    // Update checkpoint count in session metrics
-    sessionMetrics.current.checkpointCount += 1;
-  };
 
   const handleCancelExecution = async () => {
     if (!claudeSessionId || !isLoading) return;
@@ -891,11 +876,6 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
     }
   };
 
-  const handleFork = (checkpointId: string) => {
-    setForkCheckpointId(checkpointId);
-    setForkSessionName(`Fork-${new Date().toISOString().slice(0, 10)}`);
-    setShowForkDialog(true);
-  };
 
   const handleConfirmFork = async () => {
     if (!forkCheckpointId || !forkSessionName.trim() || !effectiveSession) return;
@@ -1018,7 +998,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
       }}
     >
       <div
-        className="relative w-full max-w-6xl mx-auto px-4 pt-8 pb-4"
+        className="relative w-full px-6 pt-6 pb-4"
         style={{
           height: `${Math.max(rowVirtualizer.getTotalSize(), 100)}px`,
           minHeight: '100px',
@@ -1110,10 +1090,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
         <div className="w-full h-full flex flex-col">
 
         {/* Main Content Area */}
-        <div className={cn(
-          "flex-1 overflow-hidden transition-all duration-300",
-          showTimeline && "sm:mr-96"
-        )}>
+        <div className="flex-1 overflow-hidden">
           {showPreview ? (
             // Split pane layout when preview is active
             <SplitPane
@@ -1140,7 +1117,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
             />
           ) : (
             // Original layout when no preview
-            <div className="h-full flex flex-col max-w-6xl mx-auto px-6">
+            <div className="h-full flex flex-col max-w-4xl mx-auto">
               {projectPathInput}
               {messagesList}
               
@@ -1302,10 +1279,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
             </motion.div>
           )}
 
-          <div className={cn(
-            "fixed bottom-0 left-0 right-0 transition-all duration-300 z-50",
-            showTimeline && "sm:right-96"
-          )}>
+          <div className="fixed bottom-0 left-0 right-0 z-50">
             <FloatingPromptInput
               ref={floatingPromptRef}
               onSend={handleSendPrompt}
@@ -1315,23 +1289,6 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
               projectPath={projectPath}
               extraMenuItems={
                 <>
-                  {effectiveSession && (
-                    <TooltipSimple content="Session Timeline" side="top">
-                      <motion.div
-                        whileTap={{ scale: 0.97 }}
-                        transition={{ duration: 0.15 }}
-                      >
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setShowTimeline(!showTimeline)}
-                          className="h-9 w-9 text-muted-foreground hover:text-foreground"
-                        >
-                          <GitBranch className={cn("h-3.5 w-3.5", showTimeline && "text-primary")} />
-                        </Button>
-                      </motion.div>
-                    </TooltipSimple>
-                  )}
                   {messages.length > 0 && (
                     <Popover
                       trigger={
@@ -1404,47 +1361,6 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
           )}
         </ErrorBoundary>
 
-        {/* Timeline */}
-        <AnimatePresence>
-          {showTimeline && effectiveSession && (
-            <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
-              className="fixed right-0 top-0 h-full w-full sm:w-96 bg-background border-l border-border shadow-xl z-30 overflow-hidden"
-            >
-              <div className="h-full flex flex-col">
-                {/* Timeline Header */}
-                <div className="flex items-center justify-between p-4 border-b border-border">
-                  <h3 className="text-lg font-semibold">Session Timeline</h3>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setShowTimeline(false)}
-                    className="h-8 w-8"
-                  >
-                    <X className="h-4 w-4" weight="bold" />
-                  </Button>
-                </div>
-                
-                {/* Timeline Content */}
-                <div className="flex-1 overflow-y-auto p-4">
-                  <TimelineNavigator
-                    sessionId={effectiveSession.id}
-                    projectId={effectiveSession.project_id}
-                    projectPath={projectPath}
-                    currentMessageIndex={messages.length - 1}
-                    onCheckpointSelect={handleCheckpointSelect}
-                    onFork={handleFork}
-                    onCheckpointCreated={handleCheckpointCreated}
-                    refreshVersion={timelineVersion}
-                  />
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
 
       {/* Fork Dialog */}

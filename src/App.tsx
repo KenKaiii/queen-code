@@ -46,7 +46,7 @@ type View =
  */
 function AppContent() {
   const [view, setView] = useState<View>("tabs");
-  const { createClaudeMdTab, createSettingsTab, createMCPTab, createServerDashboardTab, createCodeRadioTab } = useTabState();
+  const { createClaudeMdTab, createSettingsTab, createMCPTab, createServerDashboardTab, createCodeRadioTab, createLearnWithKenTab } = useTabState();
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [sessions, setSessions] = useState<Session[]>([]);
@@ -365,6 +365,7 @@ function AppContent() {
       <CustomTitlebar
         onServerDashboardClick={() => createServerDashboardTab()}
         onCodeRadioClick={() => createCodeRadioTab()}
+        onLearnWithKenClick={() => createLearnWithKenTab()}
         onClaudeClick={() => createClaudeMdTab()}
         onMCPClick={() => createMCPTab()}
         onSettingsClick={() => createSettingsTab()}
@@ -487,24 +488,31 @@ function App() {
 
   useEffect(() => {
     let timer: number | undefined;
+
+    // Listen for custom event from StartupIntro
+    const handleHideIntro = () => setShowIntro(false);
+    window.addEventListener('hide-startup-intro', handleHideIntro);
+
     (async () => {
       try {
         const pref = await api.getSetting('startup_intro_enabled');
         const enabled = pref === null ? true : pref === 'true';
         if (enabled) {
-          // keep intro visible and hide after duration
-          timer = window.setTimeout(() => setShowIntro(false), 2000);
+          // keep intro visible and hide after duration (fallback)
+          timer = window.setTimeout(() => setShowIntro(false), 3500);
         } else {
           // user disabled intro: hide immediately to avoid any overlay delay
           setShowIntro(false);
         }
       } catch (err) {
         // On failure, show intro once to keep UX consistent
-        timer = window.setTimeout(() => setShowIntro(false), 2000);
+        timer = window.setTimeout(() => setShowIntro(false), 3500);
       }
     })();
+
     return () => {
       if (timer) window.clearTimeout(timer);
+      window.removeEventListener('hide-startup-intro', handleHideIntro);
     };
   }, []);
 

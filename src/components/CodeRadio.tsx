@@ -84,7 +84,7 @@ export const CodeRadio: React.FC<CodeRadioProps> = ({
     const handleError = (e: any) => {
       console.error('Audio error details:', {
         error: e,
-        url: RADIO_URL,
+        url: currentSource.url,
         readyState: audio.readyState,
         networkState: audio.networkState
       });

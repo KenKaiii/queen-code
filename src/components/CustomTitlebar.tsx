@@ -11,7 +11,8 @@ import {
   DotsThreeVertical,
   Crown,
   Monitor,
-  Radio
+  Radio,
+  GraduationCap
 } from '@phosphor-icons/react';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { TooltipProvider, TooltipSimple } from '@/components/ui/tooltip-modern';
@@ -20,6 +21,7 @@ interface CustomTitlebarProps {
   onSettingsClick?: () => void;
   onServerDashboardClick?: () => void;
   onCodeRadioClick?: () => void;
+  onLearnWithKenClick?: () => void;
   onClaudeClick?: () => void;
   onMCPClick?: () => void;
   onInfoClick?: () => void;
@@ -29,6 +31,7 @@ export const CustomTitlebar: React.FC<CustomTitlebarProps> = ({
   onSettingsClick,
   onServerDashboardClick,
   onCodeRadioClick,
+  onLearnWithKenClick,
   onClaudeClick,
   onMCPClick,
   onInfoClick
@@ -176,6 +179,19 @@ export const CustomTitlebar: React.FC<CustomTitlebarProps> = ({
                 className="p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors tauri-no-drag"
               >
                 <Radio size={16} weight="duotone" />
+              </motion.button>
+            </TooltipSimple>
+          )}
+
+          {onLearnWithKenClick && (
+            <TooltipSimple content="Learn with Ken" side="bottom">
+              <motion.button
+                onClick={onLearnWithKenClick}
+                whileTap={{ scale: 0.97 }}
+                transition={{ duration: 0.15 }}
+                className="p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors tauri-no-drag"
+              >
+                <GraduationCap size={16} weight="duotone" />
               </motion.button>
             </TooltipSimple>
           )}

@@ -19,6 +19,7 @@ const MCPManager = lazy(() => import('@/components/MCPManager').then(m => ({ def
 const Settings = lazy(() => import('@/components/Settings').then(m => ({ default: m.Settings })));
 const ServerDashboard = lazy(() => import('@/components/ServerDashboard').then(m => ({ default: m.ServerDashboard })));
 const CodeRadio = lazy(() => import('@/components/CodeRadio').then(m => ({ default: m.CodeRadio })));
+const LearnWithKen = lazy(() => import('@/components/LearnWithKen').then(m => ({ default: m.LearnWithKen })));
 const MarkdownEditor = lazy(() => import('@/components/MarkdownEditor').then(m => ({ default: m.MarkdownEditor })));
 // const ClaudeFileEditor = lazy(() => import('@/components/ClaudeFileEditor').then(m => ({ default: m.ClaudeFileEditor })));
 
@@ -326,6 +327,13 @@ const TabPanel: React.FC<TabPanelProps> = ({ tab, isActive }) => {
         return (
           <div className="h-full">
             <CodeRadio />
+          </div>
+        );
+
+      case 'learn-with-ken':
+        return (
+          <div className="h-full">
+            <LearnWithKen />
           </div>
         );
 

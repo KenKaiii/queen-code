@@ -21,6 +21,7 @@ interface UseTabStateReturn {
   createSettingsTab: () => string | null;
   createServerDashboardTab: () => string | null;
   createCodeRadioTab: () => string | null;
+  createLearnWithKenTab: () => string | null;
   createClaudeMdTab: () => string | null;
   createClaudeFileTab: (fileId: string, fileName: string) => string;
   createCreateAgentTab: () => string;
@@ -206,6 +207,23 @@ export const useTabState = (): UseTabStateReturn => {
     });
   }, [addTab, tabs, setActiveTab]);
 
+  const createLearnWithKenTab = useCallback((): string | null => {
+    // Check if learn with ken tab already exists (singleton)
+    const existingTab = tabs.find(tab => tab.type === 'learn-with-ken');
+    if (existingTab) {
+      setActiveTab(existingTab.id);
+      return existingTab.id;
+    }
+
+    return addTab({
+      type: 'learn-with-ken',
+      title: 'Learn with Ken',
+      status: 'idle',
+      hasUnsavedChanges: false,
+      icon: 'graduation-cap'
+    });
+  }, [addTab, tabs, setActiveTab]);
+
   const createClaudeMdTab = useCallback((): string | null => {
     // Check if claude-md tab already exists (singleton)
     const existingTab = tabs.find(tab => tab.type === 'claude-md');
@@ -377,6 +395,7 @@ export const useTabState = (): UseTabStateReturn => {
     createSettingsTab,
     createServerDashboardTab,
     createCodeRadioTab,
+    createLearnWithKenTab,
     createClaudeMdTab,
     createClaudeFileTab,
     createCreateAgentTab,
