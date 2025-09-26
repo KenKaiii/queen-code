@@ -168,11 +168,11 @@ export const Settings: React.FC<SettingsProps> = ({
       }
 
 
-      setToast({ message: "Settings saved successfully!", type: "success" });
+      setToast({ message: "Your royal preferences applied!", type: "success" });
     } catch (err) {
-      console.error("Failed to save settings:", err);
-      setError("Failed to save settings.");
-      setToast({ message: "Failed to save settings", type: "error" });
+      console.error("Failed to apply changes:", err);
+      setError("Couldn't apply your changes.");
+      setToast({ message: "Couldn't apply your changes", type: "error" });
     } finally {
       setSaving(false);
     }
@@ -229,9 +229,9 @@ export const Settings: React.FC<SettingsProps> = ({
         <div className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-heading-1">Settings</h1>
+              <h1 className="text-heading-1">Queen's Controls</h1>
               <p className="mt-1 text-body-small text-muted-foreground">
-                Configure Claude Code preferences
+                Customize your royal coding experience
               </p>
             </div>
             <motion.div
@@ -251,7 +251,7 @@ export const Settings: React.FC<SettingsProps> = ({
                 ) : (
                   <>
                     <FloppyDisk className="mr-2 h-4 w-4" weight="duotone" />
-                    Save Settings
+Apply Changes
                   </>
                 )}
               </Button>
@@ -285,7 +285,7 @@ export const Settings: React.FC<SettingsProps> = ({
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid grid-cols-2 w-full mb-6 h-auto p-1">
               <TabsTrigger value="general" className="py-2.5 px-3">General</TabsTrigger>
-              <TabsTrigger value="environment" className="py-2.5 px-3">Environment</TabsTrigger>
+              <TabsTrigger value="environment" className="py-2.5 px-3">AI Models</TabsTrigger>
             </TabsList>
             
             {/* General Settings */}
@@ -298,9 +298,9 @@ export const Settings: React.FC<SettingsProps> = ({
                     {/* Theme Selector */}
                     <div className="flex items-center justify-between">
                       <div>
-                        <Label>Theme</Label>
+                        <Label>Visual Style</Label>
                         <p className="text-caption text-muted-foreground mt-1">
-                          Choose your preferred color theme
+                          Pick your royal visual experience
                         </p>
                       </div>
                       <div className="flex items-center gap-1 p-1 bg-muted/30 rounded-lg">
@@ -349,9 +349,9 @@ export const Settings: React.FC<SettingsProps> = ({
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
-                          <Label htmlFor="cleanup">Chat Transcript Retention (days)</Label>
+                          <Label htmlFor="cleanup">Keep My Chats For (days)</Label>
                           <p className="text-caption text-muted-foreground mt-1">
-                            How long to retain chat transcripts locally (default: 30 days)
+                            How long to keep your coding conversations (default: 30 days)
                           </p>
                         </div>
                         <Input
@@ -387,9 +387,9 @@ export const Settings: React.FC<SettingsProps> = ({
                     {/* Tab Persistence Toggle */}
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
-                        <Label htmlFor="tab-persistence">Remember Open Tabs</Label>
+                        <Label htmlFor="tab-persistence">Remember My Workspace</Label>
                         <p className="text-caption text-muted-foreground">
-                          Restore your tabs when you restart the app
+                          Bring back your tabs when you restart
                         </p>
                       </div>
                       <Switch
@@ -411,9 +411,9 @@ export const Settings: React.FC<SettingsProps> = ({
                     {/* Startup Intro Toggle */}
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
-                        <Label htmlFor="startup-intro">Show Welcome Intro on Startup</Label>
+                        <Label htmlFor="startup-intro">Royal Welcome Animation</Label>
                         <p className="text-caption text-muted-foreground">
-                          Display a brief welcome animation when the app launches
+                          Show the crown animation when Queen Code starts
                         </p>
                       </div>
                       <Switch
@@ -441,15 +441,15 @@ export const Settings: React.FC<SettingsProps> = ({
             </TabsContent>
             
             
-            {/* Environment Variables */}
+            {/* AI Models */}
             <TabsContent value="environment" className="space-y-6">
               <Card className="p-6">
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-heading-4">Environment Variables</h3>
+                      <h3 className="text-heading-4">AI Model Configuration</h3>
                       <p className="text-sm text-muted-foreground mt-1">
-                        Environment variables applied to every Claude Code session
+                        Switch to powerful models like Kimi K2 for faster, cheaper coding
                       </p>
                     </div>
                     <Button
@@ -459,14 +459,14 @@ export const Settings: React.FC<SettingsProps> = ({
                       className="gap-2"
                     >
                       <Plus className="h-3 w-3" weight="bold" />
-                      Add Variable
+                      Add Model
                     </Button>
                   </div>
                   
                   <div className="space-y-3">
                     {envVars.length === 0 ? (
                       <p className="text-xs text-muted-foreground py-2">
-                        No environment variables configured.
+                        No custom models configured yet.
                       </p>
                     ) : (
                       envVars.map((envVar) => (
@@ -504,12 +504,12 @@ export const Settings: React.FC<SettingsProps> = ({
                   
                   <div className="pt-2 space-y-2">
                     <p className="text-xs text-muted-foreground">
-                      <strong>Common variables:</strong>
+                      <strong>Popular model setups:</strong>
                     </p>
                     <ul className="text-caption text-muted-foreground space-y-1 ml-4">
-                      <li>• <code className="px-1 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400">CLAUDE_CODE_ENABLE_TELEMETRY</code> - Enable/disable telemetry (0 or 1)</li>
-                      <li>• <code className="px-1 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400">ANTHROPIC_MODEL</code> - Custom model name</li>
-                      <li>• <code className="px-1 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400">DISABLE_COST_WARNINGS</code> - Disable cost warnings (1)</li>
+                      <li>• <code className="px-1 py-0.5 rounded bg-purple-500/10 text-purple-600 dark:text-purple-400">ANTHROPIC_AUTH_TOKEN</code> - Your Kimi K2 API key</li>
+                      <li>• <code className="px-1 py-0.5 rounded bg-purple-500/10 text-purple-600 dark:text-purple-400">ANTHROPIC_BASE_URL</code> - Switch to Kimi endpoint</li>
+                      <li>• <code className="px-1 py-0.5 rounded bg-purple-500/10 text-purple-600 dark:text-purple-400">ANTHROPIC_MODEL</code> - Choose your AI brain</li>
                     </ul>
                   </div>
                 </div>

@@ -46,7 +46,7 @@ type View =
  */
 function AppContent() {
   const [view, setView] = useState<View>("tabs");
-  const { createClaudeMdTab, createSettingsTab, createUsageTab, createMCPTab } = useTabState();
+  const { createClaudeMdTab, createSettingsTab, createMCPTab, createServerDashboardTab, createCodeRadioTab } = useTabState();
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [sessions, setSessions] = useState<Session[]>([]);
@@ -363,7 +363,8 @@ function AppContent() {
     <div className="h-screen flex flex-col">
       {/* Custom Titlebar */}
       <CustomTitlebar
-        onUsageClick={() => createUsageTab()}
+        onServerDashboardClick={() => createServerDashboardTab()}
+        onCodeRadioClick={() => createCodeRadioTab()}
         onClaudeClick={() => createClaudeMdTab()}
         onMCPClick={() => createMCPTab()}
         onSettingsClick={() => createSettingsTab()}
@@ -374,7 +375,6 @@ function AppContent() {
       {/* <Topbar
         onClaudeClick={() => createClaudeMdTab()}
         onSettingsClick={() => createSettingsTab()}
-        onUsageClick={() => createUsageTab()}
         onMCPClick={() => createMCPTab()}
         onInfoClick={() => setShowNFO(true)}
       /> */}

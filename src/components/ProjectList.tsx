@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { 
+import {
   FolderOpen,
-  ChevronLeft,
-  ChevronRight
-} from "lucide-react";
+  CaretLeft,
+  CaretRight
+} from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import type { Project } from "@/lib/api";
@@ -118,7 +118,7 @@ export const ProjectList: React.FC<ProjectListProps> = ({
         <div className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold">Projects</h1>
+              <h1 className="text-heading-1">Projects</h1>
               <p className="mt-1 text-body-small text-muted-foreground">
                 Select a project to start working with Claude Code
               </p>
@@ -132,7 +132,7 @@ export const ProjectList: React.FC<ProjectListProps> = ({
                 size="default"
                 className="flex items-center gap-2"
               >
-                <FolderOpen className="h-4 w-4" />
+                <FolderOpen className="h-4 w-4" weight="duotone" />
                 Open Project
               </Button>
             </motion.div>
@@ -205,7 +205,7 @@ export const ProjectList: React.FC<ProjectListProps> = ({
                   onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                   disabled={currentPage === 1}
                 >
-                  <ChevronLeft className="h-4 w-4" />
+                  <CaretLeft className="h-4 w-4" weight="bold" />
                 </Button>
               </motion.div>
               
@@ -233,7 +233,7 @@ export const ProjectList: React.FC<ProjectListProps> = ({
                   onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                   disabled={currentPage === totalPages}
                 >
-                  <ChevronRight className="h-4 w-4" />
+                  <CaretRight className="h-4 w-4" weight="bold" />
                 </Button>
               </motion.div>
             </div>
@@ -243,7 +243,7 @@ export const ProjectList: React.FC<ProjectListProps> = ({
             <Card className="p-12">
               <div className="flex flex-col items-center justify-center text-center">
                 <div className="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-                  <FolderOpen className="h-8 w-8 text-primary" />
+                  <FolderOpen className="h-8 w-8 text-primary" weight="duotone" />
                 </div>
                 <h3 className="text-heading-3 mb-2">No recent projects</h3>
                 <p className="text-body-small text-muted-foreground mb-6">
@@ -258,7 +258,7 @@ export const ProjectList: React.FC<ProjectListProps> = ({
                     size="default"
                     className="flex items-center gap-2"
                   >
-                    <FolderOpen className="h-4 w-4" />
+                    <FolderOpen className="h-4 w-4" weight="duotone" />
                     Open Your First Project
                   </Button>
                 </motion.div>

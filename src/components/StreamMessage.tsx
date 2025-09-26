@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {
   Terminal,
-  Crown,
-  Sparkle,
   Warning,
   CheckCircle
 } from "@phosphor-icons/react";
@@ -115,8 +113,7 @@ const StreamMessageComponent: React.FC<StreamMessageProps> = ({ message, classNa
       const renderedCard = (
         <Card className={cn("border-primary/20 bg-primary/5", className)}>
           <CardContent className="p-4">
-            <div className="flex items-start gap-3">
-              <Sparkle className="h-5 w-5 text-primary mt-0.5" weight="duotone" />
+            <div className="flex items-start">
               <div className="flex-1 space-y-2 min-w-0">
                 {msg.content && Array.isArray(msg.content) && msg.content.map((content: any, idx: number) => {
                   // Text content - render as markdown
@@ -345,8 +342,7 @@ const StreamMessageComponent: React.FC<StreamMessageProps> = ({ message, classNa
       const renderedCard = (
         <Card className={cn("border-muted-foreground/20 bg-muted/20", className)}>
           <CardContent className="p-4">
-            <div className="flex items-start gap-3">
-              <Crown className="h-5 w-5 text-primary mt-0.5" />
+            <div className="flex items-start">
               <div className="flex-1 space-y-2 min-w-0">
                 {/* Handle content that is a simple string (e.g. from user commands) */}
                 {(typeof msg.content === 'string' || (msg.content && !Array.isArray(msg.content))) && (

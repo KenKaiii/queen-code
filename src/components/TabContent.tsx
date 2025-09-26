@@ -17,6 +17,8 @@ const Agents = lazy(() => import('@/components/Agents').then(m => ({ default: m.
 const UsageDashboard = lazy(() => import('@/components/UsageDashboard').then(m => ({ default: m.UsageDashboard })));
 const MCPManager = lazy(() => import('@/components/MCPManager').then(m => ({ default: m.MCPManager })));
 const Settings = lazy(() => import('@/components/Settings').then(m => ({ default: m.Settings })));
+const ServerDashboard = lazy(() => import('@/components/ServerDashboard').then(m => ({ default: m.ServerDashboard })));
+const CodeRadio = lazy(() => import('@/components/CodeRadio').then(m => ({ default: m.CodeRadio })));
 const MarkdownEditor = lazy(() => import('@/components/MarkdownEditor').then(m => ({ default: m.MarkdownEditor })));
 // const ClaudeFileEditor = lazy(() => import('@/components/ClaudeFileEditor').then(m => ({ default: m.ClaudeFileEditor })));
 
@@ -312,7 +314,21 @@ const TabPanel: React.FC<TabPanelProps> = ({ tab, isActive }) => {
             <Settings onBack={() => {}} />
           </div>
         );
-      
+
+      case 'server-dashboard':
+        return (
+          <div className="h-full">
+            <ServerDashboard />
+          </div>
+        );
+
+      case 'code-radio':
+        return (
+          <div className="h-full">
+            <CodeRadio />
+          </div>
+        );
+
       case 'claude-md':
         return (
           <div className="h-full">

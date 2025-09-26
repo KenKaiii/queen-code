@@ -1,6 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import { useTabContext } from '@/contexts/TabContext';
-import { Tab } from '@/contexts/TabContext';
+import { useTabContext, Tab } from '@/contexts/TabContext';
 
 interface UseTabStateReturn {
   // State
@@ -20,6 +19,8 @@ interface UseTabStateReturn {
   createUsageTab: () => string | null;
   createMCPTab: () => string | null;
   createSettingsTab: () => string | null;
+  createServerDashboardTab: () => string | null;
+  createCodeRadioTab: () => string | null;
   createClaudeMdTab: () => string | null;
   createClaudeFileTab: (fileId: string, fileName: string) => string;
   createCreateAgentTab: () => string;
@@ -168,6 +169,40 @@ export const useTabState = (): UseTabStateReturn => {
       status: 'idle',
       hasUnsavedChanges: false,
       icon: 'settings'
+    });
+  }, [addTab, tabs, setActiveTab]);
+
+  const createServerDashboardTab = useCallback((): string | null => {
+    // Check if server dashboard tab already exists (singleton)
+    const existingTab = tabs.find(tab => tab.type === 'server-dashboard');
+    if (existingTab) {
+      setActiveTab(existingTab.id);
+      return existingTab.id;
+    }
+
+    return addTab({
+      type: 'server-dashboard',
+      title: 'Server Dashboard',
+      status: 'idle',
+      hasUnsavedChanges: false,
+      icon: 'monitor'
+    });
+  }, [addTab, tabs, setActiveTab]);
+
+  const createCodeRadioTab = useCallback((): string | null => {
+    // Check if code radio tab already exists (singleton)
+    const existingTab = tabs.find(tab => tab.type === 'code-radio');
+    if (existingTab) {
+      setActiveTab(existingTab.id);
+      return existingTab.id;
+    }
+
+    return addTab({
+      type: 'code-radio',
+      title: 'Code Radio',
+      status: 'idle',
+      hasUnsavedChanges: false,
+      icon: 'radio'
     });
   }, [addTab, tabs, setActiveTab]);
 
@@ -340,6 +375,8 @@ export const useTabState = (): UseTabStateReturn => {
     createUsageTab,
     createMCPTab,
     createSettingsTab,
+    createServerDashboardTab,
+    createCodeRadioTab,
     createClaudeMdTab,
     createClaudeFileTab,
     createCreateAgentTab,

@@ -101,7 +101,7 @@ export const AgentExecutionDemo: React.FC = () => {
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    font-family: var(--font-sans);
     line-height: 1.6;
     color: #333;
     background: #f8fafc;
