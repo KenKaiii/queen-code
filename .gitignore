@@ -36,4 +36,11 @@ CLAUDE.md
 # Claude project-specific files
 .claude/
 
+# Project-specific folders
+.daddy/
+.qlty/
+.github/
+.cargo/
+cc_agents/
+
 .env
