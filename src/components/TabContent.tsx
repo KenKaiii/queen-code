@@ -23,6 +23,7 @@ const CodeRadio = lazy(() => import('@/components/CodeRadio').then(m => ({ defau
 const LearnWithKen = lazy(() => import('@/components/LearnWithKen').then(m => ({ default: m.LearnWithKen })));
 const CommunityChat = lazy(() => import('@/components/CommunityChat').then(m => ({ default: m.CommunityChat })));
 const MarkdownEditor = lazy(() => import('@/components/MarkdownEditor').then(m => ({ default: m.MarkdownEditor })));
+const QueenProjectCreator = lazy(() => import('@/components/QueenProjectCreator').then(m => ({ default: m.QueenProjectCreator })));
 // const ClaudeFileEditor = lazy(() => import('@/components/ClaudeFileEditor').then(m => ({ default: m.ClaudeFileEditor })));
 
 // Import non-lazy components for projects view
@@ -38,7 +39,8 @@ const TabPanel: React.FC<TabPanelProps> = ({ tab, isActive }) => {
   const [selectedProject, setSelectedProject] = React.useState<Project | null>(null);
   const [sessions, setSessions] = React.useState<Session[]>([]);
   const [loading, setLoading] = React.useState(false);
-  
+  const [showQueenCreator, setShowQueenCreator] = React.useState(false);
+
   // Track screen when tab becomes active
   useScreenTracking(isActive ? tab.type : undefined, isActive ? tab.id : undefined);
   const [error, setError] = React.useState<string | null>(null);
@@ -150,7 +152,24 @@ const TabPanel: React.FC<TabPanelProps> = ({ tab, isActive }) => {
         return (
           <div className="h-full">
               {/* Content based on selection */}
-              {selectedProject ? (
+              {showQueenCreator ? (
+                <QueenProjectCreator
+                  onBack={() => {
+                    setShowQueenCreator(false);
+                    updateTab(tab.id, {
+                      title: 'Projects'
+                    });
+                  }}
+                  onProjectCreated={(projectPath) => {
+                    setShowQueenCreator(false);
+                    updateTab(tab.id, {
+                      type: 'chat',
+                      title: projectPath.split('/').pop() || 'Session',
+                      initialProjectPath: projectPath
+                    });
+                  }}
+                />
+              ) : selectedProject ? (
                 <div className="h-full overflow-y-auto">
                   <div className="max-w-6xl mx-auto p-6">
                     <div className="mb-6">
@@ -251,6 +270,12 @@ const TabPanel: React.FC<TabPanelProps> = ({ tab, isActive }) => {
                   projects={projects}
                   onProjectClick={handleProjectClick}
                   onOpenProject={handleOpenProject}
+                  onNewQueenProject={() => {
+                    setShowQueenCreator(true);
+                    updateTab(tab.id, {
+                      title: 'New Queen Project'
+                    });
+                  }}
                   loading={loading}
                 />
               )}

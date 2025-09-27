@@ -5,9 +5,7 @@ import {
   Minus,
   Square,
   X,
-  FileText,
   Globe,
-  Info,
   DotsThreeVertical,
   Monitor,
   Radio,
@@ -26,9 +24,7 @@ interface CustomTitlebarProps {
   onCodeRadioClick?: () => void;
   onLearnWithKenClick?: () => void;
   onCommunityChatClick?: () => void;
-  onClaudeClick?: () => void;
   onMCPClick?: () => void;
-  onInfoClick?: () => void;
 }
 
 export const CustomTitlebar: React.FC<CustomTitlebarProps> = ({
@@ -37,9 +33,7 @@ export const CustomTitlebar: React.FC<CustomTitlebarProps> = ({
   onCodeRadioClick,
   onLearnWithKenClick,
   onCommunityChatClick,
-  onClaudeClick,
-  onMCPClick,
-  onInfoClick
+  onMCPClick
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -258,19 +252,6 @@ export const CustomTitlebar: React.FC<CustomTitlebarProps> = ({
             {isDropdownOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-popover border border-border rounded-lg shadow-lg z-[250]">
                 <div className="py-1">
-                  {onClaudeClick && (
-                    <button
-                      onClick={() => {
-                        onClaudeClick();
-                        setIsDropdownOpen(false);
-                      }}
-                      className="w-full px-4 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground transition-colors flex items-center gap-3"
-                    >
-                      <FileText size={14} weight="duotone" />
-                      <span>CLAUDE.md</span>
-                    </button>
-                  )}
-                  
                   {onMCPClick && (
                     <button
                       onClick={() => {
@@ -281,19 +262,6 @@ export const CustomTitlebar: React.FC<CustomTitlebarProps> = ({
                     >
                       <Globe size={14} weight="duotone" />
                       <span>MCP Servers</span>
-                    </button>
-                  )}
-                  
-                  {onInfoClick && (
-                    <button
-                      onClick={() => {
-                        onInfoClick();
-                        setIsDropdownOpen(false);
-                      }}
-                      className="w-full px-4 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground transition-colors flex items-center gap-3"
-                    >
-                      <Info size={14} weight="duotone" />
-                      <span>About</span>
                     </button>
                   )}
                 </div>

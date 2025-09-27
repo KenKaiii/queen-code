@@ -5,6 +5,7 @@ import {
   CaretLeft,
   CaretRight
 } from "@phosphor-icons/react";
+import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import type { Project } from "@/lib/api";
@@ -23,6 +24,10 @@ interface ProjectListProps {
    * Callback when open project is clicked
    */
   onOpenProject?: () => void | Promise<void>;
+  /**
+   * Callback when New Queen Project is clicked
+   */
+  onNewQueenProject?: () => void;
   /**
    * Whether the list is currently loading
    */
@@ -87,6 +92,7 @@ export const ProjectList: React.FC<ProjectListProps> = ({
   projects,
   onProjectClick,
   onOpenProject,
+  onNewQueenProject,
   className,
 }) => {
   const [showAll, setShowAll] = useState(false);
@@ -123,19 +129,37 @@ export const ProjectList: React.FC<ProjectListProps> = ({
                 Select a project to start working with Claude Code
               </p>
             </div>
-            <motion.div
-              whileTap={{ scale: 0.97 }}
-              transition={{ duration: 0.15 }}
-            >
-              <Button
-                onClick={onOpenProject}
-                size="default"
-                className="flex items-center gap-2"
+            <div className="flex items-center gap-2">
+              {onNewQueenProject && (
+                <motion.div
+                  whileTap={{ scale: 0.97 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  <Button
+                    onClick={onNewQueenProject}
+                    size="default"
+                    variant="outline"
+                    className="flex items-center gap-2"
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    New Queen Project
+                  </Button>
+                </motion.div>
+              )}
+              <motion.div
+                whileTap={{ scale: 0.97 }}
+                transition={{ duration: 0.15 }}
               >
-                <FolderOpen className="h-4 w-4" weight="duotone" />
-                Open Project
-              </Button>
-            </motion.div>
+                <Button
+                  onClick={onOpenProject}
+                  size="default"
+                  className="flex items-center gap-2"
+                >
+                  <FolderOpen className="h-4 w-4" weight="duotone" />
+                  Open Project
+                </Button>
+              </motion.div>
+            </div>
           </div>
         </div>
 

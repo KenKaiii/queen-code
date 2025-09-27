@@ -46,7 +46,7 @@ type View =
  */
 function AppContent() {
   const [view, setView] = useState<View>("tabs");
-  const { createClaudeMdTab, createSettingsTab, createMCPTab, createServerDashboardTab, createCodeRadioTab, createLearnWithKenTab, createCommunityChatTab } = useTabState();
+  const { createSettingsTab, createMCPTab, createServerDashboardTab, createCodeRadioTab, createLearnWithKenTab, createCommunityChatTab } = useTabState();
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [sessions, setSessions] = useState<Session[]>([]);
@@ -367,10 +367,8 @@ function AppContent() {
         onCodeRadioClick={() => createCodeRadioTab()}
         onLearnWithKenClick={() => createLearnWithKenTab()}
         onCommunityChatClick={() => createCommunityChatTab()}
-        onClaudeClick={() => createClaudeMdTab()}
         onMCPClick={() => createMCPTab()}
         onSettingsClick={() => createSettingsTab()}
-        onInfoClick={() => setShowNFO(true)}
       />
       
       {/* Topbar - Commented out since navigation moved to titlebar */}

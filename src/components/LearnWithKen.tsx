@@ -3,9 +3,10 @@ import {
   GraduationCap,
   Code,
   ShieldCheck,
-  ArrowLeft,
   MagnifyingGlass
 } from "@phosphor-icons/react";
+import { ArrowLeft } from "lucide-react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -346,18 +347,17 @@ Proper context setup takes 10 minutes once but saves hours on every request. You
                 variant="ghost"
                 size="sm"
                 onClick={() => setSelectedTile(null)}
-                className="gap-2"
               >
-                <ArrowLeft className="h-4 w-4" weight="duotone" />
+                <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Learn
               </Button>
             </div>
           </div>
 
           {/* Article Content */}
-          <div className="flex-1 overflow-y-auto p-6 pt-0">
-            <Card className="p-6">
-              <div className="prose prose-sm dark:prose-invert max-w-none">
+          <div className="flex-1 overflow-y-auto px-6 pb-6">
+            <Card className="px-6 py-4">
+              <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
                 >
@@ -399,20 +399,36 @@ Proper context setup takes 10 minutes once but saves hours on every request. You
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6 pt-0">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {filteredTiles.map((tile) => (
-              <Card
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {filteredTiles.map((tile, index) => (
+              <motion.div
                 key={tile.id}
-                className="p-6 h-full cursor-pointer transition-all border-border/50 hover:border-accent"
-                onClick={() => setSelectedTile(tile.id)}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
+                whileHover={{ y: -4 }}
+                whileTap={{ scale: 0.98 }}
               >
-                  <div className="flex flex-col h-full">
-                    <h3 className="text-heading-4 mb-2">{tile.title}</h3>
-                    <p className="text-body-small text-muted-foreground">
+                <Card
+                  className="relative p-4 h-full cursor-pointer transition-all duration-200 group overflow-hidden hover:border-primary hover:shadow-lg"
+                  onClick={() => setSelectedTile(tile.id)}
+                >
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-primary/10 to-transparent rounded-bl-full -mr-12 -mt-12 transition-transform group-hover:scale-110" />
+
+                  <div className="relative flex flex-col h-full">
+                    <div className="mb-2 flex items-center gap-2">
+                      <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                        {tile.icon}
+                      </div>
+                    </div>
+
+                    <h3 className="text-heading-4 mb-1">{tile.title}</h3>
+                    <p className="text-sm text-muted-foreground leading-snug">
                       {tile.description}
                     </p>
                   </div>
                 </Card>
+              </motion.div>
             ))}
           </div>
 

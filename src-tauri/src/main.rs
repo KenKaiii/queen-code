@@ -44,6 +44,10 @@ use commands::storage::{
 };
 use commands::proxy::{get_proxy_settings, save_proxy_settings, apply_proxy_settings};
 use commands::servers::{scan_dev_servers, kill_dev_server};
+use commands::queen::{
+    check_queen_cli_status, install_queen_cli, get_queen_templates, create_queen_project,
+    get_queen_projects_directory, set_queen_projects_directory,
+};
 use process::ProcessRegistryState;
 use std::sync::Mutex;
 use tauri::Manager;
@@ -289,6 +293,14 @@ fn main() {
             // Server Management
             scan_dev_servers,
             kill_dev_server,
+
+            // Queen Project Management
+            check_queen_cli_status,
+            install_queen_cli,
+            get_queen_templates,
+            create_queen_project,
+            get_queen_projects_directory,
+            set_queen_projects_directory,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
