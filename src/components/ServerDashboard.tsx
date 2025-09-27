@@ -108,7 +108,7 @@ export const ServerDashboard: React.FC<ServerDashboardProps> = ({
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 300); // 300ms timeout
 
-        const response = await fetch(`http://localhost:${port}`, {
+        await fetch(`http://localhost:${port}`, {
           signal: controller.signal,
           mode: 'no-cors' // Avoid CORS issues
         });
