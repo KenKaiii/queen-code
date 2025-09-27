@@ -184,7 +184,7 @@ export const useTabState = (): UseTabStateReturn => {
 
     return addTab({
       type: 'server-dashboard',
-      title: 'Server Dashboard',
+      title: 'Servers',
       status: 'idle',
       hasUnsavedChanges: false,
       icon: 'monitor'

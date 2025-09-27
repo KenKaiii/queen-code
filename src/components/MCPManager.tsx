@@ -99,7 +99,7 @@ export const MCPManager: React.FC<MCPManagerProps> = ({
       <div className="max-w-6xl mx-auto flex flex-col h-full">
         {/* Header */}
         <div className="p-6">
-          <div className="flex items-center justify-between">
+          <div className="flex items-start justify-between">
             <div>
               <h1 className="text-heading-1">MCP Servers</h1>
               <p className="mt-1 text-body-small text-muted-foreground">

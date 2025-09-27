@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { StreamMessage } from '../StreamMessage';
 import { Terminal } from 'lucide-react';
+import { LoadingIcon } from '@/components/LoadingIcon';
 import { cn } from '@/lib/utils';
 import type { ClaudeStreamMessage } from '../AgentExecution';
 
@@ -145,7 +146,7 @@ export const MessageList: React.FC<MessageListProps> = React.memo(({
           className="sticky bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-background to-transparent"
         >
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <div className="h-2 w-2 bg-primary rounded-full animate-pulse" />
+            <LoadingIcon className="h-4 w-4" />
             <span>Claude is thinking...</span>
           </div>
         </motion.div>

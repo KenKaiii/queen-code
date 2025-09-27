@@ -119,14 +119,14 @@ export const CodeRadio: React.FC<CodeRadioProps> = ({
       <div className="max-w-6xl mx-auto flex flex-col h-full">
         {/* Header */}
         <div className="p-6">
-          <div className="flex items-center justify-between">
+          <div className="flex items-start justify-between">
             <div>
               <h1 className="text-heading-1">Code Radio</h1>
               <p className="mt-1 text-body-small text-muted-foreground">
                 24/7 music to help you code better
               </p>
             </div>
-            <Badge variant="outline" className="gap-2">
+            <Badge variant="outline" className="gap-2 mt-1">
               <Waveform className="h-4 w-4" weight="duotone" />
               {isPlaying ? "Live" : "Offline"}
             </Badge>

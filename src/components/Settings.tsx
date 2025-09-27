@@ -227,7 +227,7 @@ export const Settings: React.FC<SettingsProps> = ({
       <div className="max-w-6xl mx-auto flex flex-col h-full">
         {/* Header */}
         <div className="p-6">
-          <div className="flex items-center justify-between">
+          <div className="flex items-start justify-between">
             <div>
               <h1 className="text-heading-1">Queen's Controls</h1>
               <p className="mt-1 text-body-small text-muted-foreground">
@@ -237,6 +237,7 @@ export const Settings: React.FC<SettingsProps> = ({
             <motion.div
               whileTap={{ scale: 0.97 }}
               transition={{ duration: 0.15 }}
+              className="mt-1"
             >
               <Button
                 onClick={saveSettings}

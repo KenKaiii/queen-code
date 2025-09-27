@@ -96,13 +96,14 @@ export const ServerDashboard: React.FC<ServerDashboardProps> = ({
       <div className="max-w-6xl mx-auto flex flex-col h-full">
         {/* Header */}
         <div className="p-6">
-          <div className="flex items-center justify-between">
+          <div className="flex items-start justify-between">
             <div>
-              <h1 className="text-heading-1">Server Dashboard</h1>
+              <h1 className="text-heading-1">Servers</h1>
               <p className="mt-1 text-body-small text-muted-foreground">
                 Manage your development servers (React, Python, Go, Tauri, etc.)
               </p>
             </div>
+            <div className="mt-1">
             <Button
               onClick={scanPorts}
               disabled={scanning}
@@ -121,6 +122,7 @@ export const ServerDashboard: React.FC<ServerDashboardProps> = ({
                 </>
               )}
             </Button>
+            </div>
           </div>
         </div>
 

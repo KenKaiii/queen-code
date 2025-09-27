@@ -83,7 +83,7 @@ class AnalyticsService {
             anonymous: true,
             consent_date: settings.consentDate,
             app_type: 'desktop',
-            app_name: 'opcode',
+            app_name: 'queen-code',
           });
           
           // Set initial screen
@@ -150,7 +150,7 @@ class AnalyticsService {
     const enhancedProperties = {
       ...sanitizedProperties,
       screen_name: this.currentScreen,
-      app_context: 'opcode_desktop',
+      app_context: 'queen_code_desktop',
     };
     
     // Create event

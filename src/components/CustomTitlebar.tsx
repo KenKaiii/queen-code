@@ -181,7 +181,7 @@ export const CustomTitlebar: React.FC<CustomTitlebarProps> = ({
           )}
 
           {onServerDashboardClick && (
-            <TooltipSimple content="Server Dashboard" side="bottom">
+            <TooltipSimple content="Servers" side="bottom">
               <motion.button
                 onClick={onServerDashboardClick}
                 whileTap={{ scale: 0.97 }}

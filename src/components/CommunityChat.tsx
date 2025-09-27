@@ -180,14 +180,14 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({ className }) => {
       <div className="max-w-6xl mx-auto flex flex-col h-full">
         {/* Header */}
         <div className="p-6">
-          <div className="flex items-center justify-between">
+          <div className="flex items-start justify-between">
             <div>
               <h1 className="text-heading-1">Community Chat</h1>
               <p className="mt-1 text-body-small text-muted-foreground">
                 Chat with other Queen Code users
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 mt-1">
               <Badge variant="secondary" className="text-xs">
                 Chatting as {username}
               </Badge>

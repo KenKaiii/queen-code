@@ -122,14 +122,14 @@ export const ProjectList: React.FC<ProjectListProps> = ({
       <div className="max-w-6xl mx-auto flex flex-col h-full">
         {/* Header */}
         <div className="p-6">
-          <div className="flex items-center justify-between">
+          <div className="flex items-start justify-between">
             <div>
               <h1 className="text-heading-1">Projects</h1>
               <p className="mt-1 text-body-small text-muted-foreground">
                 Select a project to start working with Claude Code
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 mt-1">
               {onNewQueenProject && (
                 <motion.div
                   whileTap={{ scale: 0.97 }}
@@ -138,7 +138,6 @@ export const ProjectList: React.FC<ProjectListProps> = ({
                   <Button
                     onClick={onNewQueenProject}
                     size="default"
-                    variant="outline"
                     className="flex items-center gap-2"
                   >
                     <Sparkles className="h-4 w-4" />

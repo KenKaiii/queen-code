@@ -31,7 +31,6 @@ import {
   MultiEditWidget,
   MultiEditResultWidget,
   SystemReminderWidget,
-  SystemInitializedWidget,
   TaskWidget,
   LSResultWidget,
   ThinkingWidget,
@@ -92,16 +91,9 @@ const StreamMessageComponent: React.FC<StreamMessageProps> = ({ message, classNa
       return <SummaryWidget summary={message.summary} leafUuid={message.leafUuid} />;
     }
 
-    // System initialization message
+    // System initialization message - hidden from user
     if (message.type === "system" && message.subtype === "init") {
-      return (
-        <SystemInitializedWidget
-          sessionId={message.session_id}
-          model={message.model}
-          cwd={message.cwd}
-          tools={message.tools}
-        />
-      );
+      return null;
     }
 
     // Assistant message
@@ -664,10 +656,15 @@ const StreamMessageComponent: React.FC<StreamMessageProps> = ({ message, classNa
       return renderedCard;
     }
 
-    // Result message - render with markdown
+    // Result message - hidden from user
     if (message.type === "result") {
+      return null;
+    }
+
+    // Legacy result rendering (should not reach here)
+    if (false && message.type === "result") {
       const isError = message.is_error || message.subtype?.includes("error");
-      
+
       return (
         <Card className={cn(
           isError ? "border-destructive/20 bg-destructive/5" : "border-green-500/20 bg-green-500/5",
@@ -728,10 +725,10 @@ const StreamMessageComponent: React.FC<StreamMessageProps> = ({ message, classNa
                   {message.num_turns !== undefined && (
                     <div>Turns: {message.num_turns}</div>
                   )}
-                  {message.usage && (
+                  {message.usage?.input_tokens !== undefined && message.usage?.output_tokens !== undefined && (
                     <div>
-                      Total tokens: {message.usage.input_tokens + message.usage.output_tokens} 
-                      ({message.usage.input_tokens} in, {message.usage.output_tokens} out)
+                      Total tokens: {(message.usage?.input_tokens ?? 0) + (message.usage?.output_tokens ?? 0)}
+                      ({message.usage?.input_tokens} in, {message.usage?.output_tokens} out)
                     </div>
                   )}
                 </div>

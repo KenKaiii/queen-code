@@ -316,7 +316,7 @@ export const UsageDashboard: React.FC<UsageDashboardProps> = ({ }) => {
       <div className="max-w-6xl mx-auto flex flex-col h-full">
         {/* Header */}
         <div className="p-6">
-          <div className="flex items-center justify-between">
+          <div className="flex items-start justify-between">
             <div>
               <h1 className="text-heading-1">Usage Dashboard</h1>
               <p className="mt-1 text-body-small text-muted-foreground">
@@ -324,7 +324,7 @@ export const UsageDashboard: React.FC<UsageDashboardProps> = ({ }) => {
               </p>
             </div>
             {/* Date Range Filter */}
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 mt-1">
               <Filter className="h-4 w-4 text-muted-foreground" />
               <div className="flex space-x-1">
                 {(["7d", "30d", "all"] as const).map((range) => (

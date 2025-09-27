@@ -84,8 +84,8 @@ export const NFOCredits: React.FC<NFOCreditsProps> = ({ onClose }) => {
   
   // Credits content
   const creditsContent = [
-    { type: "header", text: "opcode v0.2.1" },
-    { type: "subheader", text: "[ A STRATEGIC PROJECT BY ASTERISK ]" },
+    { type: "header", text: "Queen Code v0.2.1" },
+    { type: "subheader", text: "[ POWERED BY QUEEN AI SYSTEMS ]" },
     { type: "spacer" },
     { type: "section", title: "━━━ CREDITS ━━━" },
     { type: "credit", role: "POWERED BY", name: "Anthropic Claude 4" },
@@ -147,7 +147,7 @@ export const NFOCredits: React.FC<NFOCreditsProps> = ({ onClose }) => {
             <div className="flex items-center justify-between px-4 py-2 bg-card border-b border-border">
               <div className="flex items-center space-x-2">
                 <div className="text-sm font-bold tracking-wider font-mono text-foreground">
-                  opcode.NFO
+                  queen-code.NFO
                 </div>
               </div>
               <div className="flex items-center space-x-2">
@@ -156,7 +156,7 @@ export const NFOCredits: React.FC<NFOCreditsProps> = ({ onClose }) => {
                   size="sm"
                   onClick={async (e) => {
                     e.stopPropagation();
-                    await openUrl("https://github.com/getAsterisk/opcode/issues/new");
+                    await openUrl("https://github.com/KenKaiii/queen-code/issues/new");
                   }}
                   className="flex items-center gap-1 h-auto px-2 py-1"
                   title="File a bug"

@@ -297,24 +297,22 @@ export const CCAgents: React.FC<CCAgentsProps> = ({ onBack, className }) => {
           transition={{ duration: 0.3 }}
           className="mb-6"
         >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+          <div className="flex items-start justify-between">
+            <div>
+              <h1 className="text-heading-1">CC Agents</h1>
+              <p className="mt-1 text-body-small text-muted-foreground">
+                Manage your Claude Code agents
+              </p>
+            </div>
+            <div className="flex items-center gap-2 mt-1">
               <Button
                 variant="ghost"
-                size="icon"
+                size="sm"
                 onClick={onBack}
-                className="h-8 w-8"
               >
-                <ArrowLeft className="h-4 w-4" />
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back
               </Button>
-              <div>
-                <h1 className="text-heading-1">CC Agents</h1>
-                <p className="mt-1 text-body-small text-muted-foreground">
-                  Manage your Claude Code agents
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
