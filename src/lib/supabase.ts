@@ -13,8 +13,17 @@ export interface ChatMessage {
 }
 
 export const generateUsername = (): string => {
-  const adjectives = ['Quick', 'Happy', 'Clever', 'Swift', 'Bright', 'Cool', 'Smart', 'Bold'];
-  const nouns = ['Coder', 'Dev', 'Hacker', 'Builder', 'Maker', 'Engineer', 'Creator'];
+  const adjectives = [
+    'Caffeinated', 'Debugging', 'Sleepless', 'Googling', 'Procrastinating',
+    'StackOverflow', 'Refactoring', 'Compiling', 'Panicking', 'Typing',
+    'Overthinking', 'Yolo', 'Rubber', 'Async', 'Deprecated',
+    'Legacy', 'Spaghetti', 'Screaming', 'Confused', 'Enlightened'
+  ];
+  const nouns = [
+    'Potato', 'Llama', 'Unicorn', 'Wizard', 'Ninja', 'Duck',
+    'Hamster', 'Raccoon', 'Burrito', 'Muffin', 'Waffle', 'Narwhal',
+    'Penguin', 'Sloth', 'Donut', 'Pickle', 'Banana', 'Taco'
+  ];
   const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
   const noun = nouns[Math.floor(Math.random() * nouns.length)];
   const num = Math.floor(Math.random() * 999);

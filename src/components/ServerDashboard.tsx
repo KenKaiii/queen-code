@@ -16,9 +16,10 @@ import { invoke } from '@tauri-apps/api/core';
 
 interface ServerInfo {
   port: number;
-  isRunning: boolean;
-  service?: string;
-  protocol: 'http' | 'https';
+  service: string;
+  processName: string;
+  pid: number;
+  pids: number[];
 }
 
 interface ServerDashboardProps {
@@ -37,164 +38,42 @@ export const ServerDashboard: React.FC<ServerDashboardProps> = ({
   const [scanning, setScanning] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
-  // Generate comprehensive dev port ranges
-  const generateDevPorts = () => {
-    const ports: number[] = [];
-
-    // React/Next.js range (3000-3099)
-    for (let i = 3000; i <= 3099; i++) ports.push(i);
-
-    // Node/Express range (4000-4099)
-    for (let i = 4000; i <= 4099; i++) ports.push(i);
-
-    // Python/Flask range (5000-5099)
-    for (let i = 5000; i <= 5099; i++) ports.push(i);
-
-    // Alt dev range (6000-6099)
-    for (let i = 6000; i <= 6099; i++) ports.push(i);
-
-    // Custom dev range (7000-7099)
-    for (let i = 7000; i <= 7099; i++) ports.push(i);
-
-    // Python/Django range (8000-8099)
-    for (let i = 8000; i <= 8099; i++) ports.push(i);
-
-    // Go/Alt range (9000-9099)
-    for (let i = 9000; i <= 9099; i++) ports.push(i);
-
-    // Tauri and special ports
-    ports.push(1420, 5173, 5174, 8888);
-
-    return ports;
-  };
-
-  const devPorts = generateDevPorts();
-
-  const knownServices: Record<number, string> = {
-    1420: 'Tauri Dev',
-    3000: 'React/Next.js',
-    3001: 'React Dev',
-    3030: 'Create React App',
-    4000: 'Express/Node',
-    4200: 'Angular',
-    4321: 'Vite Dev',
-    5000: 'Flask/Python',
-    5001: 'Python Dev',
-    5173: 'Vite',
-    5174: 'Vite Preview',
-    6006: 'Storybook',
-    6080: 'Dev Server',
-    7000: 'Custom Dev',
-    7001: 'Alt Dev',
-    8000: 'Django/Python',
-    8080: 'Local Server',
-    8888: 'Jupyter',
-    9000: 'Go/Dev Server',
-    9090: 'Webpack Dev',
-    9999: 'Alt Server'
-  };
-
-  /**
-   * Scan development ports for running servers (excludes system services)
-   */
   const scanPorts = async () => {
     setScanning(true);
-    const foundServers: ServerInfo[] = [];
 
-    // Only scan known development ports
-    for (const port of devPorts) {
-      try {
-        // Use fetch with very short timeout to check if port is responding
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 300); // 300ms timeout
-
-        await fetch(`http://localhost:${port}`, {
-          signal: controller.signal,
-          mode: 'no-cors' // Avoid CORS issues
-        });
-
-        clearTimeout(timeoutId);
-
-        // Smart service detection based on port ranges
-        const detectService = (port: number): string => {
-          if (knownServices[port]) return knownServices[port];
-
-          if (port >= 3000 && port <= 3099) return 'React/Next.js';
-          if (port >= 4000 && port <= 4099) return 'Node.js/Express';
-          if (port >= 5000 && port <= 5099) return 'Python/Flask';
-          if (port >= 6000 && port <= 6099) return 'Dev Server';
-          if (port >= 7000 && port <= 7099) return 'Custom Dev';
-          if (port >= 8000 && port <= 8099) return 'Python/Django';
-          if (port >= 9000 && port <= 9099) return 'Go/Dev Server';
-
-          return 'Development Server';
-        };
-
-        foundServers.push({
-          port,
-          isRunning: true,
-          service: detectService(port),
-          protocol: 'http'
-        });
-      } catch (error) {
-        // Port not responding, timeout, or not a web server - skip
-      }
+    try {
+      const foundServers = await invoke<ServerInfo[]>('scan_dev_servers');
+      setServers(foundServers);
+    } catch (error) {
+      console.error('Failed to scan dev servers:', error);
+      setToast({ message: 'Failed to scan servers', type: 'error' });
+      setServers([]);
     }
 
-    setServers(foundServers);
     setScanning(false);
     setLoading(false);
   };
 
-  /**
-   * Open server in default browser using multiple fallback methods
-   */
   const openServer = async (server: ServerInfo) => {
-    const url = `${server.protocol}://localhost:${server.port}`;
+    const url = `http://localhost:${server.port}`;
 
     try {
-      console.log('Attempting to open URL:', url);
-
-      // Try Tauri invoke to open URL
-      await invoke('open_url', { url });
-      console.log('Tauri opener succeeded');
-      setToast({ message: `Opened ${server.service} in browser`, type: 'success' });
-    } catch (tauriError) {
-      console.error('Tauri opener failed:', tauriError);
-
-      try {
-        // Fallback to window.open for web preview
-        const newWindow = window.open(url, '_blank');
-        if (newWindow) {
-          console.log('Window.open succeeded');
-          setToast({ message: `Opened ${server.service} in browser`, type: 'success' });
-        } else {
-          throw new Error('Window.open was blocked');
-        }
-      } catch (windowError) {
-        console.error('Window.open also failed:', windowError);
-        setToast({
-          message: `Copy URL: ${url}`,
-          type: 'error'
-        });
-
-        // Copy URL to clipboard as last resort
-        try {
-          await navigator.clipboard.writeText(url);
-        } catch (clipboardError) {
-          console.error('Clipboard also failed:', clipboardError);
-        }
+      const newWindow = window.open(url, '_blank');
+      if (newWindow) {
+        setToast({ message: `Opened ${server.service} in browser`, type: 'success' });
+      } else {
+        await navigator.clipboard.writeText(url);
+        setToast({ message: `URL copied: ${url}`, type: 'error' });
       }
+    } catch (error) {
+      console.error('Failed to open server:', error);
+      setToast({ message: 'Failed to open server', type: 'error' });
     }
   };
 
-  /**
-   * Kill server process
-   */
   const killServer = async (server: ServerInfo) => {
     try {
-      // Simulate kill and remove from list
-      // Future: Implement actual process killing via Tauri backend
+      await invoke('kill_dev_server', { pids: server.pids });
       setServers(prev => prev.filter(s => s.port !== server.port));
       setToast({ message: `Killed ${server.service} on port ${server.port}`, type: 'success' });
     } catch (error) {
@@ -205,7 +84,11 @@ export const ServerDashboard: React.FC<ServerDashboardProps> = ({
 
   // Scan ports on component mount
   useEffect(() => {
+    console.log('[ServerDashboard] Component mounted, scanning ports...');
     scanPorts();
+    return () => {
+      console.log('[ServerDashboard] Component unmounted');
+    };
   }, []);
 
   return (
@@ -281,7 +164,7 @@ export const ServerDashboard: React.FC<ServerDashboardProps> = ({
                           <div>
                             <p className="font-medium">{server.service}</p>
                             <p className="text-xs text-muted-foreground">
-                              {server.protocol}://localhost:{server.port}
+                              {server.processName} • http://localhost:{server.port}
                             </p>
                           </div>
                         </div>

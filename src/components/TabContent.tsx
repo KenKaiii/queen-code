@@ -8,6 +8,7 @@ import { api, type Project, type Session, type ClaudeMdFile } from '@/lib/api';
 import { ProjectList } from '@/components/ProjectList';
 import { SessionList } from '@/components/SessionList';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 // Lazy load heavy components
 const ClaudeCodeSession = lazy(() => import('@/components/ClaudeCodeSession').then(m => ({ default: m.ClaudeCodeSession })));
@@ -132,9 +133,17 @@ const TabPanel: React.FC<TabPanelProps> = ({ tab, isActive }) => {
     }
   };
   
-  // Panel visibility - hide when not active
-  const panelVisibilityClass = isActive ? "" : "hidden";
-  
+  // Keep Community Chat active in background, but Code Radio can unmount (audio persists globally)
+  const shouldStayActiveInBackground = tab.type === 'community-chat';
+  const shouldRender = isActive || shouldStayActiveInBackground;
+
+  if (!shouldRender) {
+    return null;
+  }
+
+  // Hide inactive background tabs with CSS
+  const visibilityClass = isActive ? '' : 'hidden';
+
   const renderContent = () => {
     switch (tab.type) {
       case 'projects':
@@ -391,26 +400,23 @@ const TabPanel: React.FC<TabPanelProps> = ({ tab, isActive }) => {
   };
 
   return (
-    <>
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -8 }}
-        transition={{ duration: 0.15 }}
-        className={`h-full w-full ${panelVisibilityClass}`}
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -8 }}
+      transition={{ duration: 0.15 }}
+      className={cn("h-full w-full", visibilityClass)}
+    >
+      <Suspense
+        fallback={
+          <div className="flex items-center justify-center h-full">
+            <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+          </div>
+        }
       >
-        <Suspense
-          fallback={
-            <div className="flex items-center justify-center h-full">
-              <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-            </div>
-          }
-        >
-          {renderContent()}
-        </Suspense>
-      </motion.div>
-
-    </>
+        {renderContent()}
+      </Suspense>
+    </motion.div>
   );
 };
 

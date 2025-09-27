@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Play,
@@ -15,6 +15,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Toast, ToastContainer } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
+import { useRadioStore } from "@/stores/radioStore";
 
 interface CodeRadioProps {
   className?: string;
@@ -37,14 +38,23 @@ interface RadioSource {
 export const CodeRadio: React.FC<CodeRadioProps> = ({
   className,
 }) => {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [volume, setVolume] = useState(0.7);
-  const [isMuted, setIsMuted] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [activeStation, setActiveStation] = useState<RadioStation>('code');
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const {
+    isPlaying,
+    isLoading,
+    volume,
+    isMuted,
+    activeStation,
+    setVolume,
+    setIsMuted,
+    initAudio,
+    play,
+    pause,
+    stop,
+    switchStation: switchStationInStore
+  } = useRadioStore();
+
+  const [error, setError] = React.useState<string | null>(null);
+  const [toast, setToast] = React.useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   const radioSources: RadioSource[] = [
     {
@@ -65,145 +75,41 @@ export const CodeRadio: React.FC<CodeRadioProps> = ({
 
   const currentSource = radioSources.find(source => source.id === activeStation)!;
 
-  // Initialize audio element
+  // Initialize global audio on component mount
   useEffect(() => {
-    audioRef.current = new Audio();
-    audioRef.current.src = currentSource.url;
-    audioRef.current.preload = "metadata";
-    audioRef.current.volume = volume;
-    audioRef.current.crossOrigin = "anonymous";
+    initAudio();
+  }, [initAudio]);
 
-    const audio = audioRef.current;
-
-    // Audio event listeners
-    const handleLoadStart = () => setIsLoading(true);
-    const handleCanPlay = () => setIsLoading(false);
-    const handlePlay = () => setIsPlaying(true);
-    const handlePause = () => setIsPlaying(false);
-    const handleEnded = () => setIsPlaying(false);
-    const handleError = (e: any) => {
-      console.error('Audio error details:', {
-        error: e,
-        url: currentSource.url,
-        readyState: audio.readyState,
-        networkState: audio.networkState
-      });
-      setError('Failed to connect to Code Radio - Check console for details');
-      setIsPlaying(false);
-      setIsLoading(false);
-    };
-
-    audio.addEventListener('loadstart', handleLoadStart);
-    audio.addEventListener('canplay', handleCanPlay);
-    audio.addEventListener('play', handlePlay);
-    audio.addEventListener('pause', handlePause);
-    audio.addEventListener('ended', handleEnded);
-    audio.addEventListener('error', handleError);
-
-    return () => {
-      audio.removeEventListener('loadstart', handleLoadStart);
-      audio.removeEventListener('canplay', handleCanPlay);
-      audio.removeEventListener('play', handlePlay);
-      audio.removeEventListener('pause', handlePause);
-      audio.removeEventListener('ended', handleEnded);
-      audio.removeEventListener('error', handleError);
-      audio.pause();
-    };
-  }, []);
-
-  // Update audio source when station changes (but don't auto-restart)
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.src = currentSource.url;
-    }
-  }, [activeStation, currentSource.url]);
-
-  // Update volume when slider changes
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = isMuted ? 0 : volume;
-    }
-  }, [volume, isMuted]);
-
-  /**
-   * Play the radio stream
-   */
   const handlePlay = async () => {
-    if (!audioRef.current) return;
-
     try {
       setError(null);
-      setIsLoading(true);
-      await audioRef.current.play();
-      setToast({ message: "Code Radio is now playing", type: "success" });
+      await play();
+      setToast({ message: `${currentSource.name} is now playing`, type: "success" });
     } catch (error) {
       console.error('Failed to play audio:', error);
-      setError('Failed to start Code Radio');
-      setToast({ message: "Failed to start Code Radio", type: "error" });
-      setIsLoading(false);
+      setError('Failed to start radio');
+      setToast({ message: "Failed to start radio", type: "error" });
     }
   };
 
-  /**
-   * Pause the radio stream
-   */
   const handlePause = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      setToast({ message: "Code Radio paused", type: "success" });
-    }
+    pause();
+    setToast({ message: "Radio paused", type: "success" });
   };
 
-  /**
-   * Stop the radio stream and reset for next play
-   */
   const handleStop = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-
-      // Immediately update UI state
-      setIsPlaying(false);
-      setIsLoading(false);
-      setError(null);
-
-      // Reset the audio source to clear any stream state issues
-      audioRef.current.src = '';
-      audioRef.current.load();
-
-      // Set the source back immediately for next play
-      audioRef.current.src = currentSource.url;
-
-      setToast({ message: `${currentSource.name} stopped`, type: "success" });
-    }
+    stop();
+    setError(null);
+    setToast({ message: `${currentSource.name} stopped`, type: "success" });
   };
 
-  /**
-   * Switch radio station and stop current playback
-   */
   const switchStation = (stationId: RadioStation) => {
-    if (audioRef.current) {
-      // Stop current audio
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-
-      // Update state immediately
-      setIsPlaying(false);
-      setIsLoading(false);
-      setError(null);
-      setActiveStation(stationId);
-
-      // Update audio source
-      const newSource = radioSources.find(source => source.id === stationId)!;
-      audioRef.current.src = newSource.url;
-
-      setToast({ message: `Switched to ${newSource.name}`, type: "success" });
-    }
+    switchStationInStore(stationId);
+    setError(null);
+    const newSource = radioSources.find(source => source.id === stationId)!;
+    setToast({ message: `Switched to ${newSource.name}`, type: "success" });
   };
 
-  /**
-   * Toggle mute
-   */
   const toggleMute = () => {
     setIsMuted(!isMuted);
   };
@@ -217,7 +123,7 @@ export const CodeRadio: React.FC<CodeRadioProps> = ({
             <div>
               <h1 className="text-heading-1">Code Radio</h1>
               <p className="mt-1 text-body-small text-muted-foreground">
-                24/7 coding music from freeCodeCamp
+                24/7 music to help you code better
               </p>
             </div>
             <Badge variant="outline" className="gap-2">
@@ -256,9 +162,7 @@ export const CodeRadio: React.FC<CodeRadioProps> = ({
               <div className="text-center">
                 <h3 className="text-heading-3 mb-2">{currentSource.name}</h3>
                 <p className="text-body-small text-muted-foreground mb-4">
-                  {isPlaying ? currentSource.description :
-                   isLoading ? "Connecting..." :
-                   error ? error : "Ready to play"}
+                  {error ? error : currentSource.description}
                 </p>
               </div>
 
@@ -288,12 +192,23 @@ export const CodeRadio: React.FC<CodeRadioProps> = ({
                     </>
                   ) : isLoading ? (
                     <>
-                      <motion.div
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                      >
-                        <Radio className="h-4 w-4" weight="duotone" />
-                      </motion.div>
+                      <div className="flex gap-1">
+                        <motion.div
+                          animate={{ scale: [1, 1.2, 1] }}
+                          transition={{ duration: 0.6, repeat: Infinity, delay: 0 }}
+                          className="w-1 h-1 rounded-full bg-current"
+                        />
+                        <motion.div
+                          animate={{ scale: [1, 1.2, 1] }}
+                          transition={{ duration: 0.6, repeat: Infinity, delay: 0.2 }}
+                          className="w-1 h-1 rounded-full bg-current"
+                        />
+                        <motion.div
+                          animate={{ scale: [1, 1.2, 1] }}
+                          transition={{ duration: 0.6, repeat: Infinity, delay: 0.4 }}
+                          className="w-1 h-1 rounded-full bg-current"
+                        />
+                      </div>
                       Connecting
                     </>
                   ) : (
@@ -373,9 +288,6 @@ export const CodeRadio: React.FC<CodeRadioProps> = ({
           />
         )}
       </ToastContainer>
-
-      {/* Hidden Audio Element */}
-      <audio ref={audioRef} />
     </div>
   );
 };

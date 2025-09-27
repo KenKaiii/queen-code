@@ -9,14 +9,16 @@ import {
   Globe,
   Info,
   DotsThreeVertical,
-  Crown,
   Monitor,
   Radio,
   GraduationCap,
-  ChatsCircle
+  ChatsCircle,
+  Waveform
 } from '@phosphor-icons/react';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { TooltipProvider, TooltipSimple } from '@/components/ui/tooltip-modern';
+import { useRadioStore } from '@/stores/radioStore';
+import { Badge } from '@/components/ui/badge';
 
 interface CustomTitlebarProps {
   onSettingsClick?: () => void;
@@ -42,6 +44,7 @@ export const CustomTitlebar: React.FC<CustomTitlebarProps> = ({
   const [isHovered, setIsHovered] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { isPlaying } = useRadioStore();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -145,15 +148,25 @@ export const CustomTitlebar: React.FC<CustomTitlebarProps> = ({
         </div>
       </div>
 
-      {/* Center - Queen Claude Brand */}
+      {/* Center - Queen Claude Brand with Music Indicator */}
       <div
         className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none flex items-center gap-2"
         data-tauri-drag-region
       >
-        <Crown size={16} className="text-primary" weight="duotone" />
-        <span className="text-sm font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+        <span className="text-heading-4 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
           Queen Code
         </span>
+        {isPlaying && (
+          <Badge variant="outline" className="gap-1.5 pointer-events-none">
+            <motion.div
+              animate={{ scaleY: [1, 1.5, 0.8, 1.2, 1] }}
+              transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <Waveform className="h-3 w-3 text-primary" weight="duotone" />
+            </motion.div>
+            <span className="text-xs">Playing</span>
+          </Badge>
+        )}
       </div>
 
       {/* Right side - Navigation icons with improved spacing */}

@@ -43,6 +43,7 @@ use commands::storage::{
     storage_insert_row, storage_execute_sql, storage_reset_database,
 };
 use commands::proxy::{get_proxy_settings, save_proxy_settings, apply_proxy_settings};
+use commands::servers::{scan_dev_servers, kill_dev_server};
 use process::ProcessRegistryState;
 use std::sync::Mutex;
 use tauri::Manager;
@@ -284,6 +285,10 @@ fn main() {
             // Proxy Settings
             get_proxy_settings,
             save_proxy_settings,
+
+            // Server Management
+            scan_dev_servers,
+            kill_dev_server,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

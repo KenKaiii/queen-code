@@ -323,7 +323,8 @@ html *, html *::before, html *::after {
 /* Headings use Spectral - MAXIMUM SPECIFICITY */
 html h1, html h2, html h3, html h4, html h5, html h6,
 html .text-display-1, html .text-display-2,
-html .text-heading-1, html .text-heading-2, html .text-heading-3, html .text-heading-4 {
+html .text-heading-1, html .text-heading-2, html .text-heading-3, html .text-heading-4,
+html .brand-text, html .brand-text * {
   font-family: var(--font-display) !important;
 }
 
