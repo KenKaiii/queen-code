@@ -216,19 +216,20 @@ jobs:
         env:
           APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
         run: |
+          APP_NAME=$(find dmg_temp -name "*.app" -type d -depth 1 | head -1)
           codesign --sign "$APPLE_SIGNING_IDENTITY" \
             --timestamp \
             --options runtime \
             --force \
             --deep \
             --entitlements src-tauri/entitlements.plist \
-            dmg_temp/Queen Code.app
+            "$APP_NAME"
       
       - name: Create DMG
         run: |
           hdiutil create -volname "Queen Code Installer" \
             -srcfolder dmg_temp \
-            -ov -format UDZO Queen Code.dmg
+            -ov -format UDZO queen-code.dmg
       
       - name: Sign DMG
         env:
@@ -236,7 +237,7 @@ jobs:
         run: |
           codesign --sign "$APPLE_SIGNING_IDENTITY" \
             --timestamp \
-            --force Queen Code.dmg
+            --force queen-code.dmg
       
       - name: Notarize DMG
         env:
@@ -251,16 +252,16 @@ jobs:
             --password "$APPLE_PASSWORD"
           
           # Submit for notarization
-          xcrun notarytool submit Queen Code.dmg \
+          xcrun notarytool submit queen-code.dmg \
             --keychain-profile "notarytool-profile" \
             --wait
       
       - name: Staple notarization
-        run: xcrun stapler staple Queen Code.dmg
+        run: xcrun stapler staple queen-code.dmg
       
       - name: Verify DMG
         run: |
-          spctl -a -t open -vvv --context context:primary-signature Queen Code.dmg
+          spctl -a -t open -vvv --context context:primary-signature queen-code.dmg
           echo "✅ DMG verification complete"
       
       - name: Create artifacts directory
