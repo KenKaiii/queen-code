@@ -9,10 +9,13 @@ fn get_extended_path() -> String {
     #[cfg(target_os = "windows")]
     {
         let appdata = std::env::var("APPDATA").unwrap_or_default();
+        let localappdata = std::env::var("LOCALAPPDATA").unwrap_or_default();
+        let userprofile = std::env::var("USERPROFILE").unwrap_or_default();
+        let programdata = std::env::var("ProgramData").unwrap_or_default();
 
         format!(
-            "{};C:\\Program Files\\nodejs;C:\\Program Files (x86)\\nodejs;{}\\npm",
-            current_path, appdata
+            "{};C:\\Program Files\\nodejs;C:\\Program Files (x86)\\nodejs;{}\\npm;{}\\Roaming\\npm;{}\\npm;{}\\Yarn\\bin;{}\\AppData\\Roaming\\nvm",
+            current_path, appdata, userprofile, programdata, localappdata, userprofile
         )
     }
 
