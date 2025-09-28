@@ -7,3 +7,4 @@ pub mod slash_commands;
 pub mod proxy;
 pub mod servers;
 pub mod queen;
+pub mod permissions;

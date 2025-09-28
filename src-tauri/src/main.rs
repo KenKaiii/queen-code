@@ -48,6 +48,7 @@ use commands::queen::{
     check_queen_cli_status, install_queen_cli, get_queen_templates, create_queen_project,
     get_queen_projects_directory, set_queen_projects_directory,
 };
+use commands::permissions::{check_permissions, open_system_permissions, request_full_disk_access};
 use process::ProcessRegistryState;
 use std::sync::Mutex;
 use tauri::Manager;
@@ -301,6 +302,11 @@ fn main() {
             create_queen_project,
             get_queen_projects_directory,
             set_queen_projects_directory,
+
+            // Permissions Management
+            check_permissions,
+            open_system_permissions,
+            request_full_disk_access,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

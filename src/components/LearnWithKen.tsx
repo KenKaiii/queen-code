@@ -336,7 +336,7 @@ Proper context setup takes 10 minutes once but saves hours on every request. You
         <div className="max-w-6xl mx-auto flex flex-col h-full">
           {/* Header */}
           <div className="p-6">
-            <div className="flex items-center justify-between">
+            <div className="flex items-start justify-between">
               <div>
                 <h1 className="text-heading-1">{selectedTileData.title}</h1>
                 <p className="mt-1 text-body-small text-muted-foreground">
@@ -377,14 +377,14 @@ Proper context setup takes 10 minutes once but saves hours on every request. You
       <div className="max-w-6xl mx-auto flex flex-col h-full">
         {/* Header */}
         <div className="p-6">
-          <div className="flex items-center justify-between">
+          <div className="flex items-start justify-between">
             <div>
               <h1 className="text-heading-1">Learn with Ken</h1>
               <p className="mt-1 text-body-small text-muted-foreground">
                 Essential coding knowledge, best practices, and pro tips
               </p>
             </div>
-            <div className="relative">
+            <div className="relative mt-1">
               <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" weight="duotone" />
               <Input
                 type="text"

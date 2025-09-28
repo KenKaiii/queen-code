@@ -43,7 +43,7 @@ export interface Session {
   project_id: string;
   /** The project path */
   project_path: string;
-  /** Optional todo data associated with this session */
+  /** Optional task data associated with this session */
   todo_data?: any;
   /** Unix timestamp when the session file was created */
   created_at: number;
@@ -442,6 +442,17 @@ export interface ImportServerResult {
   name: string;
   success: boolean;
   error?: string;
+}
+
+/**
+ * Permission status information
+ */
+export interface PermissionStatus {
+  name: string;
+  granted: boolean | null;
+  required: boolean;
+  description: string;
+  instructions: string;
 }
 
 /**
@@ -1938,6 +1949,46 @@ export const api = {
       return await invoke<string>("slash_command_delete", { commandId, projectPath });
     } catch (error) {
       console.error("Failed to delete slash command:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Checks the status of macOS permissions
+   * @returns Promise resolving to an array of permission statuses
+   */
+  async checkPermissions(): Promise<PermissionStatus[]> {
+    try {
+      return await invoke<PermissionStatus[]>("check_permissions");
+    } catch (error) {
+      console.error("Failed to check permissions:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Opens macOS System Settings to the specified permission panel
+   * @param permissionType - Type of permission: "full_disk_access", "automation", or "privacy"
+   * @returns Promise resolving when System Settings opens
+   */
+  async openSystemPermissions(permissionType: string): Promise<void> {
+    try {
+      await invoke<void>("open_system_permissions", { permissionType });
+    } catch (error) {
+      console.error("Failed to open system permissions:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Requests Full Disk Access permission (triggers macOS prompt)
+   * @returns Promise resolving to true if granted, throws error if denied
+   */
+  async requestFullDiskAccess(): Promise<boolean> {
+    try {
+      return await invoke<boolean>("request_full_disk_access");
+    } catch (error) {
+      console.error("Failed to request full disk access:", error);
       throw error;
     }
   },

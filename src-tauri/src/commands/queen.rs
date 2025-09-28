@@ -3,6 +3,29 @@ use std::process::{Command, Stdio};
 use tauri::State;
 use super::agents::AgentDb;
 
+fn get_extended_path() -> String {
+    let current_path = std::env::var("PATH").unwrap_or_default();
+
+    #[cfg(target_os = "windows")]
+    {
+        let appdata = std::env::var("APPDATA").unwrap_or_default();
+
+        format!(
+            "{};C:\\Program Files\\nodejs;C:\\Program Files (x86)\\nodejs;{}\\npm",
+            current_path, appdata
+        )
+    }
+
+    #[cfg(not(target_os = "windows"))]
+    {
+        let home = std::env::var("HOME").unwrap_or_default();
+        format!(
+            "{}:/usr/local/bin:/opt/homebrew/bin:{}/.npm-global/bin:{}/.nvm/versions/node/*/bin",
+            current_path, home, home
+        )
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct QueenCliStatus {
     pub installed: bool,
@@ -54,11 +77,13 @@ pub async fn check_queen_cli_status() -> Result<QueenCliStatus, String> {
 
 #[tauri::command]
 pub async fn install_queen_cli() -> Result<String, String> {
-    let output = Command::new("npm")
-        .args(&["install", "-g", "@kenkaiiii/queen-claude"])
+    let mut cmd = Command::new("npm");
+    cmd.args(&["install", "-g", "@kenkaiiii/queen-claude"])
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
-        .output()
+        .env("PATH", get_extended_path());
+
+    let output = cmd.output()
         .map_err(|e| format!("Failed to execute npm: {}", e))?;
 
     if !output.status.success() {
@@ -114,12 +139,14 @@ pub async fn create_queen_project(
             .map_err(|e| format!("Failed to create parent directory: {}", e))?;
     }
 
-    let output = Command::new(&template)
-        .arg(&project_name)
+    let mut cmd = Command::new(&template);
+    cmd.arg(&project_name)
         .current_dir(&parent_directory)
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
-        .output()
+        .env("PATH", get_extended_path());
+
+    let output = cmd.output()
         .map_err(|e| format!("Failed to execute {}: {}", template, e))?;
 
     if !output.status.success() {
@@ -127,11 +154,13 @@ pub async fn create_queen_project(
         return Err(format!("Project creation failed: {}", stderr));
     }
 
-    let init_output = Command::new("queen-init")
-        .current_dir(&project_path)
+    let mut init_cmd = Command::new("queen-init");
+    init_cmd.current_dir(&project_path)
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
-        .output()
+        .env("PATH", get_extended_path());
+
+    let init_output = init_cmd.output()
         .map_err(|e| format!("Failed to execute queen-init: {}", e))?;
 
     if !init_output.status.success() {
@@ -143,22 +172,31 @@ pub async fn create_queen_project(
 }
 
 fn check_command_exists(command: &str) -> bool {
-    Command::new("which")
-        .arg(command)
+    #[cfg(target_os = "windows")]
+    let check_cmd = "where";
+
+    #[cfg(not(target_os = "windows"))]
+    let check_cmd = "which";
+
+    let mut cmd = Command::new(check_cmd);
+    cmd.arg(command)
         .stdout(Stdio::null())
         .stderr(Stdio::null())
-        .status()
+        .env("PATH", get_extended_path());
+
+    cmd.status()
         .map(|status| status.success())
         .unwrap_or(false)
 }
 
 fn get_queen_version() -> Option<String> {
-    let output = Command::new("npm")
-        .args(&["list", "-g", "@kenkaiiii/queen-claude", "--depth=0"])
+    let mut cmd = Command::new("npm");
+    cmd.args(&["list", "-g", "@kenkaiiii/queen-claude", "--depth=0"])
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
-        .output()
-        .ok()?;
+        .env("PATH", get_extended_path());
+
+    let output = cmd.output().ok()?;
 
     if output.status.success() {
         let stdout = String::from_utf8_lossy(&output.stdout);
