@@ -199,17 +199,18 @@ jobs:
           
           # Copy ARM64 app as base
           cp -R "$AARCH64_APP" dmg_temp/
-          
+
           # Create universal binary using lipo
-          lipo -create -output dmg_temp/Queen Code.app/Contents/MacOS/queen-code \
+          APP_NAME=$(basename "$AARCH64_APP")
+          lipo -create -output "dmg_temp/$APP_NAME/Contents/MacOS/queen-code" \
             "$AARCH64_APP/Contents/MacOS/queen-code" \
             "$X86_64_APP/Contents/MacOS/queen-code"
-          
+
           # Ensure executable permissions are set
-          chmod +x dmg_temp/Queen Code.app/Contents/MacOS/queen-code
-          
+          chmod +x "dmg_temp/$APP_NAME/Contents/MacOS/queen-code"
+
           echo "✅ Universal binary created"
-          lipo -info dmg_temp/Queen Code.app/Contents/MacOS/queen-code
+          lipo -info "dmg_temp/$APP_NAME/Contents/MacOS/queen-code"
       
       - name: Sign app bundle
         env:
@@ -265,11 +266,12 @@ jobs:
       - name: Create artifacts directory
         run: |
           mkdir -p dist/macos-universal
-          cp Queen Code.dmg dist/macos-universal/
+          cp queen-code.dmg dist/macos-universal/
           
           # Also save the app bundle using ditto to preserve permissions and signatures
+          APP_NAME=$(find dmg_temp -name "*.app" -type d -depth 1 | head -1)
           ditto -c -k --sequesterRsrc --keepParent \
-            dmg_temp/Queen Code.app dist/macos-universal/queen-code.app.zip
+            "$APP_NAME" dist/macos-universal/queen-code.app.zip
           
           # Generate checksum
           shasum -a 256 dist/macos-universal/* > dist/macos-universal/checksums.txt

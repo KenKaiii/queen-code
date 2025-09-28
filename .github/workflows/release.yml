@@ -65,7 +65,7 @@ jobs:
 
           # macOS artifacts
           if [ -d "artifacts/macos-universal" ]; then
-            cp "artifacts/macos-universal/Queen Code.dmg" release-assets/queen-code_${{ steps.version.outputs.version }}_macos_universal.dmg || true
+            cp artifacts/macos-universal/queen-code.dmg release-assets/queen-code_${{ steps.version.outputs.version }}_macos_universal.dmg || true
             cp artifacts/macos-universal/queen-code.app.zip release-assets/queen-code_${{ steps.version.outputs.version }}_macos_universal.app.zip || true
           fi
 
