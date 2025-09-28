@@ -64,7 +64,6 @@ jobs:
         run: bun install
 
       - name: Import Apple certificates
-        if: ${{ secrets.APPLE_CERTIFICATE != '' }}
         env:
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
@@ -145,7 +144,6 @@ jobs:
           ls -la artifacts/macos-x86_64/ || echo "macos-x86_64 directory not found"
 
       - name: Import Apple certificates
-        if: ${{ secrets.APPLE_CERTIFICATE != '' }}
         env:
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
@@ -214,7 +212,6 @@ jobs:
           lipo -info dmg_temp/opcode.app/Contents/MacOS/opcode
       
       - name: Sign app bundle
-        if: ${{ secrets.APPLE_SIGNING_IDENTITY != '' }}
         env:
           APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
         run: |
@@ -233,7 +230,6 @@ jobs:
             -ov -format UDZO opcode.dmg
       
       - name: Sign DMG
-        if: ${{ secrets.APPLE_SIGNING_IDENTITY != '' }}
         env:
           APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
         run: |
@@ -242,7 +238,6 @@ jobs:
             --force opcode.dmg
       
       - name: Notarize DMG
-        if: ${{ secrets.APPLE_ID != '' }}
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
@@ -260,11 +255,9 @@ jobs:
             --wait
       
       - name: Staple notarization
-        if: ${{ secrets.APPLE_ID != '' }}
         run: xcrun stapler staple opcode.dmg
       
       - name: Verify DMG
-        if: ${{ secrets.APPLE_SIGNING_IDENTITY != '' }}
         run: |
           spctl -a -t open -vvv --context context:primary-signature opcode.dmg
           echo "✅ DMG verification complete"
