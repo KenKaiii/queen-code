@@ -1,5 +1,9 @@
 use serde::{Deserialize, Serialize};
+
+#[cfg(target_os = "macos")]
 use std::process::Command;
+
+#[cfg(target_os = "macos")]
 use std::fs;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -95,6 +99,7 @@ pub fn open_system_permissions(permission_type: String) -> Result<(), String> {
     Ok(())
 }
 
+#[cfg(target_os = "macos")]
 fn check_full_disk_access() -> Option<bool> {
     let test_path = dirs::home_dir()?.join(".ssh");
 
@@ -110,19 +115,27 @@ fn check_full_disk_access() -> Option<bool> {
 
 #[tauri::command]
 pub fn request_full_disk_access() -> Result<bool, String> {
-    let home_dir = dirs::home_dir()
-        .ok_or_else(|| "Could not find home directory".to_string())?;
+    #[cfg(target_os = "macos")]
+    {
+        let home_dir = dirs::home_dir()
+            .ok_or_else(|| "Could not find home directory".to_string())?;
 
-    let ssh_path = home_dir.join(".ssh");
+        let ssh_path = home_dir.join(".ssh");
 
-    if !ssh_path.exists() {
-        return Ok(true);
+        if !ssh_path.exists() {
+            return Ok(true);
+        }
+
+        match fs::read_dir(&ssh_path) {
+            Ok(_) => Ok(true),
+            Err(_) => {
+                Err("Full Disk Access is required. Please grant permission in System Settings.".to_string())
+            }
+        }
     }
 
-    match fs::read_dir(&ssh_path) {
-        Ok(_) => Ok(true),
-        Err(_) => {
-            Err("Full Disk Access is required. Please grant permission in System Settings.".to_string())
-        }
+    #[cfg(not(target_os = "macos"))]
+    {
+        Ok(true)
     }
 }
