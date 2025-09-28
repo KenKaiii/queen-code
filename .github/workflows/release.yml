@@ -64,14 +64,14 @@ jobs:
 
           # macOS artifacts
           if [ -d "artifacts/macos-universal" ]; then
-            cp artifacts/macos-universal/opcode.dmg release-assets/queen-code_${{ steps.version.outputs.version }}_macos_universal.dmg || true
-            cp artifacts/macos-universal/opcode.app.zip release-assets/queen-code_${{ steps.version.outputs.version }}_macos_universal.app.tar.gz || true
+            cp artifacts/macos-universal/queen-code.dmg release-assets/queen-code_${{ steps.version.outputs.version }}_macos_universal.dmg || true
+            cp artifacts/macos-universal/queen-code.app.zip release-assets/queen-code_${{ steps.version.outputs.version }}_macos_universal.app.zip || true
           fi
 
           # Windows artifacts
           if [ -d "artifacts/windows-x86_64" ]; then
-            cp artifacts/windows-x86_64/*.msi release-assets/queen-code_${{ steps.version.outputs.version }}_windows_x86_64.msi || true
-            cp artifacts/windows-x86_64/*.exe release-assets/queen-code_${{ steps.version.outputs.version }}_windows_x86_64.exe || true
+            find artifacts/windows-x86_64 -name "*.msi" -exec cp {} release-assets/queen-code_${{ steps.version.outputs.version }}_windows_x86_64.msi \; || true
+            find artifacts/windows-x86_64 -name "*.exe" -exec cp {} release-assets/queen-code_${{ steps.version.outputs.version }}_windows_x86_64.exe \; || true
           fi
           
           # Create source code archives
