@@ -1,4 +1,6 @@
 use serde::{Deserialize, Serialize};
+
+#[cfg(any(target_os = "macos", target_os = "windows"))]
 use std::process::Command;
 
 #[cfg(target_os = "macos")]
@@ -79,6 +81,7 @@ pub fn open_system_permissions(permission_type: String) -> Result<(), String> {
             .arg(url)
             .spawn()
             .map_err(|e| format!("Failed to open System Settings: {}", e))?;
+        Ok(())
     }
 
     #[cfg(target_os = "windows")]
@@ -87,14 +90,13 @@ pub fn open_system_permissions(permission_type: String) -> Result<(), String> {
             .args(&["/C", "start", "ms-settings:privacy"])
             .spawn()
             .map_err(|e| format!("Failed to open Windows Settings: {}", e))?;
+        Ok(())
     }
 
     #[cfg(target_os = "linux")]
     {
-        return Err("Please check your system settings manually for file and network permissions".to_string());
+        Err("Please check your system settings manually for file and network permissions".to_string())
     }
-
-    Ok(())
 }
 
 #[cfg(target_os = "macos")]
