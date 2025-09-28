@@ -262,6 +262,7 @@ async fn scan_dev_servers_windows() -> Result<Vec<DevServer>, String> {
                                         service,
                                         process_name,
                                         pid,
+                                        pids: vec![pid],
                                     });
                                 }
                             }

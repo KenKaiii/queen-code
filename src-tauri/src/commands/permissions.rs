@@ -62,6 +62,7 @@ pub fn check_permissions() -> Vec<PermissionStatus> {
 }
 
 #[tauri::command]
+#[allow(unused_variables)]
 pub fn open_system_permissions(permission_type: String) -> Result<(), String> {
     #[cfg(target_os = "macos")]
     {
