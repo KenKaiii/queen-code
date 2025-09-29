@@ -139,18 +139,15 @@ jobs:
 
           chmod +x "dmg_temp/$APP_NAME/Contents/MacOS/queen-code"
 
-          # Copy one of the existing DMGs as base (they should be identical except for architecture)
-          EXISTING_DMG=$(find artifacts -name "*.dmg" | head -1)
-          if [ -n "$EXISTING_DMG" ]; then
-            cp "$EXISTING_DMG" queen-code.dmg
-            echo "✅ Using existing signed DMG: $EXISTING_DMG"
-          else
-            # Create new DMG if none exists
-            hdiutil create -volname "Queen Code Installer" \
-              -srcfolder dmg_temp \
-              -ov -format UDZO queen-code.dmg
-            echo "✅ Created new DMG"
-          fi
+          # Create new DMG with the universal binary
+          echo "Creating universal DMG from merged binary..."
+          hdiutil create -volname "Queen Code Installer" \
+            -srcfolder dmg_temp \
+            -ov -format UDZO queen-code.dmg
+
+          # Verify the universal binary is in the DMG
+          echo "✅ Created universal DMG with merged x64 + aarch64 binary"
+          echo "DMG size: $(du -h queen-code.dmg | cut -f1)"
 
       - name: Create artifacts directory
         run: |
