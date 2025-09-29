@@ -146,7 +146,7 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({ className }) => {
 
       // Broadcast to all OTHER connected users
       if (channelRef.current) {
-        const broadcastResult = await channelRef.current.send({
+        await channelRef.current.send({
           type: 'broadcast',
           event: 'new-message',
           payload: data,

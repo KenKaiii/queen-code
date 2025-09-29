@@ -103,7 +103,6 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
   const queuedPromptsRef = useRef<Array<{ id: string; prompt: string; model: "sonnet" | "opus" }>>([]);
   const isMountedRef = useRef(true);
   const isListeningRef = useRef(false);
-  const sessionStartTime = useRef<number>(Date.now());
   
   // Session metrics state for enhanced analytics
   const sessionMetrics = useRef({
