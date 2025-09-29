@@ -21,7 +21,7 @@ jobs:
     secrets: inherit
 
   build-macos:
-    uses: ./.github/workflows/build-macos.yml
+    uses: ./.github/workflows/build-macos-signed.yml
     secrets: inherit
 
   build-windows:

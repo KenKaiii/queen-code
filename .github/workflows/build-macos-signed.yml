@@ -1,0 +1,170 @@
+name: Build macOS (Signed Only)
+
+on:
+  workflow_call:
+    secrets:
+      APPLE_CERTIFICATE:
+        required: false
+      APPLE_CERTIFICATE_PASSWORD:
+        required: false
+      KEYCHAIN_PASSWORD:
+        required: false
+      APPLE_SIGNING_IDENTITY:
+        required: false
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    name: Build macOS ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: macos-13
+            target: x86_64-apple-darwin
+            arch: x86_64
+          - os: macos-14
+            target: aarch64-apple-darwin
+            arch: aarch64
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Import Apple certificates
+        if: ${{ env.APPLE_CERTIFICATE != '' }}
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          # Create variables
+          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+
+          # Import certificate from secrets
+          echo -n "$APPLE_CERTIFICATE" | base64 --decode -o $CERTIFICATE_PATH
+
+          # Create temporary keychain
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+
+          # Import certificate to keychain
+          security import $CERTIFICATE_PATH -P "$APPLE_CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
+
+      - name: Build native
+        env:
+          CI: true
+        run: bun run tauri build
+
+      - name: Sign app bundle
+        if: ${{ env.APPLE_SIGNING_IDENTITY != '' }}
+        env:
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+        run: |
+          APP_PATH=$(find src-tauri/target/release/bundle/macos -name "*.app" -type d | head -1)
+          if [ -n "$APP_PATH" ]; then
+            codesign --sign "$APPLE_SIGNING_IDENTITY" \
+              --timestamp \
+              --options runtime \
+              --force \
+              --deep \
+              --entitlements src-tauri/entitlements.plist \
+              "$APP_PATH"
+            echo "✅ App bundle signed"
+          fi
+
+      - name: Upload architecture-specific artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-${{ matrix.arch }}
+          path: |
+            src-tauri/target/release/bundle/macos/Queen Code.app
+            src-tauri/target/release/bundle/dmg/*.dmg
+          retention-days: 1
+
+  universal:
+    name: Create Universal Binary
+    needs: [build]
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: macos-*
+          path: artifacts
+
+      - name: Create universal app and DMG
+        run: |
+          mkdir -p dmg_temp
+
+          AARCH64_APP=$(find artifacts/macos-aarch64 -name "Queen Code.app" -type d | head -1)
+          X86_64_APP=$(find artifacts/macos-x86_64 -name "Queen Code.app" -type d | head -1)
+
+          if [ -z "$AARCH64_APP" ] || [ -z "$X86_64_APP" ]; then
+            echo "❌ Could not find app bundles"
+            exit 1
+          fi
+
+          echo "✅ Found app bundles"
+
+          # Copy ARM64 app as base
+          cp -R "$AARCH64_APP" dmg_temp/
+
+          # Create universal binary
+          APP_NAME=$(basename "$AARCH64_APP")
+          lipo -create -output "dmg_temp/$APP_NAME/Contents/MacOS/queen-code" \
+            "$AARCH64_APP/Contents/MacOS/queen-code" \
+            "$X86_64_APP/Contents/MacOS/queen-code"
+
+          chmod +x "dmg_temp/$APP_NAME/Contents/MacOS/queen-code"
+
+          # Copy one of the existing DMGs as base (they should be identical except for architecture)
+          EXISTING_DMG=$(find artifacts -name "*.dmg" | head -1)
+          if [ -n "$EXISTING_DMG" ]; then
+            cp "$EXISTING_DMG" queen-code.dmg
+            echo "✅ Using existing signed DMG: $EXISTING_DMG"
+          else
+            # Create new DMG if none exists
+            hdiutil create -volname "Queen Code Installer" \
+              -srcfolder dmg_temp \
+              -ov -format UDZO queen-code.dmg
+            echo "✅ Created new DMG"
+          fi
+
+      - name: Create artifacts directory
+        run: |
+          mkdir -p dist/macos-universal
+          cp queen-code.dmg dist/macos-universal/
+
+          APP_NAME=$(find dmg_temp -name "*.app" -type d -depth 1 | head -1)
+          ditto -c -k --sequesterRsrc --keepParent \
+            "$APP_NAME" dist/macos-universal/queen-code.app.zip
+
+          shasum -a 256 dist/macos-universal/* > dist/macos-universal/checksums.txt
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-universal
+          path: dist/macos-universal/*
