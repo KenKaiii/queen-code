@@ -154,3 +154,5 @@ export const MessageList: React.FC<MessageListProps> = React.memo(({
     </div>
   );
 });
+
+MessageList.displayName = 'MessageList';

@@ -82,3 +82,5 @@ export const PromptQueue: React.FC<PromptQueueProps> = React.memo(({
     </motion.div>
   );
 });
+
+PromptQueue.displayName = 'PromptQueue';

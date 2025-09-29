@@ -173,3 +173,5 @@ export const SessionHeader: React.FC<SessionHeaderProps> = React.memo(({
     </motion.div>
   );
 });
+
+SessionHeader.displayName = 'SessionHeader';

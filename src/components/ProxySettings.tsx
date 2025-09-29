@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 
-export interface ProxySettings {
+export interface ProxyConfig {
   http_proxy: string | null;
   https_proxy: string | null;
   no_proxy: string | null;
@@ -14,18 +14,18 @@ export interface ProxySettings {
 
 interface ProxySettingsProps {
   setToast: (toast: { message: string; type: 'success' | 'error' } | null) => void;
-  onChange?: (hasChanges: boolean, getSettings: () => ProxySettings, saveSettings: () => Promise<void>) => void;
+  onChange?: (hasChanges: boolean, getSettings: () => ProxyConfig, saveSettings: () => Promise<void>) => void;
 }
 
 export function ProxySettings({ setToast, onChange }: ProxySettingsProps) {
-  const [settings, setSettings] = useState<ProxySettings>({
+  const [settings, setSettings] = useState<ProxyConfig>({
     http_proxy: null,
     https_proxy: null,
     no_proxy: null,
     all_proxy: null,
     enabled: false,
   });
-  const [originalSettings, setOriginalSettings] = useState<ProxySettings>({
+  const [originalSettings, setOriginalSettings] = useState<ProxyConfig>({
     http_proxy: null,
     https_proxy: null,
     no_proxy: null,
@@ -66,7 +66,7 @@ export function ProxySettings({ setToast, onChange }: ProxySettingsProps) {
 
   const loadSettings = async () => {
     try {
-      const loadedSettings = await invoke<ProxySettings>('get_proxy_settings');
+      const loadedSettings = await invoke<ProxyConfig>('get_proxy_settings');
       setSettings(loadedSettings);
       setOriginalSettings(loadedSettings);
     } catch (error) {
@@ -79,7 +79,7 @@ export function ProxySettings({ setToast, onChange }: ProxySettingsProps) {
   };
 
 
-  const handleInputChange = (field: keyof ProxySettings, value: string) => {
+  const handleInputChange = (field: keyof ProxyConfig, value: string) => {
     setSettings(prev => ({
       ...prev,
       [field]: value || null,
