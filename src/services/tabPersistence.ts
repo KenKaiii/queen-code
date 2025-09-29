@@ -191,7 +191,6 @@ export class TabPersistenceService {
         // Attempt to migrate old data
         localStorage.setItem(STORAGE_KEY, oldData);
         localStorage.removeItem(oldKey);
-        console.log('Migrated tab data from old format');
       }
     } catch (error) {
       console.error('Failed to migrate old tab data:', error);

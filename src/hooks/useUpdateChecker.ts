@@ -38,12 +38,11 @@ export const useUpdateChecker = (
         const currentVersion = await getVersion();
 
         // Fetch latest release from GitHub
-        const response = await fetch(
+        const response = await window.fetch(
           `https://api.github.com/repos/${owner}/${repo}/releases/latest`
         );
 
         if (!response.ok) {
-          console.warn('Failed to check for updates:', response.statusText);
           return;
         }
 

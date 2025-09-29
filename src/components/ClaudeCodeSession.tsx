@@ -22,7 +22,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { TooltipProvider, TooltipSimple } from "@/components/ui/tooltip-modern";
 import { SplitPane } from "@/components/ui/split-pane";
 import { WebviewPreview } from "./WebviewPreview";
-import type { ClaudeStreamMessage } from "./AgentExecution";
+import type { ClaudeStreamMessage } from "@/types/messages";
 import { SessionPersistenceService } from "@/services/sessionPersistence";
 
 interface ClaudeCodeSessionProps {
@@ -233,18 +233,6 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
     }
   }, [displayableMessages.length]);
 
-  // Debug logging
-  useEffect(() => {
-    console.log('[ClaudeCodeSession] State update:', {
-      projectPath,
-      session,
-      extractedSessionInfo,
-      effectiveSession,
-      messagesCount: messages.length,
-      isLoading
-    });
-  }, [projectPath, session, extractedSessionInfo, effectiveSession, messages.length, isLoading]);
-
   // Load session history if resuming
   useEffect(() => {
     if (session) {
@@ -346,7 +334,6 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
         
         if (activeSession) {
           // Session is still active, reconnect to its stream
-          console.log('[ClaudeCodeSession] Found active session, reconnecting:', session.id);
           // IMPORTANT: Set claudeSessionId before reconnecting
           setClaudeSessionId(session.id);
           
@@ -363,11 +350,9 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
   };
 
   const reconnectToSession = async (sessionId: string) => {
-    console.log('[ClaudeCodeSession] Reconnecting to session:', sessionId);
     
     // Prevent duplicate listeners
     if (isListeningRef.current) {
-      console.log('[ClaudeCodeSession] Already listening to session, skipping reconnect');
       return;
     }
     
@@ -384,7 +369,6 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
     // Set up session-specific listeners
     const outputUnlisten = await listen<string>(`claude-output:${sessionId}`, async (event) => {
       try {
-        console.log('[ClaudeCodeSession] Received claude-output on reconnect:', event.payload);
         
         if (!isMountedRef.current) return;
         
@@ -406,8 +390,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
       }
     });
 
-    const completeUnlisten = await listen<boolean>(`claude-complete:${sessionId}`, async (event) => {
-      console.log('[ClaudeCodeSession] Received claude-complete on reconnect:', event.payload);
+    const completeUnlisten = await listen<boolean>(`claude-complete:${sessionId}`, async () => {
       if (isMountedRef.current) {
         setIsLoading(false);
         hasActiveSessionRef.current = false;
@@ -426,7 +409,6 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
   // Project path selection handled by parent tab controls
 
   const handleSendPrompt = async (prompt: string, model: "sonnet" | "opus") => {
-    console.log('[ClaudeCodeSession] handleSendPrompt called with:', { prompt, model, projectPath, claudeSessionId, effectiveSession });
     
     if (!projectPath) {
       setError("Please select a project directory first");
@@ -476,13 +458,11 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
         //     generic ones to prevent duplicate handling.
         // --------------------------------------------------------------------
 
-        console.log('[ClaudeCodeSession] Setting up generic event listeners first');
 
         let currentSessionId: string | null = claudeSessionId || effectiveSession?.id || null;
 
         // Helper to attach session-specific listeners **once we are sure**
         const attachSessionSpecificListeners = async (sid: string) => {
-          console.log('[ClaudeCodeSession] Attaching session-specific listeners for', sid);
 
           const specificOutputUnlisten = await listen<string>(`claude-output:${sid}`, (evt) => {
             handleStreamMessage(evt.payload);
@@ -493,9 +473,8 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
             setError(evt.payload);
           });
 
-          const specificCompleteUnlisten = await listen<boolean>(`claude-complete:${sid}`, (evt) => {
-            console.log('[ClaudeCodeSession] Received claude-complete (scoped):', evt.payload);
-            processComplete(evt.payload);
+          const specificCompleteUnlisten = await listen<boolean>(`claude-complete:${sid}`, () => {
+            processComplete();
           });
 
           // Replace existing unlisten refs with these new ones (after cleaning up)
@@ -512,7 +491,6 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
             const msg = JSON.parse(event.payload) as ClaudeStreamMessage;
             if (msg.type === 'system' && msg.subtype === 'init' && msg.session_id) {
               if (!currentSessionId || currentSessionId !== msg.session_id) {
-                console.log('[ClaudeCodeSession] Detected new session_id from generic listener:', msg.session_id);
                 currentSessionId = msg.session_id;
                 setClaudeSessionId(msg.session_id);
 
@@ -569,7 +547,6 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
                 }
                 
                 // Track tool start
-                console.log('Tool started:', toolUse.name);
               });
             }
             
@@ -582,7 +559,6 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
                 if (isError) {
                   sessionMetrics.current.toolsFailed += 1;
                   sessionMetrics.current.errorsEncountered += 1;
-                  console.log('Tool execution failed:', result.content);
                 }
               });
             }
@@ -613,28 +589,10 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
         }
 
         // Helper to handle completion events (both generic and scoped)
-        const processComplete = async (success: boolean) => {
+        const processComplete = async () => {
           setIsLoading(false);
           hasActiveSessionRef.current = false;
           isListeningRef.current = false; // Reset listening state
-          
-          // Track enhanced session stopped metrics when session completes
-          if (effectiveSession && claudeSessionId) {
-            const sessionStartTimeValue = messages.length > 0 ? messages[0].timestamp || Date.now() : Date.now();
-            const duration = Date.now() - sessionStartTimeValue;
-            const metrics = sessionMetrics.current;
-            
-            // Session stopped
-            console.log('Session completed:', {
-              duration,
-              success,
-              messageCount: messages.length,
-              tools: {
-                executed: metrics.toolsExecuted,
-                failed: metrics.toolsFailed
-              }
-            });
-          }
 
           // Session completed successfully
 
@@ -655,9 +613,8 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
           setError(evt.payload);
         });
 
-        const genericCompleteUnlisten = await listen<boolean>('claude-complete', (evt) => {
-          console.log('[ClaudeCodeSession] Received claude-complete (generic):', evt.payload);
-          processComplete(evt.payload);
+        const genericCompleteUnlisten = await listen<boolean>('claude-complete', () => {
+          processComplete();
         });
 
         // Store the generic unlisteners for now; they may be replaced later.
@@ -701,28 +658,13 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
           });
         }
         
-        // Track enhanced prompt submission
-        const codeBlockMatches = prompt.match(/```[\s\S]*?```/g) || [];
-        const hasCode = codeBlockMatches.length > 0;
-        const conversationDepth = messages.filter(m => m.user_message).length;
-        const sessionAge = sessionStartTime.current ? Date.now() - sessionStartTime.current : 0;
-        const wordCount = prompt.split(/\s+/).filter(word => word.length > 0).length;
-        
         // Prompt submitted
-        console.log('Prompt submitted:', {
-          wordCount,
-          conversationDepth,
-          hasCode,
-          sessionAge
-        });
 
         // Execute the appropriate command
         if (effectiveSession && !isFirstPrompt) {
-          console.log('[ClaudeCodeSession] Resuming session:', effectiveSession.id);
           // Session resumed
           await api.resumeClaudeCode(projectPath, effectiveSession.id, prompt, model);
         } else {
-          console.log('[ClaudeCodeSession] Starting new session');
           setIsFirstPrompt(false);
           // Session created
           await api.executeClaudeCode(projectPath, prompt, model);
@@ -819,25 +761,10 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
     if (!claudeSessionId || !isLoading) return;
     
     try {
-      const sessionStartTime = messages.length > 0 ? messages[0].timestamp || Date.now() : Date.now();
-      const duration = Date.now() - sessionStartTime;
-      
       await api.cancelClaudeExecution(claudeSessionId);
-      
-      // Calculate metrics for enhanced analytics
-      const metrics = sessionMetrics.current;
-      
+
       // Session stopped with duration
-      console.log('Session stopped by user:', {
-        duration,
-        messageCount: messages.length,
-        tools: {
-          executed: metrics.toolsExecuted,
-          failed: metrics.toolsFailed
-        },
-        pendingPrompts: queuedPrompts.length
-      });
-      
+
       // Clean up listeners
       unlistenRefs.current.forEach(unlisten => unlisten());
       unlistenRefs.current = [];
@@ -904,7 +831,6 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
       
       // Open the new forked session
       // You would need to implement navigation to the new session
-      console.log("Forked to new session:", newSessionId);
       
       setShowForkDialog(false);
       setForkCheckpointId(null);
@@ -932,7 +858,6 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
   };
 
   const handlePreviewUrlChange = (url: string) => {
-    console.log('[ClaudeCodeSession] Preview URL changed to:', url);
     setPreviewUrl(url);
   };
 
@@ -949,41 +874,15 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
     isMountedRef.current = true;
     
     return () => {
-      console.log('[ClaudeCodeSession] Component unmounting, cleaning up listeners');
       isMountedRef.current = false;
       isListeningRef.current = false;
       
       // Track session completion with engagement metrics
       if (effectiveSession) {
         // Session completed
-
-        // Session engagement metrics
-        const sessionDuration = sessionStartTime.current ? Date.now() - sessionStartTime.current : 0;
-        const messageCount = messages.filter(m => m.user_message).length;
-        const toolsUsed = new Set<string>();
-        messages.forEach(msg => {
-          if (msg.type === 'assistant' && msg.message?.content) {
-            const tools = msg.message.content.filter((c: any) => c.type === 'tool_use');
-            tools.forEach((tool: any) => toolsUsed.add(tool.name));
-          }
-        });
-        
-        // Calculate engagement score (0-100)
-        const engagementScore = Math.min(100, 
-          (messageCount * 10) + 
-          (toolsUsed.size * 5) + 
-          (sessionDuration > 300000 ? 20 : sessionDuration / 15000) // 5+ min session gets 20 points
-        );
-        
         // Track engagement metrics locally
-        console.log('Session engagement:', {
-          toolsUsed: Array.from(toolsUsed),
-          engagementScore: Math.round(engagementScore),
-          duration: sessionDuration,
-          messageCount
-        });
       }
-      
+
       // Clean up listeners
       unlistenRefs.current.forEach(unlisten => unlisten());
       unlistenRefs.current = [];

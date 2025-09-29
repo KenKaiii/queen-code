@@ -541,7 +541,7 @@ export const CCAgents: React.FC<CCAgentsProps> = ({ onBack, className }) => {
               Delete Agent
             </DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete the agent "{agentToDelete?.name}"? 
+              Are you sure you want to delete the agent &quot;{agentToDelete?.name}&quot;?
               This action cannot be undone and will permanently remove the agent and all its associated data.
             </DialogDescription>
           </DialogHeader>

@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 import { api } from '@/lib/api';
-import type { ClaudeStreamMessage } from '../AgentExecution';
+import type { ClaudeStreamMessage } from '@/types/messages';
 
 interface UseClaudeMessagesOptions {
   onSessionInfo?: (info: { sessionId: string; projectId: string }) => void;

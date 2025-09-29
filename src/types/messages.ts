@@ -1,0 +1,16 @@
+export interface ClaudeStreamMessage {
+  type: "system" | "assistant" | "user" | "result";
+  subtype?: string;
+  message?: {
+    content?: any[];
+    usage?: {
+      input_tokens: number;
+      output_tokens: number;
+    };
+  };
+  usage?: {
+    input_tokens: number;
+    output_tokens: number;
+  };
+  [key: string]: any;
+}

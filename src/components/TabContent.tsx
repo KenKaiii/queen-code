@@ -88,7 +88,6 @@ const TabPanel: React.FC<TabPanelProps> = ({ tab, isActive }) => {
   };
 
   const handleOpenProject = async () => {
-    console.log('handleOpenProject called');
     try {
       // Use native dialog to pick folder
       const { open } = await import('@tauri-apps/plugin-dialog');
@@ -99,7 +98,6 @@ const TabPanel: React.FC<TabPanelProps> = ({ tab, isActive }) => {
         defaultPath: await api.getHomeDirectory(),
       });
       
-      console.log('Selected folder:', selected);
       
       if (selected && typeof selected === 'string') {
         // Create or open project for the selected directory

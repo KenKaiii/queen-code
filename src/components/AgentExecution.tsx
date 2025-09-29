@@ -34,6 +34,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { HooksEditor } from "./HooksEditor";
 import { useTrackEvent, useComponentMetrics, useFeatureAdoptionTracking } from "@/hooks";
 import { useTabState } from "@/hooks/useTabState";
+import type { ClaudeStreamMessage } from "@/types/messages";
 
 interface AgentExecutionProps {
   /**
@@ -56,23 +57,6 @@ interface AgentExecutionProps {
    * Optional className for styling
    */
   className?: string;
-}
-
-export interface ClaudeStreamMessage {
-  type: "system" | "assistant" | "user" | "result";
-  subtype?: string;
-  message?: {
-    content?: any[];
-    usage?: {
-      input_tokens: number;
-      output_tokens: number;
-    };
-  };
-  usage?: {
-    input_tokens: number;
-    output_tokens: number;
-  };
-  [key: string]: any;
 }
 
 /**
@@ -287,7 +271,6 @@ export const AgentExecution: React.FC<AgentExecutionProps> = ({
     try {
       setIsRunning(true);
       // Update tab status to running
-      console.log('Setting tab status to running for tab:', tabId);
       if (tabId) {
         updateTabStatus(tabId, 'running');
       }
@@ -302,7 +285,6 @@ export const AgentExecution: React.FC<AgentExecutionProps> = ({
       
       // Execute the agent and get the run ID
       const executionRunId = await api.executeAgent(agent.id!, projectPath, task, model);
-      console.log("Agent execution started with run ID:", executionRunId);
       setRunId(executionRunId);
       
       // Track agent execution start
@@ -415,9 +397,7 @@ export const AgentExecution: React.FC<AgentExecutionProps> = ({
       const success = await api.killAgentSession(runId);
       
       if (success) {
-        console.log(`Successfully stopped agent session ${runId}`);
       } else {
-        console.warn(`Failed to stop agent session ${runId} - it may have already finished`);
       }
       
       // Update UI state

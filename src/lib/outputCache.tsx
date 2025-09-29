@@ -129,7 +129,6 @@ export function OutputCacheProvider({ children }: OutputCacheProviderProps) {
         status
       });
     } catch (error) {
-      console.warn(`Failed to update cache for session ${sessionId}:`, error);
     }
   }, [parseOutput, setCachedOutput]);
 
@@ -161,7 +160,6 @@ export function OutputCacheProvider({ children }: OutputCacheProviderProps) {
         return updated;
       });
     } catch (error) {
-      console.warn('Failed to poll running sessions:', error);
     }
   }, [updateSessionCache]);
 

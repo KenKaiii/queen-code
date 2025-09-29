@@ -561,14 +561,13 @@ export const api = {
   async getClaudeSettings(): Promise<ClaudeSettings> {
     try {
       const result = await invoke<{ data: ClaudeSettings }>("get_claude_settings");
-      console.log("Raw result from get_claude_settings:", result);
-      
+
       // The Rust backend returns ClaudeSettings { data: ... }
       // We need to extract the data field
       if (result && typeof result === 'object' && 'data' in result) {
         return result.data;
       }
-      
+
       // If the result is already the settings object, return it
       return result as ClaudeSettings;
     } catch (error) {
@@ -1437,9 +1436,7 @@ export const api = {
    */
   async mcpList(): Promise<MCPServer[]> {
     try {
-      console.log("API: Calling mcp_list...");
       const result = await invoke<MCPServer[]>("mcp_list");
-      console.log("API: mcp_list returned:", result);
       return result;
     } catch (error) {
       console.error("API: Failed to list MCP servers:", error);

@@ -87,7 +87,7 @@ export const HOOK_TEMPLATES: HookTemplate[] = [
     description: 'Log all bash commands to a file for auditing',
     event: 'PreToolUse',
     matcher: 'Bash',
-    commands: ['jq -r \'"\(.tool_input.command) - \(.tool_input.description // "No description")"\' >> ~/.claude/bash-command-log.txt']
+    commands: ['jq -r \'"(.tool_input.command) - (.tool_input.description // "No description")"\' >> ~/.claude/bash-command-log.txt']
   },
   {
     id: 'format-on-save',

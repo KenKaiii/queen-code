@@ -660,11 +660,11 @@ export const sanitizers = {
   // Sanitize error messages that might contain sensitive info
   sanitizeErrorMessage: (message: string): string => {
     // Remove file paths
-    message = message.replace(/\/[\w\-\/\.]+/g, '/***');
+    message = message.replace(/\/[\w\-/.]+/g, '/***');
     // Remove potential API keys or tokens
     message = message.replace(/[a-zA-Z0-9]{20,}/g, '***');
     // Remove email addresses
-    message = message.replace(/[\w\.-]+@[\w\.-]+\.\w+/g, '***@***.***');
+    message = message.replace(/[\w.-]+@[\w.-]+\.\w+/g, '***@***.***');
     return message;
   },
   
@@ -677,13 +677,13 @@ export const sanitizers = {
   // Sanitize tool names to remove any user-specific info
   sanitizeToolName: (name: string): string => {
     // Remove any path-like structures
-    return name.replace(/\/[\w\-\/\.]+/g, '').toLowerCase();
+    return name.replace(/\/[\w\-/.]+/g, '').toLowerCase();
   },
-  
+
   // Sanitize server names to remove any user-specific info
   sanitizeServerName: (name: string): string => {
     // Keep only the type or first part
-    return name.split(/[\-_]/)[0] || 'custom';
+    return name.split(/[-_]/)[0] || 'custom';
   },
   
   // Sanitize command names
@@ -695,6 +695,6 @@ export const sanitizers = {
   // Sanitize API endpoints
   sanitizeEndpoint: (endpoint: string): string => {
     // Remove any dynamic IDs or user-specific parts
-    return endpoint.replace(/\/\d+/g, '/:id').replace(/\/[\w\-]{20,}/g, '/:id');
+    return endpoint.replace(/\/\d+/g, '/:id').replace(/\/[\w-]{20,}/g, '/:id');
   },
 };

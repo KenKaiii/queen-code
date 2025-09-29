@@ -86,7 +86,6 @@ export function useCheckpoints({ sessionId, projectId, projectPath, onToast }: U
     
     try {
       // API doesn't have deleteCheckpoint, using a placeholder
-      console.warn('deleteCheckpoint not implemented in API');
       await loadCheckpoints();
       showToast("Checkpoint deleted successfully", 'success');
     } catch (error) {

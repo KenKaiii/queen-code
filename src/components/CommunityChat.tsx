@@ -78,7 +78,6 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({ className }) => {
         },
       })
       .on('broadcast', { event: 'new-message' }, (payload) => {
-        console.log('New message received via broadcast:', payload);
         const message = payload.payload as ChatMessage;
 
         // Only add if not already in messages (avoid duplicates from optimistic update)
@@ -96,11 +95,9 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({ className }) => {
       .on('presence', { event: 'sync' }, () => {
         const state = channel.presenceState();
         const count = Object.keys(state).length;
-        console.log('Online users updated:', count);
         setOnlineUsers(count);
       })
       .subscribe(async (status) => {
-        console.log('Channel subscription status:', status);
         if (status === 'SUBSCRIBED') {
           await channel.track({
             user: username,
@@ -154,9 +151,7 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({ className }) => {
           event: 'new-message',
           payload: data,
         });
-        console.log('Broadcast sent:', broadcastResult);
       } else {
-        console.warn('Channel not ready for broadcast');
       }
 
       textareaRef.current?.focus();

@@ -139,13 +139,11 @@ export function SessionOutputViewer({ session, onClose, className }: SessionOutp
             try {
               await api.streamSessionOutput(session.id);
             } catch (streamError) {
-              console.warn('Failed to start streaming, will poll instead:', streamError);
             }
           }
           
           return;
         } catch (err) {
-          console.warn('Failed to load from JSONL, falling back to regular output:', err);
         }
       }
 
@@ -182,7 +180,6 @@ export function SessionOutputViewer({ session, onClose, className }: SessionOutp
         try {
           await api.streamSessionOutput(session.id);
         } catch (streamError) {
-          console.warn('Failed to start streaming, will poll instead:', streamError);
         }
       }
     } catch (error) {

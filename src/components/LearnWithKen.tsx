@@ -2527,21 +2527,18 @@ Running the same code multiple times, usually over a list.
 **For loop:**
 \`\`\`javascript
 for (let i = 0; i < 5; i++) {
-  console.log(i)  // Prints 0, 1, 2, 3, 4
 }
 \`\`\`
 
 **For...of loop (cleaner):**
 \`\`\`javascript
 for (const user of users) {
-  console.log(user.name)
 }
 \`\`\`
 
 **Array methods (modern way):**
 \`\`\`javascript
 users.forEach(user => {
-  console.log(user.name)
 })
 
 users.map(user => user.name)  // Transform
@@ -2564,7 +2561,6 @@ Handling operations that take time (API calls, file reads, etc).
 **The old way (promises):**
 \`\`\`javascript
 fetchData().then(data => {
-  console.log(data)
 })
 \`\`\`
 
@@ -2572,7 +2568,6 @@ fetchData().then(data => {
 \`\`\`javascript
 async function getData() {
   const data = await fetchData()
-  console.log(data)
 }
 \`\`\`
 
@@ -2581,7 +2576,6 @@ async function getData() {
 async function getData() {
   try {
     const data = await fetchData()
-    console.log(data)
   } catch (error) {
     console.error("Failed:", error)
   }

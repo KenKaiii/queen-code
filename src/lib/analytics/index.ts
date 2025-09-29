@@ -207,11 +207,11 @@ class AnalyticsService {
         // For other properties, ensure no PII
         if (typeof value === 'string') {
           // Remove potential file paths
-          let cleanValue = value.replace(/\/[\w\-\/\.]+/g, '/***');
+          let cleanValue = value.replace(/\/[\w\-/.]+/g, '/***');
           // Remove potential API keys
           cleanValue = cleanValue.replace(/[a-zA-Z0-9]{32,}/g, '***');
           // Remove emails
-          cleanValue = cleanValue.replace(/[\w\.-]+@[\w\.-]+\.\w+/g, '***@***.***');
+          cleanValue = cleanValue.replace(/[\w.-]+@[\w.-]+\.\w+/g, '***@***.***');
           sanitized[key] = cleanValue;
         } else {
           sanitized[key] = value;

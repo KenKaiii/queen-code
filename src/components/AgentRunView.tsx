@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 import { formatISOTimestamp } from "@/lib/date-utils";
 import { StreamMessage } from "./StreamMessage";
 import { AGENT_ICONS } from "./CCAgents";
-import type { ClaudeStreamMessage } from "./AgentExecution";
+import type { ClaudeStreamMessage } from "@/types/messages";
 import { ErrorBoundary } from "./ErrorBoundary";
 
 interface AgentRunViewProps {
@@ -79,7 +79,6 @@ export const AgentRunView: React.FC<AgentRunViewProps> = ({
           setMessages(loadedMessages);
           return;
         } catch (err) {
-          console.warn('Failed to load from JSONL, falling back to output field:', err);
         }
       }
       
@@ -184,7 +183,6 @@ export const AgentRunView: React.FC<AgentRunViewProps> = ({
       const success = await api.killAgentSession(runId);
       
       if (success) {
-        console.log(`[AgentRunView] Successfully stopped agent session ${runId}`);
         
         // Update the run status locally
         if (run) {
@@ -210,7 +208,6 @@ export const AgentRunView: React.FC<AgentRunViewProps> = ({
           loadRun();
         }, 1000);
       } else {
-        console.warn(`[AgentRunView] Failed to stop agent session ${runId} - it may have already finished`);
       }
     } catch (err) {
       console.error('[AgentRunView] Failed to stop agent:', err);

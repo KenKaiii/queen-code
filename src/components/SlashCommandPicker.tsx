@@ -281,7 +281,7 @@ export const SlashCommandPicker: React.FC<SlashCommandPickerProps> = ({
             <span className="text-sm font-medium">Slash Commands</span>
             {searchQuery && (
               <span className="text-xs text-muted-foreground">
-                Searching: "{searchQuery}"
+                Searching: &quot;{searchQuery}&quot;
               </span>
             )}
           </div>

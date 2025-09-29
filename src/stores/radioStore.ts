@@ -98,7 +98,6 @@ export const useRadioStore = create<RadioState>((set, get) => ({
 
         if (wasPlaying && state.reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
           const delay = BASE_RECONNECT_DELAY * Math.pow(2, state.reconnectAttempts);
-          console.log(`Connection lost. Reconnecting in ${delay}ms (attempt ${state.reconnectAttempts + 1}/${MAX_RECONNECT_ATTEMPTS})`);
 
           const timer = setTimeout(async () => {
             const currentState = get();
@@ -114,7 +113,6 @@ export const useRadioStore = create<RadioState>((set, get) => ({
 
           set({ reconnectTimer: timer });
         } else if (state.reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-          console.log('Max reconnection attempts reached. Please try manually.');
           set({ reconnectAttempts: 0, wasPlayingBeforeError: false });
         }
       };
@@ -179,7 +177,6 @@ export const useRadioStore = create<RadioState>((set, get) => ({
       set({ isPlaying: false, isLoading: false, activeStation: station, wasPlayingBeforeError: false });
       audio.src = RADIO_SOURCES[station];
       audio.load();
-      console.log('Switched station to:', station, 'URL:', RADIO_SOURCES[station]);
     }
   },
 }));

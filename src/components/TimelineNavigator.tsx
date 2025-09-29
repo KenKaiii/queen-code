@@ -514,8 +514,8 @@ export const TimelineNavigator: React.FC<TimelineNavigatorProps> = ({
           <DialogHeader>
             <DialogTitle>Checkpoint Comparison</DialogTitle>
             <DialogDescription>
-              Changes between "{selectedCheckpoint?.description || selectedCheckpoint?.id.slice(0, 8)}" 
-              and "{compareCheckpoint?.description || compareCheckpoint?.id.slice(0, 8)}"
+              Changes between &quot;{selectedCheckpoint?.description || selectedCheckpoint?.id.slice(0, 8)}&quot;
+              and &quot;{compareCheckpoint?.description || compareCheckpoint?.id.slice(0, 8)}&quot;
             </DialogDescription>
           </DialogHeader>
           

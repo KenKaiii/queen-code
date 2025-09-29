@@ -390,7 +390,7 @@ export const IconPicker: React.FC<IconPickerProps> = ({
           {Object.keys(filteredCategories).length === 0 ? (
             <div className="flex flex-col items-center justify-center h-32 text-center">
               <p className="text-sm text-muted-foreground">
-                No icons found for "{searchQuery}"
+                No icons found for &quot;{searchQuery}&quot;
               </p>
             </div>
           ) : (

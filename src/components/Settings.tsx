@@ -171,7 +171,6 @@ export const Settings: React.FC<SettingsProps> = ({
       
       // Ensure loadedSettings is an object
       if (!loadedSettings || typeof loadedSettings !== 'object') {
-        console.warn("Loaded settings is not an object:", loadedSettings);
         setSettings({});
         return;
       }
@@ -289,7 +288,7 @@ export const Settings: React.FC<SettingsProps> = ({
         <div className="p-6">
           <div className="flex items-start justify-between">
             <div>
-              <h1 className="text-heading-1">Queen's Controls</h1>
+              <h1 className="text-heading-1">Queen&apos;s Controls</h1>
               <p className="mt-1 text-body-small text-muted-foreground">
                 Customize your royal coding experience
               </p>
@@ -589,7 +588,7 @@ Apply Changes
                   <div className="flex-1">
                     <h3 className="text-heading-4 mb-1">Required Permissions</h3>
                     <p className="text-sm text-muted-foreground mb-4">
-                      Queen Code needs Full Disk Access to manage Claude projects and files. We'll check current status and open System Settings where you can manually enable permissions.
+                      Queen Code needs Full Disk Access to manage Claude projects and files. We&apos;ll check current status and open System Settings where you can manually enable permissions.
                     </p>
                     <div className="flex items-center gap-3">
                       <Button
@@ -635,7 +634,7 @@ Apply Changes
                     </div>
                   ) : permissions.length === 0 ? (
                     <p className="text-sm text-muted-foreground py-4">
-                      No permission information available. Click "Refresh Status" to check.
+                      No permission information available. Click &quot;Refresh Status&quot; to check.
                     </p>
                   ) : (
                     <div className="space-y-4">
@@ -721,7 +720,7 @@ Apply Changes
                         <p className="font-medium mb-1">How to Enable Permissions:</p>
                         <ul className="space-y-1 ml-4">
                           <li>• macOS requires manual permission configuration in System Settings</li>
-                          <li>• Look for "Queen Code" in the Full Disk Access list and toggle it on</li>
+                          <li>• Look for &quot;Queen Code&quot; in the Full Disk Access list and toggle it on</li>
                           <li>• Restart the app after enabling permissions for changes to take effect</li>
                           <li>• Full Disk Access is required for reading/writing Claude projects and .ssh directory</li>
                         </ul>

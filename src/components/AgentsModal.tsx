@@ -342,7 +342,7 @@ export const AgentsModal: React.FC<AgentsModalProps> = ({ open, onOpenChange }) 
         <DialogHeader>
           <DialogTitle>Delete Agent</DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete "{agentToDelete?.name}"? This action cannot be undone.
+            Are you sure you want to delete &quot;{agentToDelete?.name}&quot;? This action cannot be undone.
           </DialogDescription>
         </DialogHeader>
         <div className="flex justify-end gap-3 mt-4">

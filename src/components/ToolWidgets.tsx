@@ -561,7 +561,7 @@ export const ReadResultWidget: React.FC<{ content: string; filePath?: string }> 
       
       {isLargeFile && !isExpanded && (
         <div className="px-4 py-3 text-xs text-muted-foreground text-center bg-muted/30">
-          Click "Expand" to view the full file
+          Click &quot;Expand&quot; to view the full file
         </div>
       )}
     </div>
@@ -1506,6 +1506,7 @@ export const CommandOutputWidget: React.FC<{
   // Parse ANSI codes for basic styling
   const parseAnsiToReact = (text: string) => {
     // Simple ANSI parsing - handles bold (\u001b[1m) and reset (\u001b[22m)
+    // eslint-disable-next-line no-control-regex
     const parts = text.split(/(\u001b\[\d+m)/);
     let isBold = false;
     const elements: React.ReactNode[] = [];
@@ -1517,6 +1518,7 @@ export const CommandOutputWidget: React.FC<{
       } else if (part === '\u001b[22m') {
         isBold = false;
         return;
+        // eslint-disable-next-line no-control-regex
       } else if (part.match(/\u001b\[\d+m/)) {
         // Ignore other ANSI codes for now
         return;

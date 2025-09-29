@@ -453,7 +453,7 @@ export const MCPAddServer: React.FC<MCPAddServerProps> = ({
           </div>
           <div className="space-y-2 text-xs text-muted-foreground">
             <div className="font-mono bg-background p-2 rounded">
-              <p>• Postgres: /path/to/postgres-mcp-server --connection-string "postgresql://..."</p>
+              <p>• Postgres: /path/to/postgres-mcp-server --connection-string &quot;postgresql://...&quot;</p>
               <p>• Weather API: /usr/local/bin/weather-cli --api-key ABC123</p>
               <p>• SSE Server: https://api.example.com/mcp/stream</p>
             </div>

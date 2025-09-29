@@ -84,10 +84,8 @@ export const ServerDashboard: React.FC<ServerDashboardProps> = ({
 
   // Scan ports on component mount
   useEffect(() => {
-    console.log('[ServerDashboard] Component mounted, scanning ports...');
     scanPorts();
     return () => {
-      console.log('[ServerDashboard] Component unmounted');
     };
   }, []);
 

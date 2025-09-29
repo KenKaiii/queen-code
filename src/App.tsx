@@ -68,7 +68,6 @@ function AppContent() {
   useEffect(() => {
     if (view === "projects" && projects.length > 0) {
       // User has projects - they're past onboarding
-      console.log('User has reached projects view with data');
     }
   }, [view, projects.length]);
 

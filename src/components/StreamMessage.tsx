@@ -11,7 +11,7 @@ import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { getClaudeSyntaxTheme } from "@/lib/claudeSyntaxTheme";
 import { useTheme } from "@/hooks";
-import type { ClaudeStreamMessage } from "./AgentExecution";
+import type { ClaudeStreamMessage } from "@/types/messages";
 import {
   TodoWidget,
   TodoReadWidget,
@@ -125,6 +125,7 @@ const StreamMessageComponent: React.FC<StreamMessageProps> = ({ message, classNa
                         .replace(/^Edit operation feedback:\s*-\s*\[.*?\]:\s*(.*)$/gm, '$1')
                         .replace(/^MultiEdit operation feedback:\s*-\s*\[.*?\]:\s*(.*)$/gm, '$1')
                         // Strip ANSI color codes (like [0;32m and [0m)
+                        // eslint-disable-next-line no-control-regex
                         .replace(/\x1b\[[0-9;]*m/g, '')
                         .replace(/\[0;?[0-9;]*m/g, '')
                         .replace(/\[[0-9;]*m/g, '');
@@ -349,6 +350,7 @@ const StreamMessageComponent: React.FC<StreamMessageProps> = ({ message, classNa
                         .replace(/^Edit operation feedback:\s*-\s*\[.*?\]:\s*(.*)$/gm, '$1')
                         .replace(/^MultiEdit operation feedback:\s*-\s*\[.*?\]:\s*(.*)$/gm, '$1')
                         // Strip ANSI color codes (like [0;32m and [0m)
+                        // eslint-disable-next-line no-control-regex
                         .replace(/\x1b\[[0-9;]*m/g, '')
                         .replace(/\[0;?[0-9;]*m/g, '')
                         .replace(/\[[0-9;]*m/g, '');
@@ -661,83 +663,6 @@ const StreamMessageComponent: React.FC<StreamMessageProps> = ({ message, classNa
       return null;
     }
 
-    // Legacy result rendering (should not reach here)
-    if (false && message.type === "result") {
-      const isError = message.is_error || message.subtype?.includes("error");
-
-      return (
-        <Card className={cn(
-          isError ? "border-destructive/20 bg-destructive/5" : "border-green-500/20 bg-green-500/5",
-          className
-        )}>
-          <CardContent className="p-4">
-            <div className="flex items-start gap-3">
-              {isError ? (
-                <Warning className="h-5 w-5 text-destructive mt-0.5" weight="duotone" />
-              ) : (
-                <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" weight="duotone" />
-              )}
-              <div className="flex-1 space-y-2">
-                <h4 className="font-semibold text-sm">
-                  {isError ? "Execution Failed" : "Execution Complete"}
-                </h4>
-                
-                {message.result && (
-                  <div className="prose prose-sm dark:prose-invert max-w-none">
-                    <ReactMarkdown
-                      remarkPlugins={[remarkGfm]}
-                      components={{
-                        code({ node, inline, className, children, ...props }: any) {
-                          const match = /language-(\w+)/.exec(className || '');
-                          return !inline && match ? (
-                            <SyntaxHighlighter
-                              style={syntaxTheme}
-                              language={match[1]}
-                              PreTag="div"
-                              {...props}
-                            >
-                              {String(children).replace(/\n$/, '')}
-                            </SyntaxHighlighter>
-                          ) : (
-                            <code className={className} {...props}>
-                              {children}
-                            </code>
-                          );
-                        }
-                      }}
-                    >
-                      {message.result}
-                    </ReactMarkdown>
-                  </div>
-                )}
-                
-                {message.error && (
-                  <div className="text-sm text-destructive">{message.error}</div>
-                )}
-                
-                <div className="text-xs text-muted-foreground space-y-1 mt-2">
-                  {(message.cost_usd !== undefined || message.total_cost_usd !== undefined) && (
-                    <div>Cost: ${((message.cost_usd || message.total_cost_usd)!).toFixed(4)} USD</div>
-                  )}
-                  {message.duration_ms !== undefined && (
-                    <div>Duration: {(message.duration_ms / 1000).toFixed(2)}s</div>
-                  )}
-                  {message.num_turns !== undefined && (
-                    <div>Turns: {message.num_turns}</div>
-                  )}
-                  {message.usage?.input_tokens !== undefined && message.usage?.output_tokens !== undefined && (
-                    <div>
-                      Total tokens: {(message.usage?.input_tokens ?? 0) + (message.usage?.output_tokens ?? 0)}
-                      ({message.usage?.input_tokens} in, {message.usage?.output_tokens} out)
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      );
-    }
 
     // Skip rendering if no meaningful content
     return null;

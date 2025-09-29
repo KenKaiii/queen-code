@@ -72,8 +72,8 @@ export function ClaudeBinaryDialog({ open, onOpenChange, onSuccess, onError }: C
               </div>
             ) : hasInstallations ? (
               <p>
-                Multiple Claude Code installations were found on your system. 
-                Please select which one you'd like to use.
+                Multiple Claude Code installations were found on your system.
+                Please select which one you&apos;d like to use.
               </p>
             ) : (
               <>

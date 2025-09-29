@@ -5,7 +5,7 @@ import { StreamMessage } from '../StreamMessage';
 import { Terminal } from 'lucide-react';
 import { LoadingIcon } from '@/components/LoadingIcon';
 import { cn } from '@/lib/utils';
-import type { ClaudeStreamMessage } from '../AgentExecution';
+import type { ClaudeStreamMessage } from '@/types/messages';
 
 interface MessageListProps {
   messages: ClaudeStreamMessage[];

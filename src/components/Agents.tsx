@@ -245,7 +245,7 @@ export const Agents: React.FC = () => {
             >
               <h3 className="text-lg font-semibold mb-4">Delete Agent</h3>
               <p className="text-muted-foreground mb-6">
-                Are you sure you want to delete "{agentToDelete.name}"? This action cannot be undone.
+                Are you sure you want to delete &quot;{agentToDelete.name}&quot;? This action cannot be undone.
               </p>
               <div className="flex gap-3 justify-end">
                 <Button

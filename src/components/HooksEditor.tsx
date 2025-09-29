@@ -789,7 +789,7 @@ export const HooksEditor: React.FC<HooksEditorProps> = ({
               </div>
             </div>
             <p className="text-sm text-muted-foreground">
-              Configure shell commands to execute at various points in Claude Code's lifecycle.
+              Configure shell commands to execute at various points in Claude Code&apos;s lifecycle.
               {scope === 'local' && ' These settings are not committed to version control.'}
             </p>
             {hasUnsavedChanges && !readOnly && (

@@ -125,7 +125,6 @@ const sessionStore: StateCreator<
     deleteSession: async (sessionId: string, projectId: string) => {
       try {
         // Note: API doesn't have a deleteSession method, so this is a placeholder
-        console.warn('deleteSession not implemented in API');
         
         // Update local state
         set((state) => ({
