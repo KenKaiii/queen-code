@@ -11,12 +11,18 @@ import {
   Radio,
   GraduationCap,
   ChatsCircle,
-  Waveform
+  Waveform,
+  Download
 } from '@phosphor-icons/react';
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import { open } from '@tauri-apps/plugin-shell';
 import { TooltipProvider, TooltipSimple } from '@/components/ui/tooltip-modern';
 import { useRadioStore } from '@/stores/radioStore';
+import { useNotificationStore } from '@/stores/notificationStore';
+import { useAgentStore } from '@/stores/agentStore';
+import { useUpdateChecker } from '@/hooks/useUpdateChecker';
 import { Badge } from '@/components/ui/badge';
+import { NotificationBadge } from '@/components/ui/notification-badge';
 
 interface CustomTitlebarProps {
   onSettingsClick?: () => void;
@@ -39,6 +45,22 @@ export const CustomTitlebar: React.FC<CustomTitlebarProps> = ({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { isPlaying } = useRadioStore();
+  const { unreadChats } = useNotificationStore();
+  const { runningAgents, fetchAgentRuns } = useAgentStore();
+  const updateInfo = useUpdateChecker('unstablemindai', 'queen-code');
+
+  // Poll for agent updates to keep server badge current
+  useEffect(() => {
+    // Initial fetch
+    fetchAgentRuns();
+
+    // Poll every 5 seconds to keep badges updated
+    const interval = setInterval(() => {
+      fetchAgentRuns();
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [fetchAgentRuns]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -168,29 +190,33 @@ export const CustomTitlebar: React.FC<CustomTitlebarProps> = ({
         {/* Primary actions group */}
         <div className="flex items-center gap-1">
           {onCommunityChatClick && (
-            <TooltipSimple content="Community Chat" side="bottom">
-              <motion.button
-                onClick={onCommunityChatClick}
-                whileTap={{ scale: 0.97 }}
-                transition={{ duration: 0.15 }}
-                className="p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors tauri-no-drag"
-              >
-                <ChatsCircle size={16} weight="duotone" />
-              </motion.button>
-            </TooltipSimple>
+            <NotificationBadge count={unreadChats}>
+              <TooltipSimple content="Community Chat" side="bottom">
+                <motion.button
+                  onClick={onCommunityChatClick}
+                  whileTap={{ scale: 0.97 }}
+                  transition={{ duration: 0.15 }}
+                  className="p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors tauri-no-drag"
+                >
+                  <ChatsCircle size={16} weight="duotone" />
+                </motion.button>
+              </TooltipSimple>
+            </NotificationBadge>
           )}
 
           {onServerDashboardClick && (
-            <TooltipSimple content="Servers" side="bottom">
-              <motion.button
-                onClick={onServerDashboardClick}
-                whileTap={{ scale: 0.97 }}
-                transition={{ duration: 0.15 }}
-                className="p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors tauri-no-drag"
-              >
-                <Monitor size={16} weight="duotone" />
-              </motion.button>
-            </TooltipSimple>
+            <NotificationBadge count={runningAgents.size}>
+              <TooltipSimple content="Servers" side="bottom">
+                <motion.button
+                  onClick={onServerDashboardClick}
+                  whileTap={{ scale: 0.97 }}
+                  transition={{ duration: 0.15 }}
+                  className="p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors tauri-no-drag"
+                >
+                  <Monitor size={16} weight="duotone" />
+                </motion.button>
+              </TooltipSimple>
+            </NotificationBadge>
           )}
 
           {onCodeRadioClick && (
@@ -223,6 +249,25 @@ export const CustomTitlebar: React.FC<CustomTitlebarProps> = ({
 
         {/* Secondary actions group */}
         <div className="flex items-center gap-1">
+          {/* Update Available Button */}
+          {updateInfo?.hasUpdate && (
+            <TooltipSimple content={`Update available: v${updateInfo.latestVersion}`} side="bottom">
+              <motion.button
+                onClick={() => open(updateInfo.releaseUrl)}
+                whileTap={{ scale: 0.97 }}
+                transition={{ duration: 0.15 }}
+                className="p-2 rounded-md bg-primary/10 hover:bg-primary/20 text-primary transition-colors tauri-no-drag relative"
+              >
+                <Download size={16} weight="duotone" />
+                <motion.span
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="absolute -top-0.5 -right-0.5 h-2 w-2 bg-primary rounded-full"
+                />
+              </motion.button>
+            </TooltipSimple>
+          )}
+
           {onSettingsClick && (
             <TooltipSimple content="Settings" side="bottom">
               <motion.button

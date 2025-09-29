@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-type RadioStation = 'code' | 'rain';
+type RadioStation = 'code' | 'rain' | 'groovesalad' | 'dronezone';
 
 interface RadioState {
   isPlaying: boolean;
@@ -28,6 +28,8 @@ interface RadioState {
 
 const RADIO_SOURCES = {
   code: 'https://coderadio-admin-v2.freecodecamp.org/listen/coderadio/radio.mp3',
+  groovesalad: 'https://knkx-live-a.edge.audiocdn.com/6285_128k',
+  dronezone: 'https://stream.zeno.fm/f3wvbbqmdg8uv',
   rain: 'https://rainyday-mynoise.radioca.st/stream',
 };
 
@@ -87,9 +89,10 @@ export const useRadioStore = create<RadioState>((set, get) => ({
       const handlePlay = () => set({ isPlaying: true });
       const handlePause = () => set({ isPlaying: false });
       const handleEnded = () => set({ isPlaying: false });
-      const handleError = () => {
+      const handleError = (e: Event) => {
         const state = get();
         const wasPlaying = state.isPlaying || state.isLoading;
+        console.error('Radio stream error:', e, 'Station:', state.activeStation, 'URL:', RADIO_SOURCES[state.activeStation]);
 
         set({ isPlaying: false, isLoading: false, wasPlayingBeforeError: wasPlaying });
 
@@ -175,6 +178,8 @@ export const useRadioStore = create<RadioState>((set, get) => ({
       audio.currentTime = 0;
       set({ isPlaying: false, isLoading: false, activeStation: station, wasPlayingBeforeError: false });
       audio.src = RADIO_SOURCES[station];
+      audio.load();
+      console.log('Switched station to:', station, 'URL:', RADIO_SOURCES[station]);
     }
   },
 }));

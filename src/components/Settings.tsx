@@ -144,17 +144,19 @@ export const Settings: React.FC<SettingsProps> = ({
   };
 
   /**
-   * Requests Full Disk Access permission
+   * Checks permissions and opens System Settings for manual configuration
    */
   const handleRequestPermissions = async () => {
     try {
-      await api.requestFullDiskAccess();
-      setToast({ message: "Checking permissions...", type: "success" });
+      // First check current status
       await loadPermissions();
-    } catch (err) {
-      console.error("Permission request failed:", err);
-      setToast({ message: "Please grant Full Disk Access in System Settings", type: "error" });
+
+      // Then open System Settings for user to manually configure
       await api.openSystemPermissions("full_disk_access");
+      setToast({ message: "Opening System Settings - please enable Full Disk Access for Queen Code", type: "success" });
+    } catch (err) {
+      console.error("Failed to open System Settings:", err);
+      setToast({ message: "Failed to open System Settings", type: "error" });
     }
   };
 
@@ -585,17 +587,17 @@ Apply Changes
                     <ShieldCheck className="h-6 w-6 text-primary" weight="duotone" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-heading-4 mb-1">Grant Required Permissions</h3>
+                    <h3 className="text-heading-4 mb-1">Required Permissions</h3>
                     <p className="text-sm text-muted-foreground mb-4">
-                      Queen Code needs Full Disk Access to manage Claude projects and files. Click below to grant access.
+                      Queen Code needs Full Disk Access to manage Claude projects and files. We'll check current status and open System Settings where you can manually enable permissions.
                     </p>
                     <div className="flex items-center gap-3">
                       <Button
                         onClick={handleRequestPermissions}
                         className="gap-2"
                       >
-                        <ShieldCheck className="h-4 w-4" weight="duotone" />
-                        Grant Permissions
+                        <ArrowSquareOut className="h-4 w-4" weight="duotone" />
+                        Open System Settings
                       </Button>
                       <Button
                         variant="outline"
@@ -609,7 +611,7 @@ Apply Changes
                         ) : (
                           <ShieldCheck className="h-4 w-4" weight="duotone" />
                         )}
-                        Check Status
+                        Refresh Status
                       </Button>
                     </div>
                   </div>
@@ -695,9 +697,7 @@ Apply Changes
                                       variant="outline"
                                       size="sm"
                                       onClick={() => handleOpenSystemPermissions(
-                                        permission.name.toLowerCase().includes("disk") ? "full_disk_access" :
-                                        permission.name.toLowerCase().includes("automation") ? "automation" :
-                                        "privacy"
+                                        permission.name.toLowerCase().includes("disk") ? "full_disk_access" : "privacy"
                                       )}
                                       className="gap-2 mt-2"
                                     >
@@ -718,11 +718,12 @@ Apply Changes
                     <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50">
                       <Warning className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" weight="duotone" />
                       <div className="text-xs text-muted-foreground">
-                        <p className="font-medium mb-1">Important Notes:</p>
+                        <p className="font-medium mb-1">How to Enable Permissions:</p>
                         <ul className="space-y-1 ml-4">
-                          <li>• If you accidentally deny a permission, you must manually enable it in System Settings</li>
-                          <li>• Some permissions may require restarting the app after granting</li>
-                          <li>• Full Disk Access is essential for reading/writing Claude projects</li>
+                          <li>• macOS requires manual permission configuration in System Settings</li>
+                          <li>• Look for "Queen Code" in the Full Disk Access list and toggle it on</li>
+                          <li>• Restart the app after enabling permissions for changes to take effect</li>
+                          <li>• Full Disk Access is required for reading/writing Claude projects and .ssh directory</li>
                         </ul>
                       </div>
                     </div>

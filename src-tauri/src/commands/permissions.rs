@@ -28,13 +28,6 @@ pub fn check_permissions() -> Vec<PermissionStatus> {
                 instructions: "Open System Settings > Privacy & Security > Full Disk Access, then enable Queen Code".to_string(),
             },
             PermissionStatus {
-                name: "Automation".to_string(),
-                granted: None,
-                required: true,
-                description: "Required to run shell commands, execute npm/bun, and manage Claude Code sessions".to_string(),
-                instructions: "Open System Settings > Privacy & Security > Automation, then enable Queen Code permissions".to_string(),
-            },
-            PermissionStatus {
                 name: "Network".to_string(),
                 granted: Some(true),
                 required: true,
@@ -72,7 +65,6 @@ pub fn open_system_permissions(permission_type: String) -> Result<(), String> {
     {
         let url = match permission_type.as_str() {
             "full_disk_access" => "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles",
-            "automation" => "x-apple.systempreferences:com.apple.preference.security?Privacy_Automation",
             "privacy" => "x-apple.systempreferences:com.apple.preference.security",
             _ => "x-apple.systempreferences:com.apple.preference.security",
         };

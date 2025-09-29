@@ -1646,7 +1646,8 @@ fn create_command_with_env(program: &str) -> Command {
         }
     }
 
-    // Add NVM support if the program is in an NVM directory
+    // Add NVM support if the program is in an NVM directory (Unix-only)
+    #[cfg(not(target_os = "windows"))]
     if program.contains("/.nvm/versions/node/") {
         if let Some(node_bin_dir) = std::path::Path::new(program).parent() {
             let current_path = std::env::var("PATH").unwrap_or_default();
@@ -1658,7 +1659,8 @@ fn create_command_with_env(program: &str) -> Command {
         }
     }
 
-    // Ensure PATH contains common Homebrew locations
+    // Ensure PATH contains common Homebrew locations (Unix-only)
+    #[cfg(not(target_os = "windows"))]
     if let Ok(existing_path) = std::env::var("PATH") {
         let mut paths: Vec<&str> = existing_path.split(':').collect();
         for p in ["/opt/homebrew/bin", "/usr/local/bin", "/usr/bin", "/bin"].iter() {

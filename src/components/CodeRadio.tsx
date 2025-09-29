@@ -21,7 +21,7 @@ interface CodeRadioProps {
   className?: string;
 }
 
-type RadioStation = 'code' | 'rain';
+type RadioStation = 'code' | 'rain' | 'groovesalad' | 'dronezone';
 
 interface RadioSource {
   id: RadioStation;
@@ -63,6 +63,20 @@ export const CodeRadio: React.FC<CodeRadioProps> = ({
       url: 'https://coderadio-admin-v2.freecodecamp.org/listen/coderadio/radio.mp3',
       icon: <Radio className="h-4 w-4" weight="duotone" />,
       description: '24/7 coding beats from freeCodeCamp'
+    },
+    {
+      id: 'groovesalad',
+      name: 'Jazz24',
+      url: 'https://knkx-live-a.edge.audiocdn.com/6285_128k',
+      icon: <Waveform className="h-4 w-4" weight="duotone" />,
+      description: 'World-class jazz for focus'
+    },
+    {
+      id: 'dronezone',
+      name: 'Lofi Radio',
+      url: 'https://stream.zeno.fm/f3wvbbqmdg8uv',
+      icon: <Waveform className="h-4 w-4" weight="duotone" />,
+      description: 'Chill lofi beats to code to'
     },
     {
       id: 'rain',

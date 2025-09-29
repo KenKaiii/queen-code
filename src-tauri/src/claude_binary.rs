@@ -254,6 +254,7 @@ fn find_standard_installations() -> Vec<ClaudeInstallation> {
     let mut installations = Vec::new();
 
     // Common installation paths for claude
+    #[cfg(not(target_os = "windows"))]
     let mut paths_to_check: Vec<(String, String)> = vec![
         ("/usr/local/bin/claude".to_string(), "system".to_string()),
         (
@@ -262,6 +263,18 @@ fn find_standard_installations() -> Vec<ClaudeInstallation> {
         ),
         ("/usr/bin/claude".to_string(), "system".to_string()),
         ("/bin/claude".to_string(), "system".to_string()),
+    ];
+
+    #[cfg(target_os = "windows")]
+    let mut paths_to_check: Vec<(String, String)> = vec![
+        (
+            "C:\\Program Files\\Claude Code\\claude.exe".to_string(),
+            "system".to_string(),
+        ),
+        (
+            "C:\\Program Files (x86)\\Claude Code\\claude.exe".to_string(),
+            "system".to_string(),
+        ),
     ];
 
     // Also check user-specific paths
@@ -490,6 +503,7 @@ pub fn create_command_with_env(program: &str) -> Command {
     }
 
     // Add NVM support if the program is in an NVM directory
+    #[cfg(not(target_os = "windows"))]
     if program.contains("/.nvm/versions/node/") {
         if let Some(node_bin_dir) = std::path::Path::new(program).parent() {
             // Ensure the Node.js bin directory is in PATH
@@ -502,8 +516,9 @@ pub fn create_command_with_env(program: &str) -> Command {
             }
         }
     }
-    
+
     // Add Homebrew support if the program is in a Homebrew directory
+    #[cfg(not(target_os = "windows"))]
     if program.contains("/homebrew/") || program.contains("/opt/homebrew/") {
         if let Some(program_dir) = std::path::Path::new(program).parent() {
             // Ensure the Homebrew bin directory is in PATH

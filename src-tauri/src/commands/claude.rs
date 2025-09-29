@@ -2132,12 +2132,25 @@ pub async fn update_hooks_config(
 pub async fn validate_hook_command(command: String) -> Result<serde_json::Value, String> {
     log::info!("Validating hook command syntax");
 
-    // Validate syntax without executing
-    let mut cmd = std::process::Command::new("bash");
-    cmd.arg("-n") // Syntax check only
-       .arg("-c")
-       .arg(&command);
-    
+    // Validate syntax without executing (platform-specific)
+    #[cfg(target_os = "windows")]
+    let mut cmd = {
+        let mut c = std::process::Command::new("powershell");
+        c.arg("-NoProfile")
+         .arg("-Command")
+         .arg(&format!("$ErrorActionPreference = 'Stop'; [ScriptBlock]::Create('{}'); exit 0", command.replace("'", "''")));
+        c
+    };
+
+    #[cfg(not(target_os = "windows"))]
+    let mut cmd = {
+        let mut c = std::process::Command::new("bash");
+        c.arg("-n") // Syntax check only
+         .arg("-c")
+         .arg(&command);
+        c
+    };
+
     match cmd.output() {
         Ok(output) => {
             if output.status.success() {

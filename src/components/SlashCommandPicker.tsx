@@ -428,7 +428,7 @@ export const SlashCommandPicker: React.FC<SlashCommandPickerProps> = ({
                               
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-baseline gap-2">
-                                  <span className="font-mono text-sm text-primary">
+                                  <span className="font-mono text-sm font-medium">
                                     {command.full_command}
                                   </span>
                                   {command.accepts_arguments && (
@@ -502,7 +502,7 @@ export const SlashCommandPicker: React.FC<SlashCommandPickerProps> = ({
                                     
                                     <div className="flex-1 min-w-0">
                                       <div className="flex items-baseline gap-2">
-                                        <span className="font-mono text-sm text-primary">
+                                        <span className="font-mono text-sm font-medium">
                                           {command.full_command}
                                         </span>
                                         {command.accepts_arguments && (

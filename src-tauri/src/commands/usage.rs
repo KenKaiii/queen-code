@@ -396,10 +396,9 @@ pub fn get_usage_stats(days: Option<u32>) -> Result<UsageStats, String> {
                 .entry(entry.project_path.clone())
                 .or_insert(ProjectUsage {
                     project_path: entry.project_path.clone(),
-                    project_name: entry
-                        .project_path
-                        .split('/')
-                        .last()
+                    project_name: std::path::Path::new(&entry.project_path)
+                        .file_name()
+                        .and_then(|n| n.to_str())
                         .unwrap_or(&entry.project_path)
                         .to_string(),
                     total_cost: 0.0,
@@ -566,10 +565,9 @@ pub fn get_usage_by_date_range(start_date: String, end_date: String) -> Result<U
                 .entry(entry.project_path.clone())
                 .or_insert(ProjectUsage {
                     project_path: entry.project_path.clone(),
-                    project_name: entry
-                        .project_path
-                        .split('/')
-                        .last()
+                    project_name: std::path::Path::new(&entry.project_path)
+                        .file_name()
+                        .and_then(|n| n.to_str())
                         .unwrap_or(&entry.project_path)
                         .to_string(),
                     total_cost: 0.0,

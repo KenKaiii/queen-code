@@ -369,7 +369,7 @@ export const TabManager: React.FC<TabManagerProps> = ({ className }) => {
                 ? "hover:bg-muted/60 text-muted-foreground hover:text-foreground"
                 : "opacity-50 cursor-not-allowed text-muted-foreground"
             )}
-            title={canAddTab() ? "New project (Ctrl+T)" : "Maximum tabs reached"}
+            title={canAddTab() ? `New project (${navigator.platform.toUpperCase().indexOf('MAC') >= 0 ? 'Cmd' : 'Ctrl'}+T)` : "Maximum tabs reached"}
           >
             <Plus className="w-4 h-4" />
           </motion.button>

@@ -53,15 +53,16 @@ const getProjectName = (path: string): string => {
 const getDisplayPath = (path: string, maxLength: number = 30): string => {
   // Try to make path home-relative
   let displayPath = path;
-  const homeIndicators = ['/Users/', '/home/'];
+  const homeIndicators = ['/Users/', '/home/', 'C:\\Users\\'];
   for (const indicator of homeIndicators) {
     if (path.includes(indicator)) {
-      const parts = path.split('/');
-      const userIndex = parts.findIndex((_part, i) => 
-        i > 0 && parts[i - 1] === indicator.split('/')[1]
+      const separator = indicator.includes('\\') ? '\\' : '/';
+      const parts = path.split(separator);
+      const userIndex = parts.findIndex((_part, i) =>
+        i > 0 && parts[i - 1] === indicator.split(separator)[1]
       );
       if (userIndex > 0) {
-        const relativePath = parts.slice(userIndex + 1).join('/');
+        const relativePath = parts.slice(userIndex + 1).join(separator);
         displayPath = `~/${relativePath}`;
         break;
       }

@@ -172,7 +172,7 @@ type Model = {
 const MODELS: Model[] = [
   {
     id: "sonnet",
-    name: "Claude 4 Sonnet",
+    name: "Claude 4.5 Sonnet",
     description: "Faster, efficient for most tasks",
     icon: <Lightning className="h-3.5 w-3.5" weight="duotone" />,
     shortName: "S",
@@ -180,7 +180,7 @@ const MODELS: Model[] = [
   },
   {
     id: "opus",
-    name: "Claude 4 Opus",
+    name: "Claude 4.1 Opus",
     description: "More capable, better for complex tasks",
     icon: <Lightning className="h-3.5 w-3.5" weight="duotone" />,
     shortName: "O",
@@ -1173,7 +1173,7 @@ const FloatingPromptInputInner = (
 
                 {/* Action buttons inside input - fixed at bottom right */}
                 <div className="absolute right-1.5 bottom-1.5 flex items-center gap-0.5">
-                  <TooltipSimple content="Expand (Ctrl+Shift+E)" side="top">
+                  <TooltipSimple content={`Expand (${navigator.platform.toUpperCase().indexOf('MAC') >= 0 ? 'Cmd' : 'Ctrl'}+Shift+E)`} side="top">
                     <motion.div
                       whileTap={{ scale: 0.97 }}
                       transition={{ duration: 0.15 }}
