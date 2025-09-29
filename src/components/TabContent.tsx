@@ -135,8 +135,8 @@ const TabPanel: React.FC<TabPanelProps> = ({ tab, isActive }) => {
     }
   };
   
-  // Keep Community Chat active in background, but Code Radio can unmount (audio persists globally)
-  const shouldStayActiveInBackground = tab.type === 'community-chat';
+  // Keep Community Chat and Claude chat sessions active in background to preserve state
+  const shouldStayActiveInBackground = tab.type === 'community-chat' || tab.type === 'chat';
   const shouldRender = isActive || shouldStayActiveInBackground;
 
   if (!shouldRender) {

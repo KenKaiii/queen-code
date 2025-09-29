@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Sparkles, Loader2, CheckCircle, XCircle, Download, Database, Globe, Box } from "lucide-react";
+import { ArrowLeft, Sparkles, Loader2, CheckCircle, XCircle, Download, Database, Globe, Box, Chrome } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,7 @@ interface QueenCliStatus {
     queen_nextjs: boolean;
     queen_tauri: boolean;
     queen_init: boolean;
+    queen_chrome: boolean;
   };
 }
 
@@ -247,6 +248,14 @@ export const QueenProjectCreator: React.FC<QueenProjectCreatorProps> = ({
                     )}
                     <span>queen-init</span>
                   </div>
+                  <div className="flex items-center gap-2">
+                    {cliStatus.commands_available.queen_chrome ? (
+                      <CheckCircle className="h-3 w-3 text-green-500" />
+                    ) : (
+                      <XCircle className="h-3 w-3 text-muted-foreground" />
+                    )}
+                    <span>queen-chrome</span>
+                  </div>
                 </div>
               )}
             </div>
@@ -266,6 +275,8 @@ export const QueenProjectCreator: React.FC<QueenProjectCreatorProps> = ({
                       return <Globe className="h-5 w-5 text-primary" />;
                     case "queen-tauri":
                       return <Box className="h-5 w-5 text-primary" />;
+                    case "queen-chrome":
+                      return <Chrome className="h-5 w-5 text-primary" />;
                     default:
                       return <Sparkles className="h-5 w-5 text-primary" />;
                   }
