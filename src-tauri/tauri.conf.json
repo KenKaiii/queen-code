@@ -25,7 +25,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; img-src 'self' asset: https://asset.localhost blob: data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-eval' https://app.posthog.com https://*.posthog.com https://*.i.posthog.com https://*.assets.i.posthog.com; connect-src 'self' ipc: https://ipc.localhost https://app.posthog.com https://*.posthog.com https://*.i.posthog.com wss://*.supabase.co https://*.supabase.co ws://localhost:* http://localhost:* https://coderadio-admin-v2.freecodecamp.org https://rainyday-mynoise.radioca.st https://knkx-live-a.edge.audiocdn.com https://*.zeno.fm; media-src 'self' https://coderadio-admin-v2.freecodecamp.org https://rainyday-mynoise.radioca.st https://knkx-live-a.edge.audiocdn.com https://*.zeno.fm",
+      "csp": "default-src 'self'; img-src 'self' asset: https://asset.localhost blob: data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-eval' https://app.posthog.com https://*.posthog.com https://*.i.posthog.com https://*.assets.i.posthog.com; connect-src 'self' ipc: https://ipc.localhost https://app.posthog.com https://*.posthog.com https://*.i.posthog.com wss://*.supabase.co https://*.supabase.co ws://localhost:* http://localhost:* https://coderadio-admin-v2.freecodecamp.org https://rainyday-mynoise.radioca.st https://knkx-live-a.edge.audiocdn.com https://*.somafm.com; media-src 'self' https://coderadio-admin-v2.freecodecamp.org https://rainyday-mynoise.radioca.st https://knkx-live-a.edge.audiocdn.com https://*.somafm.com",
       "assetProtocol": {
         "enable": true,
         "scope": [

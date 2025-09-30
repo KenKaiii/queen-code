@@ -29,7 +29,7 @@ interface RadioState {
 const RADIO_SOURCES = {
   code: 'https://coderadio-admin-v2.freecodecamp.org/listen/coderadio/radio.mp3',
   groovesalad: 'https://knkx-live-a.edge.audiocdn.com/6285_128k',
-  dronezone: 'https://stream.zeno.fm/f3wvbbqmdg8uv',
+  dronezone: 'https://ice1.somafm.com/dronezone-128-aac',
   rain: 'https://rainyday-mynoise.radioca.st/stream',
 };
 
@@ -78,7 +78,6 @@ export const useRadioStore = create<RadioState>((set, get) => ({
 
     if (!audio) {
       audio = new Audio();
-      audio.crossOrigin = "anonymous";
       audio.preload = "metadata";
 
       const handleLoadStart = () => set({ isLoading: true });
