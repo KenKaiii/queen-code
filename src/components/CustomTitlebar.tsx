@@ -78,6 +78,7 @@ export const CustomTitlebar: React.FC<CustomTitlebarProps> = ({
       const window = getCurrentWindow();
       await window.minimize();
     } catch (error) {
+      console.error('Failed to minimize window:', error);
     }
   };
 
@@ -91,6 +92,7 @@ export const CustomTitlebar: React.FC<CustomTitlebarProps> = ({
         await window.maximize();
       }
     } catch (error) {
+      console.error('Failed to maximize window:', error);
     }
   };
 
@@ -99,6 +101,7 @@ export const CustomTitlebar: React.FC<CustomTitlebarProps> = ({
       const window = getCurrentWindow();
       await window.close();
     } catch (error) {
+      console.error('Failed to close window:', error);
     }
   };
 

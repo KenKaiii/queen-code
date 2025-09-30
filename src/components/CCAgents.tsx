@@ -36,7 +36,6 @@ import { invoke } from "@tauri-apps/api/core";
 import { cn } from "@/lib/utils";
 import { Toast, ToastContainer } from "@/components/ui/toast";
 import { CreateAgent } from "./CreateAgent";
-import { AgentExecution } from "./AgentExecution";
 import { AgentRunsList } from "./AgentRunsList";
 import { GitHubAgentBrowser } from "./GitHubAgentBrowser";
 import { AGENT_ICONS, type AgentIconName } from "@/types/agents";
@@ -101,6 +100,7 @@ export const CCAgents: React.FC<CCAgentsProps> = ({ onBack, className }) => {
       const runsList = await api.listAgentRuns();
       setRuns(runsList);
     } catch (err) {
+      console.error('Failed to load agent runs:', err);
     } finally {
       setRunsLoading(false);
     }
@@ -264,14 +264,19 @@ export const CCAgents: React.FC<CCAgentsProps> = ({ onBack, className }) => {
   }
 
   if (view === "execute" && selectedAgent) {
+    // Dynamic import to avoid code-split conflicts
+    const AgentExecution = React.lazy(() => import("./AgentExecution").then(m => ({ default: m.AgentExecution })));
+
     return (
-      <AgentExecution
-        agent={selectedAgent}
-        onBack={() => {
-          setView("list");
-          handleExecutionComplete();
-        }}
-      />
+      <React.Suspense fallback={<div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+        <AgentExecution
+          agent={selectedAgent}
+          onBack={() => {
+            setView("list");
+            handleExecutionComplete();
+          }}
+        />
+      </React.Suspense>
     );
   }
 

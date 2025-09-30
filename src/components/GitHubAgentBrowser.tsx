@@ -58,6 +58,7 @@ export const GitHubAgentBrowser: React.FC<GitHubAgentBrowserProps> = ({
       const agents = await api.listAgents();
       setExistingAgents(agents);
     } catch (err) {
+      console.error('Failed to load existing agents:', err);
     }
   };
 
@@ -150,6 +151,7 @@ export const GitHubAgentBrowser: React.FC<GitHubAgentBrowserProps> = ({
     try {
       await open("https://github.com/KenKaiii/queen-code/tree/main/cc_agents");
     } catch (error) {
+      console.error('Failed to open GitHub repository:', error);
     }
   };
 

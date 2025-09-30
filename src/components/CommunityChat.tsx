@@ -85,6 +85,7 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({ className }) => {
 
           // Play notification sound if message is from another user
           if (message.username !== username && audioRef.current) {
+            // Audio playback - intentionally empty, ready for future notification implementation
           }
 
           return [...prev, message];

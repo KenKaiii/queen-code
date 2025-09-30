@@ -93,6 +93,8 @@ export const AgentRunView: React.FC<AgentRunViewProps> = ({
             const msg = JSON.parse(line) as ClaudeStreamMessage;
             parsedMessages.push(msg);
           } catch (err) {
+            // Skip malformed JSONL lines
+            console.warn('Failed to parse JSONL line:', err);
           }
         }
         
@@ -209,6 +211,7 @@ export const AgentRunView: React.FC<AgentRunViewProps> = ({
         // Stop failed - agent may have already finished
       }
     } catch (err) {
+      console.error('Failed to stop agent execution:', err);
     }
   };
 

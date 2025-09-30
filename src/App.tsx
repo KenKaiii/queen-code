@@ -452,7 +452,9 @@ function App() {
         : null;
       if (cached === 'true') return true;
       if (cached === 'false') return false;
-    } catch (_ignore) {}
+    } catch {
+      // Intentionally ignored
+    }
     return true; // default if no cache
   });
 

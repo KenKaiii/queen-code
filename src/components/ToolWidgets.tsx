@@ -2152,6 +2152,7 @@ export const WebSearchWidget: React.FC<{
     try {
       await open(url);
     } catch (error) {
+      console.error('Failed to open URL:', error);
     }
   };
   
@@ -2371,6 +2372,7 @@ export const WebFetchWidget: React.FC<{
     try {
       await open(url);
     } catch (error) {
+      console.error('Failed to open URL:', error);
     }
   };
   

@@ -110,6 +110,7 @@ export const Settings: React.FC<SettingsProps> = ({
       const path = await api.getClaudeBinaryPath();
       setCurrentBinaryPath(path);
     } catch (err) {
+      console.error('Failed to load Claude binary path:', err);
     }
   };
 

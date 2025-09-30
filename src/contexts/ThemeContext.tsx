@@ -90,6 +90,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           }
         }
       } catch (error) {
+        console.error('Failed to load theme:', error);
       } finally {
         setIsLoading(false);
       }
@@ -136,6 +137,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       // Save to storage
       await api.saveSetting(THEME_STORAGE_KEY, newTheme);
     } catch (error) {
+      console.error('Failed to set theme:', error);
     } finally {
       setIsLoading(false);
     }
@@ -156,6 +158,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       // Save to storage
       await api.saveSetting(CUSTOM_COLORS_STORAGE_KEY, JSON.stringify(newColors));
     } catch (error) {
+      console.error('Failed to set custom colors:', error);
     } finally {
       setIsLoading(false);
     }

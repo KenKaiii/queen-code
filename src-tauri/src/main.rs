@@ -67,7 +67,7 @@ fn main() {
         .plugin(tauri_plugin_shell::init())
         .setup(|app| {
             // Initialize agents database
-            let conn = init_database(&app.handle()).expect("Failed to initialize agents database");
+            let conn = init_database(app.handle()).expect("Failed to initialize agents database");
             
             // Load and apply proxy settings from the database
             {
@@ -116,7 +116,7 @@ fn main() {
             }
             
             // Re-open the connection for the app to manage
-            let conn = init_database(&app.handle()).expect("Failed to initialize agents database");
+            let conn = init_database(app.handle()).expect("Failed to initialize agents database");
             app.manage(AgentDb(Mutex::new(conn)));
 
             // Initialize checkpoint state
@@ -124,7 +124,7 @@ fn main() {
 
             // Set the Claude directory path
             if let Ok(claude_dir) = dirs::home_dir()
-                .ok_or_else(|| "Could not find home directory")
+                .ok_or("Could not find home directory")
                 .and_then(|home| {
                     let claude_path = home.join(".claude");
                     claude_path

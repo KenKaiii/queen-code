@@ -66,32 +66,30 @@ export function useClaudeMessages(options: UseClaudeMessagesOptions = {}) {
   }, []);
 
   const loadMessages = useCallback(async (sessionId: string) => {
-    try {
-      const output = await api.getSessionOutput(parseInt(sessionId));
-      // Note: API returns a string, not an array of outputs
-      const outputs = [{ jsonl: output }];
-      const loadedMessages: ClaudeStreamMessage[] = [];
-      const loadedRawJsonl: string[] = [];
-      
-      outputs.forEach(output => {
-        if (output.jsonl) {
-          const lines = output.jsonl.split('\n').filter(line => line.trim());
-          lines.forEach(line => {
-            try {
-              const msg = JSON.parse(line);
-              loadedMessages.push(msg);
-              loadedRawJsonl.push(line);
-            } catch (e) {
-            }
-          });
-        }
-      });
-      
-      setMessages(loadedMessages);
-      setRawJsonlOutput(loadedRawJsonl);
-    } catch (error) {
-      throw error;
-    }
+    const output = await api.getSessionOutput(parseInt(sessionId));
+    // Note: API returns a string, not an array of outputs
+    const outputs = [{ jsonl: output }];
+    const loadedMessages: ClaudeStreamMessage[] = [];
+    const loadedRawJsonl: string[] = [];
+
+    outputs.forEach(output => {
+      if (output.jsonl) {
+        const lines = output.jsonl.split('\n').filter(line => line.trim());
+        lines.forEach(line => {
+          try {
+            const msg = JSON.parse(line);
+            loadedMessages.push(msg);
+            loadedRawJsonl.push(line);
+          } catch (e) {
+            // Skip malformed JSONL lines
+            console.warn('Failed to parse JSONL line:', e);
+          }
+        });
+      }
+    });
+
+    setMessages(loadedMessages);
+    setRawJsonlOutput(loadedRawJsonl);
   }, []);
 
   // Set up event listener
@@ -106,6 +104,7 @@ export function useClaudeMessages(options: UseClaudeMessagesOptions = {}) {
           const message = JSON.parse(event.payload) as ClaudeStreamMessage;
           handleMessage(message);
         } catch (error) {
+          console.warn('Failed to parse Claude output message:', error);
         }
       });
     };

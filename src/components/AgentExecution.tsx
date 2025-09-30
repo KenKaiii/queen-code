@@ -309,6 +309,7 @@ export const AgentExecution: React.FC<AgentExecutionProps> = ({
           const message = JSON.parse(event.payload) as ClaudeStreamMessage;
           setMessages(prev => [...prev, message]);
         } catch (err) {
+          console.warn('Failed to parse agent output:', err);
         }
       });
 

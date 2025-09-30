@@ -60,7 +60,7 @@ pub async fn scan_dev_servers() -> Result<Vec<DevServer>, String> {
 #[cfg(target_os = "macos")]
 async fn scan_dev_servers_macos() -> Result<Vec<DevServer>, String> {
     let output = Command::new("lsof")
-        .args(&["-i", "-P", "-n", "-sTCP:LISTEN"])
+        .args(["-i", "-P", "-n", "-sTCP:LISTEN"])
         .output()
         .map_err(|e| format!("Failed to execute lsof: {}", e))?;
 
@@ -100,13 +100,13 @@ async fn scan_dev_servers_macos() -> Result<Vec<DevServer>, String> {
             let port_str = if addr_part.contains("[::1]:") {
                 addr_part.strip_prefix("[::1]:").unwrap_or("")
             } else {
-                addr_part.split(':').last().unwrap_or("")
+                addr_part.split(':').next_back().unwrap_or("")
             };
 
             if let Ok(port) = port_str.split_whitespace().next().unwrap_or("").parse::<u16>() {
                 // Only include common dev server port ranges (1000-10000)
                 // This excludes system services on high ports (50000+)
-                if port < 1000 || port > 10000 {
+                if !(1000..=10000).contains(&port) {
                     continue;
                 }
 
@@ -147,7 +147,7 @@ async fn scan_dev_servers_macos() -> Result<Vec<DevServer>, String> {
 #[cfg(target_os = "linux")]
 async fn scan_dev_servers_linux() -> Result<Vec<DevServer>, String> {
     let output = Command::new("lsof")
-        .args(&["-i", "-P", "-n", "-sTCP:LISTEN"])
+        .args(["-i", "-P", "-n", "-sTCP:LISTEN"])
         .output()
         .map_err(|e| format!("Failed to execute lsof: {}", e))?;
 
@@ -186,13 +186,13 @@ async fn scan_dev_servers_linux() -> Result<Vec<DevServer>, String> {
             let port_str = if addr_part.contains("[::1]:") {
                 addr_part.strip_prefix("[::1]:").unwrap_or("")
             } else {
-                addr_part.split(':').last().unwrap_or("")
+                addr_part.split(':').next_back().unwrap_or("")
             };
 
             if let Ok(port) = port_str.split_whitespace().next().unwrap_or("").parse::<u16>() {
                 // Only include common dev server port ranges (1000-10000)
                 // This excludes system services on high ports (50000+)
-                if port < 1000 || port > 10000 {
+                if !(1000..=10000).contains(&port) {
                     continue;
                 }
 

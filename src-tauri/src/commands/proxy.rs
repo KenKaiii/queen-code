@@ -4,25 +4,14 @@ use rusqlite::params;
 
 use crate::commands::agents::AgentDb;
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct ProxySettings {
     pub http_proxy: Option<String>,
     pub https_proxy: Option<String>,
     pub no_proxy: Option<String>,
     pub all_proxy: Option<String>,
+    #[serde(default)]
     pub enabled: bool,
-}
-
-impl Default for ProxySettings {
-    fn default() -> Self {
-        Self {
-            http_proxy: None,
-            https_proxy: None,
-            no_proxy: None,
-            all_proxy: None,
-            enabled: false,
-        }
-    }
 }
 
 /// Get proxy settings from the database

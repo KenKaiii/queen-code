@@ -347,6 +347,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
           reconnectToSession(session.id);
         }
       } catch (err) {
+        console.error('Failed to check for active session:', err);
       }
     }
   };
@@ -381,6 +382,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
         const message = JSON.parse(event.payload) as ClaudeStreamMessage;
         setMessages(prev => [...prev, message]);
       } catch (err) {
+        console.warn('Failed to process Claude output event:', err);
       }
     });
 
@@ -594,6 +596,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
             
             setMessages((prev) => [...prev, message]);
           } catch (err) {
+            console.warn('Failed to process stream message:', err);
           }
         }
 

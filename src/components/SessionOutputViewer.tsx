@@ -162,6 +162,8 @@ export function SessionOutputViewer({ session, onClose, className }: SessionOutp
           const message = JSON.parse(line) as ClaudeStreamMessage;
           parsedMessages.push(message);
         } catch (err) {
+          // Skip malformed JSONL lines
+          console.warn('Failed to parse JSONL line:', err);
         }
       }
       setMessages(parsedMessages);
@@ -204,11 +206,12 @@ export function SessionOutputViewer({ session, onClose, className }: SessionOutp
         try {
           // Store raw JSONL
           setRawJsonlOutput(prev => [...prev, event.payload]);
-          
+
           // Parse and display
           const message = JSON.parse(event.payload) as ClaudeStreamMessage;
           setMessages(prev => [...prev, message]);
         } catch (err) {
+          console.warn('Failed to process session output event:', err);
         }
       });
 
@@ -227,6 +230,7 @@ export function SessionOutputViewer({ session, onClose, className }: SessionOutp
 
       unlistenRefs.current = [outputUnlisten, errorUnlisten, completeUnlisten, cancelUnlisten];
     } catch (error) {
+      console.error('Failed to setup live event listeners:', error);
     }
   };
 

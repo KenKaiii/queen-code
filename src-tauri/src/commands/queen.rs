@@ -115,7 +115,7 @@ pub async fn check_queen_cli_status() -> Result<QueenCliStatus, String> {
 #[tauri::command]
 pub async fn install_queen_cli() -> Result<String, String> {
     let mut cmd = Command::new("npm");
-    cmd.args(&["install", "-g", "@kenkaiiii/queen-claude"])
+    cmd.args(["install", "-g", "@kenkaiiii/queen-claude"])
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .env("PATH", get_extended_path());
@@ -177,7 +177,7 @@ pub async fn create_queen_project(
     }
 
     if !parent_path.exists() {
-        std::fs::create_dir_all(&parent_path)
+        std::fs::create_dir_all(parent_path)
             .map_err(|e| format!("Failed to create parent directory: {}", e))?;
     }
 
@@ -233,7 +233,7 @@ fn check_command_exists(command: &str) -> bool {
 
 fn get_queen_version() -> Option<String> {
     let mut cmd = Command::new("npm");
-    cmd.args(&["list", "-g", "@kenkaiiii/queen-claude", "--depth=0"])
+    cmd.args(["list", "-g", "@kenkaiiii/queen-claude", "--depth=0"])
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .env("PATH", get_extended_path());

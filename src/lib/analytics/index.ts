@@ -57,9 +57,10 @@ class AnalyticsService {
       
       // Start event queue flush interval
       this.startFlushInterval();
-      
       this.initialized = true;
     } catch (error) {
+      // Analytics initialization should not break app
+      console.warn('Failed to initialize analytics:', error);
     }
   }
   
@@ -99,6 +100,8 @@ class AnalyticsService {
         },
       });
     } catch (error) {
+      // Analytics tracking errors should not break functionality
+      console.warn('Failed to track analytics event:', error);
     }
   }
   

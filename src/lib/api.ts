@@ -467,6 +467,7 @@ export const api = {
     try {
       return await invoke<string>("get_home_directory");
     } catch (error) {
+      console.error('Failed to get home directory:', error);
       return "/";
     }
   },
@@ -476,11 +477,7 @@ export const api = {
    * @returns Promise resolving to an array of projects
    */
   async listProjects(): Promise<Project[]> {
-    try {
-      return await invoke<Project[]>("list_projects");
-    } catch (error) {
-      throw error;
-    }
+    return invoke<Project[]>("list_projects");
   },
 
   /**
@@ -489,11 +486,7 @@ export const api = {
    * @returns Promise resolving to the created project
    */
   async createProject(path: string): Promise<Project> {
-    try {
-      return await invoke<Project>('create_project', { path });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<Project>('create_project', { path });
   },
 
   /**
@@ -502,11 +495,7 @@ export const api = {
    * @returns Promise resolving to an array of sessions
    */
   async getProjectSessions(projectId: string): Promise<Session[]> {
-    try {
-      return await invoke<Session[]>('get_project_sessions', { projectId });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<Session[]>('get_project_sessions', { projectId });
   },
 
   /**
@@ -514,11 +503,7 @@ export const api = {
    * @returns Promise resolving to list of available agents on GitHub
    */
   async fetchGitHubAgents(): Promise<GitHubAgentFile[]> {
-    try {
-      return await invoke<GitHubAgentFile[]>('fetch_github_agents');
-    } catch (error) {
-      throw error;
-    }
+    return invoke<GitHubAgentFile[]>('fetch_github_agents');
   },
 
   /**
@@ -527,11 +512,7 @@ export const api = {
    * @returns Promise resolving to the agent export data
    */
   async fetchGitHubAgentContent(downloadUrl: string): Promise<AgentExport> {
-    try {
-      return await invoke<AgentExport>('fetch_github_agent_content', { downloadUrl });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<AgentExport>('fetch_github_agent_content', { downloadUrl });
   },
 
   /**
@@ -540,11 +521,7 @@ export const api = {
    * @returns Promise resolving to the imported agent
    */
   async importAgentFromGitHub(downloadUrl: string): Promise<Agent> {
-    try {
-      return await invoke<Agent>('import_agent_from_github', { downloadUrl });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<Agent>('import_agent_from_github', { downloadUrl });
   },
 
   /**
@@ -552,20 +529,16 @@ export const api = {
    * @returns Promise resolving to the settings object
    */
   async getClaudeSettings(): Promise<ClaudeSettings> {
-    try {
-      const result = await invoke<{ data: ClaudeSettings }>("get_claude_settings");
+    const result = await invoke<{ data: ClaudeSettings }>("get_claude_settings");
 
-      // The Rust backend returns ClaudeSettings { data: ... }
-      // We need to extract the data field
-      if (result && typeof result === 'object' && 'data' in result) {
-        return result.data;
-      }
-
-      // If the result is already the settings object, return it
-      return result as ClaudeSettings;
-    } catch (error) {
-      throw error;
+    // The Rust backend returns ClaudeSettings { data: ... }
+    // We need to extract the data field
+    if (result && typeof result === 'object' && 'data' in result) {
+      return result.data;
     }
+
+    // If the result is already the settings object, return it
+    return result as ClaudeSettings;
   },
 
   /**
@@ -574,11 +547,7 @@ export const api = {
    * @returns Promise resolving when the session is opened
    */
   async openNewSession(path?: string): Promise<string> {
-    try {
-      return await invoke<string>("open_new_session", { path });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<string>("open_new_session", { path });
   },
 
   /**
@@ -586,11 +555,7 @@ export const api = {
    * @returns Promise resolving to the system prompt content
    */
   async getSystemPrompt(): Promise<string> {
-    try {
-      return await invoke<string>("get_system_prompt");
-    } catch (error) {
-      throw error;
-    }
+    return invoke<string>("get_system_prompt");
   },
 
   /**
@@ -598,11 +563,7 @@ export const api = {
    * @returns Promise resolving to the version status
    */
   async checkClaudeVersion(): Promise<ClaudeVersionStatus> {
-    try {
-      return await invoke<ClaudeVersionStatus>("check_claude_version");
-    } catch (error) {
-      throw error;
-    }
+    return invoke<ClaudeVersionStatus>("check_claude_version");
   },
 
   /**
@@ -611,11 +572,7 @@ export const api = {
    * @returns Promise resolving when the file is saved
    */
   async saveSystemPrompt(content: string): Promise<string> {
-    try {
-      return await invoke<string>("save_system_prompt", { content });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<string>("save_system_prompt", { content });
   },
 
   /**
@@ -624,11 +581,7 @@ export const api = {
    * @returns Promise resolving when the settings are saved
    */
   async saveClaudeSettings(settings: ClaudeSettings): Promise<string> {
-    try {
-      return await invoke<string>("save_claude_settings", { settings });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<string>("save_claude_settings", { settings });
   },
 
   /**
@@ -637,11 +590,7 @@ export const api = {
    * @returns Promise resolving to an array of CLAUDE.md files
    */
   async findClaudeMdFiles(projectPath: string): Promise<ClaudeMdFile[]> {
-    try {
-      return await invoke<ClaudeMdFile[]>("find_claude_md_files", { projectPath });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<ClaudeMdFile[]>("find_claude_md_files", { projectPath });
   },
 
   /**
@@ -650,11 +599,7 @@ export const api = {
    * @returns Promise resolving to the file content
    */
   async readClaudeMdFile(filePath: string): Promise<string> {
-    try {
-      return await invoke<string>("read_claude_md_file", { filePath });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<string>("read_claude_md_file", { filePath });
   },
 
   /**
@@ -664,11 +609,7 @@ export const api = {
    * @returns Promise resolving when the file is saved
    */
   async saveClaudeMdFile(filePath: string, content: string): Promise<string> {
-    try {
-      return await invoke<string>("save_claude_md_file", { filePath, content });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<string>("save_claude_md_file", { filePath, content });
   },
 
   // Agent API methods
@@ -678,11 +619,7 @@ export const api = {
    * @returns Promise resolving to an array of agents
    */
   async listAgents(): Promise<Agent[]> {
-    try {
-      return await invoke<Agent[]>('list_agents');
-    } catch (error) {
-      throw error;
-    }
+    return invoke<Agent[]>('list_agents');
   },
 
   /**
@@ -703,18 +640,14 @@ export const api = {
     model?: string,
     hooks?: string
   ): Promise<Agent> {
-    try {
-      return await invoke<Agent>('create_agent', {
-        name,
-        icon,
-        systemPrompt: system_prompt,
-        defaultTask: default_task,
-        model,
-        hooks
-      });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<Agent>('create_agent', {
+      name,
+      icon,
+      systemPrompt: system_prompt,
+      defaultTask: default_task,
+      model,
+      hooks
+    });
   },
 
   /**
@@ -737,19 +670,15 @@ export const api = {
     model?: string,
     hooks?: string
   ): Promise<Agent> {
-    try {
-      return await invoke<Agent>('update_agent', {
-        id,
-        name,
-        icon,
-        systemPrompt: system_prompt,
-        defaultTask: default_task,
-        model,
-        hooks
-      });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<Agent>('update_agent', {
+      id,
+      name,
+      icon,
+      systemPrompt: system_prompt,
+      defaultTask: default_task,
+      model,
+      hooks
+    });
   },
 
   /**
@@ -758,11 +687,7 @@ export const api = {
    * @returns Promise resolving when the agent is deleted
    */
   async deleteAgent(id: number): Promise<void> {
-    try {
-      return await invoke('delete_agent', { id });
-    } catch (error) {
-      throw error;
-    }
+    return invoke('delete_agent', { id });
   },
 
   /**
@@ -771,11 +696,7 @@ export const api = {
    * @returns Promise resolving to the agent
    */
   async getAgent(id: number): Promise<Agent> {
-    try {
-      return await invoke<Agent>('get_agent', { id });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<Agent>('get_agent', { id });
   },
 
   /**
@@ -784,11 +705,7 @@ export const api = {
    * @returns Promise resolving to the JSON string
    */
   async exportAgent(id: number): Promise<string> {
-    try {
-      return await invoke<string>('export_agent', { id });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<string>('export_agent', { id });
   },
 
   /**
@@ -797,11 +714,7 @@ export const api = {
    * @returns Promise resolving to the imported agent
    */
   async importAgent(jsonData: string): Promise<Agent> {
-    try {
-      return await invoke<Agent>('import_agent', { jsonData });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<Agent>('import_agent', { jsonData });
   },
 
   /**
@@ -810,11 +723,7 @@ export const api = {
    * @returns Promise resolving to the imported agent
    */
   async importAgentFromFile(filePath: string): Promise<Agent> {
-    try {
-      return await invoke<Agent>('import_agent_from_file', { filePath });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<Agent>('import_agent_from_file', { filePath });
   },
 
   /**
@@ -991,11 +900,7 @@ export const api = {
    * @returns Promise resolving to array of session messages
    */
   async loadAgentSessionHistory(sessionId: string): Promise<any[]> {
-    try {
-      return await invoke<any[]>('load_agent_session_history', { sessionId });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<any[]>('load_agent_session_history', { sessionId });
   },
 
   /**
@@ -1063,11 +968,7 @@ export const api = {
    * @returns Promise resolving to usage statistics
    */
   async getUsageStats(): Promise<UsageStats> {
-    try {
-      return await invoke<UsageStats>("get_usage_stats");
-    } catch (error) {
-      throw error;
-    }
+    return invoke<UsageStats>("get_usage_stats");
   },
 
   /**
@@ -1077,11 +978,7 @@ export const api = {
    * @returns Promise resolving to usage statistics
    */
   async getUsageByDateRange(startDate: string, endDate: string): Promise<UsageStats> {
-    try {
-      return await invoke<UsageStats>("get_usage_by_date_range", { startDate, endDate });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<UsageStats>("get_usage_by_date_range", { startDate, endDate });
   },
 
   /**
@@ -1096,15 +993,11 @@ export const api = {
     until?: string,
     order?: "asc" | "desc"
   ): Promise<ProjectUsage[]> {
-    try {
-      return await invoke<ProjectUsage[]>("get_session_stats", {
-        since,
-        until,
-        order,
-      });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<ProjectUsage[]>("get_session_stats", {
+      since,
+      until,
+      order,
+    });
   },
 
   /**
@@ -1113,11 +1006,7 @@ export const api = {
    * @returns Promise resolving to array of usage entries
    */
   async getUsageDetails(limit?: number): Promise<UsageEntry[]> {
-    try {
-      return await invoke<UsageEntry[]>("get_usage_details", { limit });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<UsageEntry[]>("get_usage_details", { limit });
   },
 
   /**
@@ -1235,16 +1124,12 @@ export const api = {
     sessionId: string,
     projectId: string
   ): Promise<CheckpointDiff> {
-    try {
-      return await invoke<CheckpointDiff>("get_checkpoint_diff", {
-        fromCheckpointId,
-        toCheckpointId,
-        sessionId,
-        projectId
-      });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<CheckpointDiff>("get_checkpoint_diff", {
+      fromCheckpointId,
+      toCheckpointId,
+      sessionId,
+      projectId
+    });
   },
 
   /**
@@ -1256,16 +1141,12 @@ export const api = {
     projectPath: string,
     message: string
   ): Promise<void> {
-    try {
-      await invoke("track_checkpoint_message", {
-        sessionId,
-        projectId,
-        projectPath,
-        message
-      });
-    } catch (error) {
-      throw error;
-    }
+    return invoke("track_checkpoint_message", {
+      sessionId,
+      projectId,
+      projectPath,
+      message
+    });
   },
 
   /**
@@ -1277,16 +1158,12 @@ export const api = {
     projectPath: string,
     message: string
   ): Promise<boolean> {
-    try {
-      return await invoke<boolean>("check_auto_checkpoint", {
-        sessionId,
-        projectId,
-        projectPath,
-        message
-      });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<boolean>("check_auto_checkpoint", {
+      sessionId,
+      projectId,
+      projectPath,
+      message
+    });
   },
 
   /**
@@ -1298,16 +1175,12 @@ export const api = {
     projectPath: string,
     keepCount: number
   ): Promise<number> {
-    try {
-      return await invoke<number>("cleanup_old_checkpoints", {
-        sessionId,
-        projectId,
-        projectPath,
-        keepCount
-      });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<number>("cleanup_old_checkpoints", {
+      sessionId,
+      projectId,
+      projectPath,
+      keepCount
+    });
   },
 
   /**
@@ -1323,26 +1196,18 @@ export const api = {
     total_checkpoints: number;
     current_checkpoint_id?: string;
   }> {
-    try {
-      return await invoke("get_checkpoint_settings", {
-        sessionId,
-        projectId,
-        projectPath
-      });
-    } catch (error) {
-      throw error;
-    }
+    return invoke("get_checkpoint_settings", {
+      sessionId,
+      projectId,
+      projectPath
+    });
   },
 
   /**
    * Clears checkpoint manager for a session (cleanup on session end)
    */
   async clearCheckpointManager(sessionId: string): Promise<void> {
-    try {
-      await invoke("clear_checkpoint_manager", { sessionId });
-    } catch (error) {
-      throw error;
-    }
+    return invoke("clear_checkpoint_manager", { sessionId });
   },
 
   /**
@@ -1368,141 +1233,92 @@ export const api = {
     url?: string,
     scope: string = "local"
   ): Promise<AddServerResult> {
-    try {
-      return await invoke<AddServerResult>("mcp_add", {
-        name,
-        transport,
-        command,
-        args,
-        env,
-        url,
-        scope
-      });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<AddServerResult>("mcp_add", {
+      name,
+      transport,
+      command,
+      args,
+      env,
+      url,
+      scope
+    });
   },
 
   /**
    * Lists all configured MCP servers
    */
   async mcpList(): Promise<MCPServer[]> {
-    try {
-      const result = await invoke<MCPServer[]>("mcp_list");
-      return result;
-    } catch (error) {
-      throw error;
-    }
+    return invoke<MCPServer[]>("mcp_list");
   },
 
   /**
    * Gets details for a specific MCP server
    */
   async mcpGet(name: string): Promise<MCPServer> {
-    try {
-      return await invoke<MCPServer>("mcp_get", { name });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<MCPServer>("mcp_get", { name });
   },
 
   /**
    * Removes an MCP server
    */
   async mcpRemove(name: string): Promise<string> {
-    try {
-      return await invoke<string>("mcp_remove", { name });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<string>("mcp_remove", { name });
   },
 
   /**
    * Adds an MCP server from JSON configuration
    */
   async mcpAddJson(name: string, jsonConfig: string, scope: string = "local"): Promise<AddServerResult> {
-    try {
-      return await invoke<AddServerResult>("mcp_add_json", { name, jsonConfig, scope });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<AddServerResult>("mcp_add_json", { name, jsonConfig, scope });
   },
 
   /**
    * Imports MCP servers from Claude Desktop
    */
   async mcpAddFromClaudeDesktop(scope: string = "local"): Promise<ImportResult> {
-    try {
-      return await invoke<ImportResult>("mcp_add_from_claude_desktop", { scope });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<ImportResult>("mcp_add_from_claude_desktop", { scope });
   },
 
   /**
    * Starts Claude Code as an MCP server
    */
   async mcpServe(): Promise<string> {
-    try {
-      return await invoke<string>("mcp_serve");
-    } catch (error) {
-      throw error;
-    }
+    return invoke<string>("mcp_serve");
   },
 
   /**
    * Tests connection to an MCP server
    */
   async mcpTestConnection(name: string): Promise<string> {
-    try {
-      return await invoke<string>("mcp_test_connection", { name });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<string>("mcp_test_connection", { name });
   },
 
   /**
    * Resets project-scoped server approval choices
    */
   async mcpResetProjectChoices(): Promise<string> {
-    try {
-      return await invoke<string>("mcp_reset_project_choices");
-    } catch (error) {
-      throw error;
-    }
+    return invoke<string>("mcp_reset_project_choices");
   },
 
   /**
    * Gets the status of MCP servers
    */
   async mcpGetServerStatus(): Promise<Record<string, ServerStatus>> {
-    try {
-      return await invoke<Record<string, ServerStatus>>("mcp_get_server_status");
-    } catch (error) {
-      throw error;
-    }
+    return invoke<Record<string, ServerStatus>>("mcp_get_server_status");
   },
 
   /**
    * Reads .mcp.json from the current project
    */
   async mcpReadProjectConfig(projectPath: string): Promise<MCPProjectConfig> {
-    try {
-      return await invoke<MCPProjectConfig>("mcp_read_project_config", { projectPath });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<MCPProjectConfig>("mcp_read_project_config", { projectPath });
   },
 
   /**
    * Saves .mcp.json to the current project
    */
   async mcpSaveProjectConfig(projectPath: string, config: MCPProjectConfig): Promise<string> {
-    try {
-      return await invoke<string>("mcp_save_project_config", { projectPath, config });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<string>("mcp_save_project_config", { projectPath, config });
   },
 
   /**
@@ -1510,11 +1326,7 @@ export const api = {
    * @returns Promise resolving to the path if set, null otherwise
    */
   async getClaudeBinaryPath(): Promise<string | null> {
-    try {
-      return await invoke<string | null>("get_claude_binary_path");
-    } catch (error) {
-      throw error;
-    }
+    return invoke<string | null>("get_claude_binary_path");
   },
 
   /**
@@ -1523,11 +1335,7 @@ export const api = {
    * @returns Promise resolving when the path is saved
    */
   async setClaudeBinaryPath(path: string): Promise<void> {
-    try {
-      return await invoke<void>("set_claude_binary_path", { path });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<void>("set_claude_binary_path", { path });
   },
 
   /**
@@ -1535,11 +1343,7 @@ export const api = {
    * @returns Promise resolving to an array of Claude installations
    */
   async listClaudeInstallations(): Promise<ClaudeInstallation[]> {
-    try {
-      return await invoke<ClaudeInstallation[]>("list_claude_installations");
-    } catch (error) {
-      throw error;
-    }
+    return invoke<ClaudeInstallation[]>("list_claude_installations");
   },
 
   // Storage API methods
@@ -1549,11 +1353,7 @@ export const api = {
    * @returns Promise resolving to an array of table information
    */
   async storageListTables(): Promise<any[]> {
-    try {
-      return await invoke<any[]>("storage_list_tables");
-    } catch (error) {
-      throw error;
-    }
+    return invoke<any[]>("storage_list_tables");
   },
 
   /**
@@ -1570,16 +1370,12 @@ export const api = {
     pageSize: number,
     searchQuery?: string
   ): Promise<any> {
-    try {
-      return await invoke<any>("storage_read_table", {
-        tableName,
-        page,
-        pageSize,
-        searchQuery,
-      });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<any>("storage_read_table", {
+      tableName,
+      page,
+      pageSize,
+      searchQuery,
+    });
   },
 
   /**
@@ -1594,15 +1390,11 @@ export const api = {
     primaryKeyValues: Record<string, any>,
     updates: Record<string, any>
   ): Promise<void> {
-    try {
-      return await invoke<void>("storage_update_row", {
-        tableName,
-        primaryKeyValues,
-        updates,
-      });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<void>("storage_update_row", {
+      tableName,
+      primaryKeyValues,
+      updates,
+    });
   },
 
   /**
@@ -1615,14 +1407,10 @@ export const api = {
     tableName: string,
     primaryKeyValues: Record<string, any>
   ): Promise<void> {
-    try {
-      return await invoke<void>("storage_delete_row", {
-        tableName,
-        primaryKeyValues,
-      });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<void>("storage_delete_row", {
+      tableName,
+      primaryKeyValues,
+    });
   },
 
   /**
@@ -1635,14 +1423,10 @@ export const api = {
     tableName: string,
     values: Record<string, any>
   ): Promise<number> {
-    try {
-      return await invoke<number>("storage_insert_row", {
-        tableName,
-        values,
-      });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<number>("storage_insert_row", {
+      tableName,
+      values,
+    });
   },
 
   /**
@@ -1651,11 +1435,7 @@ export const api = {
    * @returns Promise resolving to query result
    */
   async storageExecuteSql(query: string): Promise<any> {
-    try {
-      return await invoke<any>("storage_execute_sql", { query });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<any>("storage_execute_sql", { query });
   },
 
   /**
@@ -1663,11 +1443,7 @@ export const api = {
    * @returns Promise resolving when the database is reset
    */
   async storageResetDatabase(): Promise<void> {
-    try {
-      return await invoke<void>("storage_reset_database");
-    } catch (error) {
-      throw error;
-    }
+    return invoke<void>("storage_reset_database");
   },
 
   // Theme settings helpers
@@ -1691,6 +1467,7 @@ export const api = {
       const setting = result?.data?.find((row: any) => row.key === key);
       return setting?.value || null;
     } catch (error) {
+      console.error(`Failed to get setting "${key}":`, error);
       return null;
     }
   },
@@ -1702,28 +1479,25 @@ export const api = {
    * @returns Promise resolving when the setting is saved
    */
   async saveSetting(key: string, value: string): Promise<void> {
-    try {
-      // Mirror to localStorage for instant availability on next startup
-      if (typeof window !== 'undefined' && 'localStorage' in window) {
-        try {
-          window.localStorage.setItem(`app_setting:${key}`, value);
-        } catch (_ignore) {
-          // best-effort; continue to persist in DB
-        }
-      }
-      // Try to update first
+    // Mirror to localStorage for instant availability on next startup
+    if (typeof window !== 'undefined' && 'localStorage' in window) {
       try {
-        await this.storageUpdateRow(
-          'app_settings',
-          { key },
-          { value }
-        );
-      } catch (updateError) {
-        // If update fails (row doesn't exist), insert new row
-        await this.storageInsertRow('app_settings', { key, value });
+        window.localStorage.setItem(`app_setting:${key}`, value);
+      } catch (error) {
+        // LocalStorage quota exceeded or disabled - continue to persist in DB
+        console.warn('Failed to mirror setting to localStorage:', error);
       }
-    } catch (error) {
-      throw error;
+    }
+    // Try to update first
+    try {
+      await this.storageUpdateRow(
+        'app_settings',
+        { key },
+        { value }
+      );
+    } catch (updateError) {
+      // If update fails (row doesn't exist), insert new row
+      await this.storageInsertRow('app_settings', { key, value });
     }
   },
 
@@ -1734,11 +1508,7 @@ export const api = {
    * @returns Promise resolving to the hooks configuration
    */
   async getHooksConfig(scope: 'user' | 'project' | 'local', projectPath?: string): Promise<HooksConfiguration> {
-    try {
-      return await invoke<HooksConfiguration>("get_hooks_config", { scope, projectPath });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<HooksConfiguration>("get_hooks_config", { scope, projectPath });
   },
 
   /**
@@ -1753,11 +1523,7 @@ export const api = {
     hooks: HooksConfiguration,
     projectPath?: string
   ): Promise<string> {
-    try {
-      return await invoke<string>("update_hooks_config", { scope, projectPath, hooks });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<string>("update_hooks_config", { scope, projectPath, hooks });
   },
 
   /**
@@ -1766,11 +1532,7 @@ export const api = {
    * @returns Promise resolving to validation result
    */
   async validateHookCommand(command: string): Promise<{ valid: boolean; message: string }> {
-    try {
-      return await invoke<{ valid: boolean; message: string }>("validate_hook_command", { command });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<{ valid: boolean; message: string }>("validate_hook_command", { command });
   },
 
   /**
@@ -1779,19 +1541,15 @@ export const api = {
    * @returns Promise resolving to merged hooks configuration
    */
   async getMergedHooksConfig(projectPath: string): Promise<HooksConfiguration> {
-    try {
-      const [userHooks, projectHooks, localHooks] = await Promise.all([
-        this.getHooksConfig('user'),
-        this.getHooksConfig('project', projectPath),
-        this.getHooksConfig('local', projectPath)
-      ]);
+    const [userHooks, projectHooks, localHooks] = await Promise.all([
+      this.getHooksConfig('user'),
+      this.getHooksConfig('project', projectPath),
+      this.getHooksConfig('local', projectPath)
+    ]);
 
-      // Import HooksManager for merging
-      const { HooksManager } = await import('@/lib/hooksManager');
-      return HooksManager.mergeConfigs(userHooks, projectHooks, localHooks);
-    } catch (error) {
-      throw error;
-    }
+    // Import HooksManager for merging
+    const { HooksManager } = await import('@/lib/hooksManager');
+    return HooksManager.mergeConfigs(userHooks, projectHooks, localHooks);
   },
 
   // Slash Commands API methods
@@ -1802,11 +1560,7 @@ export const api = {
    * @returns Promise resolving to array of slash commands
    */
   async slashCommandsList(projectPath?: string): Promise<SlashCommand[]> {
-    try {
-      return await invoke<SlashCommand[]>("slash_commands_list", { projectPath });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<SlashCommand[]>("slash_commands_list", { projectPath });
   },
 
   /**
@@ -1815,11 +1569,7 @@ export const api = {
    * @returns Promise resolving to the slash command
    */
   async slashCommandGet(commandId: string): Promise<SlashCommand> {
-    try {
-      return await invoke<SlashCommand>("slash_command_get", { commandId });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<SlashCommand>("slash_command_get", { commandId });
   },
 
   /**
@@ -1842,19 +1592,15 @@ export const api = {
     allowedTools: string[],
     projectPath?: string
   ): Promise<SlashCommand> {
-    try {
-      return await invoke<SlashCommand>("slash_command_save", {
-        scope,
-        name,
-        namespace,
-        content,
-        description,
-        allowedTools,
-        projectPath
-      });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<SlashCommand>("slash_command_save", {
+      scope,
+      name,
+      namespace,
+      content,
+      description,
+      allowedTools,
+      projectPath
+    });
   },
 
   /**
@@ -1864,11 +1610,7 @@ export const api = {
    * @returns Promise resolving to deletion message
    */
   async slashCommandDelete(commandId: string, projectPath?: string): Promise<string> {
-    try {
-      return await invoke<string>("slash_command_delete", { commandId, projectPath });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<string>("slash_command_delete", { commandId, projectPath });
   },
 
   /**
@@ -1876,11 +1618,7 @@ export const api = {
    * @returns Promise resolving to an array of permission statuses
    */
   async checkPermissions(): Promise<PermissionStatus[]> {
-    try {
-      return await invoke<PermissionStatus[]>("check_permissions");
-    } catch (error) {
-      throw error;
-    }
+    return invoke<PermissionStatus[]>("check_permissions");
   },
 
   /**
@@ -1889,11 +1627,7 @@ export const api = {
    * @returns Promise resolving when System Settings opens
    */
   async openSystemPermissions(permissionType: string): Promise<void> {
-    try {
-      await invoke<void>("open_system_permissions", { permissionType });
-    } catch (error) {
-      throw error;
-    }
+    return invoke<void>("open_system_permissions", { permissionType });
   },
 
   /**
@@ -1901,11 +1635,7 @@ export const api = {
    * @returns Promise resolving to true if granted, throws error if denied
    */
   async requestFullDiskAccess(): Promise<boolean> {
-    try {
-      return await invoke<boolean>("request_full_disk_access");
-    } catch (error) {
-      throw error;
-    }
+    return invoke<boolean>("request_full_disk_access");
   },
 
 };

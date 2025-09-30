@@ -399,6 +399,7 @@ const FloatingPromptInputInner = (
           }
         });
       } catch (error) {
+        console.error('Failed to handle paste:', error);
       }
     };
 
@@ -705,9 +706,10 @@ const FloatingPromptInputInner = (
               return newPrompt;
             });
           };
-          
+
           reader.readAsDataURL(blob);
         } catch (error) {
+          console.error('Failed to read clipboard image:', error);
         }
       }
     }

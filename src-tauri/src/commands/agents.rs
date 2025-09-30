@@ -378,20 +378,37 @@ pub async fn list_agents(db: State<'_, AgentDb>) -> Result<Vec<Agent>, String> {
     Ok(agents)
 }
 
+/// Parameters for creating an agent
+#[derive(Debug, Deserialize)]
+pub struct CreateAgentParams {
+    pub name: String,
+    pub icon: String,
+    pub system_prompt: String,
+    pub default_task: Option<String>,
+    pub model: Option<String>,
+    pub enable_file_read: Option<bool>,
+    pub enable_file_write: Option<bool>,
+    pub enable_network: Option<bool>,
+    pub hooks: Option<String>,
+}
+
 /// Create a new agent
 #[tauri::command]
 pub async fn create_agent(
     db: State<'_, AgentDb>,
-    name: String,
-    icon: String,
-    system_prompt: String,
-    default_task: Option<String>,
-    model: Option<String>,
-    enable_file_read: Option<bool>,
-    enable_file_write: Option<bool>,
-    enable_network: Option<bool>,
-    hooks: Option<String>,
+    params: CreateAgentParams,
 ) -> Result<Agent, String> {
+    let CreateAgentParams {
+        name,
+        icon,
+        system_prompt,
+        default_task,
+        model,
+        enable_file_read,
+        enable_file_write,
+        enable_network,
+        hooks,
+    } = params;
     let conn = db.0.lock().map_err(|e| e.to_string())?;
     let model = model.unwrap_or_else(|| "sonnet".to_string());
     let enable_file_read = enable_file_read.unwrap_or(true);
@@ -433,21 +450,39 @@ pub async fn create_agent(
     Ok(agent)
 }
 
+/// Parameters for updating an agent
+#[derive(Debug, Deserialize)]
+pub struct UpdateAgentParams {
+    pub id: i64,
+    pub name: String,
+    pub icon: String,
+    pub system_prompt: String,
+    pub default_task: Option<String>,
+    pub model: Option<String>,
+    pub enable_file_read: Option<bool>,
+    pub enable_file_write: Option<bool>,
+    pub enable_network: Option<bool>,
+    pub hooks: Option<String>,
+}
+
 /// Update an existing agent
 #[tauri::command]
 pub async fn update_agent(
     db: State<'_, AgentDb>,
-    id: i64,
-    name: String,
-    icon: String,
-    system_prompt: String,
-    default_task: Option<String>,
-    model: Option<String>,
-    enable_file_read: Option<bool>,
-    enable_file_write: Option<bool>,
-    enable_network: Option<bool>,
-    hooks: Option<String>,
+    params: UpdateAgentParams,
 ) -> Result<Agent, String> {
+    let UpdateAgentParams {
+        id,
+        name,
+        icon,
+        system_prompt,
+        default_task,
+        model,
+        enable_file_read,
+        enable_file_write,
+        enable_network,
+        hooks,
+    } = params;
     let conn = db.0.lock().map_err(|e| e.to_string())?;
     let model = model.unwrap_or_else(|| "sonnet".to_string());
 
@@ -763,11 +798,11 @@ pub async fn execute_agent(
     ];
 
     // Always use system binary execution (sidecar removed)
-    spawn_agent_system(
+    spawn_agent_system(SpawnAgentSystemParams {
         app,
         run_id,
         agent_id,
-        agent.name.clone(),
+        agent_name: agent.name.clone(),
         claude_path,
         args,
         project_path,
@@ -775,7 +810,7 @@ pub async fn execute_agent(
         execution_model,
         db,
         registry,
-    ).await
+    }).await
 }
 
 /// Creates a system binary command for agent execution
@@ -799,8 +834,8 @@ fn create_agent_system_command(
     cmd
 }
 
-/// Spawn agent using system binary command
-async fn spawn_agent_system(
+/// Parameters for spawning an agent system
+struct SpawnAgentSystemParams<'a> {
     app: AppHandle,
     run_id: i64,
     agent_id: i64,
@@ -810,9 +845,25 @@ async fn spawn_agent_system(
     project_path: String,
     task: String,
     execution_model: String,
-    db: State<'_, AgentDb>,
-    registry: State<'_, crate::process::ProcessRegistryState>,
-) -> Result<i64, String> {
+    db: State<'a, AgentDb>,
+    registry: State<'a, crate::process::ProcessRegistryState>,
+}
+
+/// Spawn agent using system binary command
+async fn spawn_agent_system(params: SpawnAgentSystemParams<'_>) -> Result<i64, String> {
+    let SpawnAgentSystemParams {
+        app,
+        run_id,
+        agent_id,
+        agent_name,
+        claude_path,
+        args,
+        project_path,
+        task,
+        execution_model,
+        db,
+        registry,
+    } = params;
     // Build the command
     let mut cmd = create_agent_system_command(&claude_path, args, &project_path);
 
@@ -986,13 +1037,15 @@ async fn spawn_agent_system(
     registry
         .0
         .register_process(
-            run_id,
-            agent_id,
-            agent_name,
-            pid,
-            project_path.clone(),
-            task.clone(),
-            execution_model.clone(),
+            crate::process::registry::RegisterProcessParams {
+                run_id,
+                agent_id,
+                agent_name,
+                pid,
+                project_path: project_path.clone(),
+                task: task.clone(),
+                model: execution_model.clone(),
+            },
             child,
         )
         .map_err(|e| format!("Failed to register process: {}", e))?;
@@ -1652,7 +1705,7 @@ fn create_command_with_env(program: &str) -> Command {
         if let Some(node_bin_dir) = std::path::Path::new(program).parent() {
             let current_path = std::env::var("PATH").unwrap_or_default();
             let node_bin_str = node_bin_dir.to_string_lossy();
-            if !current_path.contains(&node_bin_str.as_ref()) {
+            if !current_path.contains(node_bin_str.as_ref()) {
                 let new_path = format!("{}:{}", node_bin_str, current_path);
                 tokio_cmd.env("PATH", new_path);
             }
@@ -1956,11 +2009,9 @@ pub async fn load_agent_session_history(
         let reader = BufReader::new(file);
         let mut messages = Vec::new();
 
-        for line in reader.lines() {
-            if let Ok(line) = line {
-                if let Ok(json) = serde_json::from_str::<serde_json::Value>(&line) {
-                    messages.push(json);
-                }
+        for line in reader.lines().map_while(Result::ok) {
+            if let Ok(json) = serde_json::from_str::<serde_json::Value>(&line) {
+                messages.push(json);
             }
         }
 

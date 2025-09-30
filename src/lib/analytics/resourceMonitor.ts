@@ -108,6 +108,8 @@ export class ResourceMonitor {
         analytics.track(event.event, event.properties);
       }
     } catch (error) {
+      // Analytics errors should not break functionality
+      console.warn('Failed to flush analytics event queue:', error);
     }
   }
   

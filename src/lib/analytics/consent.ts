@@ -116,6 +116,8 @@ export class ConsentManager {
     try {
       localStorage.setItem(ANALYTICS_STORAGE_KEY, JSON.stringify(this.settings));
     } catch (error) {
+      // LocalStorage quota exceeded or disabled
+      console.warn('Failed to persist analytics settings:', error);
     }
   }
   

@@ -116,18 +116,33 @@ fn execute_claude_mcp_command(app_handle: &AppHandle, args: Vec<&str>) -> Result
     }
 }
 
+/// Parameters for adding MCP server
+#[derive(Debug, Deserialize)]
+pub struct McpAddParams {
+    pub name: String,
+    pub transport: String,
+    pub command: Option<String>,
+    pub args: Vec<String>,
+    pub env: HashMap<String, String>,
+    pub url: Option<String>,
+    pub scope: String,
+}
+
 /// Adds a new MCP server
 #[tauri::command]
 pub async fn mcp_add(
     app: AppHandle,
-    name: String,
-    transport: String,
-    command: Option<String>,
-    args: Vec<String>,
-    env: HashMap<String, String>,
-    url: Option<String>,
-    scope: String,
+    params: McpAddParams,
 ) -> Result<AddServerResult, String> {
+    let McpAddParams {
+        name,
+        transport,
+        command,
+        args,
+        env,
+        url,
+        scope,
+    } = params;
     info!("Adding MCP server: {} with transport: {}", name, transport);
 
     // Prepare owned strings for environment variables

@@ -182,10 +182,11 @@ export function AgentRunOutputViewer({
           // Set up live event listeners for running sessions
           if (run.status === 'running') {
             setupLiveEventListeners();
-            
             try {
               await api.streamSessionOutput(run.id);
             } catch (streamError) {
+              // Stream errors are non-critical - live listeners will still work
+              console.warn('Failed to start streaming session output:', streamError);
             }
           }
           
@@ -208,6 +209,8 @@ export function AgentRunOutputViewer({
           const message = JSON.parse(line) as ClaudeStreamMessage;
           parsedMessages.push(message);
         } catch (err) {
+          // Skip malformed JSONL lines
+          console.warn('Failed to parse JSONL line:', err);
         }
       }
       setMessages(parsedMessages);
@@ -223,11 +226,11 @@ export function AgentRunOutputViewer({
       // Set up live event listeners for running sessions
       if (run.status === 'running') {
         setupLiveEventListeners();
-        
         try {
           await api.streamSessionOutput(run.id);
         } catch (streamError) {
           // Stream errors are non-critical - live listeners will still work
+          console.warn('Failed to start streaming session output:', streamError);
         }
       }
     } catch (error) {
@@ -262,14 +265,15 @@ export function AgentRunOutputViewer({
           if (isInitialLoadRef.current) {
             return;
           }
-          
+
           // Store raw JSONL
           setRawJsonlOutput(prev => [...prev, event.payload]);
-          
+
           // Parse and display
           const message = JSON.parse(event.payload) as ClaudeStreamMessage;
           setMessages(prev => [...prev, message]);
         } catch (err) {
+          console.warn('Failed to process agent output event:', err);
         }
       });
 
@@ -288,6 +292,7 @@ export function AgentRunOutputViewer({
 
       unlistenRefs.current = [outputUnlisten, errorUnlisten, completeUnlisten, cancelUnlisten];
     } catch (error) {
+      console.error('Failed to setup live event listeners:', error);
     }
   };
 

@@ -28,6 +28,17 @@ pub struct ProcessInfo {
     pub model: String,
 }
 
+/// Parameters for registering a process
+pub struct RegisterProcessParams {
+    pub run_id: i64,
+    pub agent_id: i64,
+    pub agent_name: String,
+    pub pid: u32,
+    pub project_path: String,
+    pub task: String,
+    pub model: String,
+}
+
 /// Information about a running process with handle
 #[allow(dead_code)]
 pub struct ProcessHandle {
@@ -61,15 +72,19 @@ impl ProcessRegistry {
     /// Register a new running agent process
     pub fn register_process(
         &self,
-        run_id: i64,
-        agent_id: i64,
-        agent_name: String,
-        pid: u32,
-        project_path: String,
-        task: String,
-        model: String,
+        params: RegisterProcessParams,
         child: Child,
     ) -> Result<(), String> {
+        let RegisterProcessParams {
+            run_id,
+            agent_id,
+            agent_name,
+            pid,
+            project_path,
+            task,
+            model,
+        } = params;
+
         let process_info = ProcessInfo {
             run_id,
             process_type: ProcessType::AgentRun { agent_id, agent_name },
@@ -87,14 +102,18 @@ impl ProcessRegistry {
     #[allow(dead_code)]
     pub fn register_sidecar_process(
         &self,
-        run_id: i64,
-        agent_id: i64,
-        agent_name: String,
-        pid: u32,
-        project_path: String,
-        task: String,
-        model: String,
+        params: RegisterProcessParams,
     ) -> Result<(), String> {
+        let RegisterProcessParams {
+            run_id,
+            agent_id,
+            agent_name,
+            pid,
+            project_path,
+            task,
+            model,
+        } = params;
+
         let process_info = ProcessInfo {
             run_id,
             process_type: ProcessType::AgentRun { agent_id, agent_name },
@@ -491,15 +510,14 @@ impl ProcessRegistry {
         let processes_lock = self.processes.clone();
 
         // First, identify finished processes
-        {
+        let run_ids: Vec<i64> = {
             let processes = processes_lock.lock().map_err(|e| e.to_string())?;
-            let run_ids: Vec<i64> = processes.keys().cloned().collect();
-            drop(processes);
+            processes.keys().cloned().collect()
+        };
 
-            for run_id in run_ids {
-                if !self.is_process_running(run_id).await? {
-                    finished_runs.push(run_id);
-                }
+        for run_id in run_ids {
+            if !self.is_process_running(run_id).await? {
+                finished_runs.push(run_id);
             }
         }
 

@@ -91,6 +91,7 @@ export const MCPServerList: React.FC<MCPServerListProps> = ({
       setCopiedServer(serverName);
       setTimeout(() => setCopiedServer(null), 2000);
     } catch (error) {
+      console.error('Failed to copy server JSON:', error);
     }
   };
 
@@ -111,9 +112,9 @@ export const MCPServerList: React.FC<MCPServerListProps> = ({
         server_name: name,
         was_connected: wasConnected
       });
-      
       onServerRemoved(name);
     } catch (error) {
+      console.error('Failed to remove MCP server:', error);
     } finally {
       setRemovingServer(null);
     }

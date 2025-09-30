@@ -74,6 +74,7 @@ export const QueenProjectCreator: React.FC<QueenProjectCreatorProps> = ({
       const dir = await invoke<string>("get_queen_projects_directory");
       setProjectsDirectory(dir);
     } catch (err) {
+      console.error('Failed to load projects directory:', err);
     }
   };
 

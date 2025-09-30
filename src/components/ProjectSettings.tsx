@@ -3,8 +3,10 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { HooksEditor } from '@/components/HooksEditor';
 import { SlashCommandsManager } from '@/components/SlashCommandsManager';
+
+// Dynamic import to avoid code-split conflicts
+const HooksEditor = React.lazy(() => import('@/components/HooksEditor').then(m => ({ default: m.HooksEditor })));
 import { api } from '@/lib/api';
 import { 
   AlertTriangle, 
@@ -152,11 +154,13 @@ export const ProjectSettings: React.FC<ProjectSettingsProps> = ({
                       and should be committed to version control.
                     </p>
                   </div>
-                  
-                  <HooksEditor
-                    projectPath={project.path}
-                    scope="project"
-                  />
+
+                  <React.Suspense fallback={<div className="flex items-center justify-center p-8"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div></div>}>
+                    <HooksEditor
+                      projectPath={project.path}
+                      scope="project"
+                    />
+                  </React.Suspense>
                 </div>
               </Card>
             </TabsContent>
@@ -171,7 +175,7 @@ export const ProjectSettings: React.FC<ProjectSettingsProps> = ({
                       <code className="mx-1 px-2 py-1 bg-muted rounded text-xs">.claude/settings.local.json</code>
                       and should NOT be committed to version control.
                     </p>
-                    
+
                     {!gitIgnoreLocal && (
                       <div className="flex items-center gap-4 p-3 bg-yellow-500/10 rounded-md">
                         <AlertTriangle className="h-5 w-5 text-yellow-600" />
@@ -190,11 +194,13 @@ export const ProjectSettings: React.FC<ProjectSettingsProps> = ({
                       </div>
                     )}
                   </div>
-                  
-                  <HooksEditor
-                    projectPath={project.path}
-                    scope="local"
-                  />
+
+                  <React.Suspense fallback={<div className="flex items-center justify-center p-8"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div></div>}>
+                    <HooksEditor
+                      projectPath={project.path}
+                      scope="local"
+                    />
+                  </React.Suspense>
                 </div>
               </Card>
             </TabsContent>

@@ -60,6 +60,7 @@ export const useUpdateChecker = (
           releaseName: release.name,
         });
       } catch (error) {
+        console.error('Failed to check for updates:', error);
       }
     };
 

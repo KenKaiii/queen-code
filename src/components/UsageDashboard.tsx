@@ -27,7 +27,7 @@ const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes cache - increased for bette
 /**
  * Optimized UsageDashboard component with caching and progressive loading
  */
-export const UsageDashboard: React.FC<UsageDashboardProps> = ({ }) => {
+export const UsageDashboard: React.FC<UsageDashboardProps> = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [stats, setStats] = useState<UsageStats | null>(null);

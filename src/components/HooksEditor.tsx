@@ -49,7 +49,6 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import { HooksManager } from '@/lib/hooksManager';
 import { api } from '@/lib/api';
 import {
   HooksConfiguration,
@@ -57,9 +56,131 @@ import {
   HookMatcher,
   HookCommand,
   HookTemplate,
+  HookValidationError,
+  HookValidationWarning,
   COMMON_TOOL_MATCHERS,
   HOOK_TEMPLATES,
 } from '@/types/hooks';
+
+// Utility functions to avoid static import of HooksManager (code-split optimization)
+const generateId = (): string => {
+  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+};
+
+const checkDangerousPatterns = (command: string): string[] => {
+  const warnings: string[] = [];
+
+  if (!command || typeof command !== 'string') {
+    return warnings;
+  }
+
+  const patterns = [
+    { pattern: /rm\s+-rf\s+\/(?:\s|$)/, message: 'Destructive command on root directory' },
+    { pattern: /rm\s+-rf\s+~/, message: 'Destructive command on home directory' },
+    { pattern: /:\(\)\{.*:\|:.*\}/, message: 'Fork bomb detected' },
+    { pattern: />\s*\/dev\/sd/, message: 'Writing to disk device' },
+    { pattern: /dd\s+if=.*of=\/dev/, message: 'Dangerous disk write' },
+  ];
+
+  for (const { pattern, message } of patterns) {
+    if (pattern.test(command)) {
+      warnings.push(message);
+    }
+  }
+
+  return warnings;
+};
+
+const validateConfig = async (hooks: HooksConfiguration): Promise<{ valid: boolean; errors: HookValidationError[]; warnings: HookValidationWarning[] }> => {
+  const errors: HookValidationError[] = [];
+  const warnings: HookValidationWarning[] = [];
+
+  if (!hooks) {
+    return { valid: true, errors, warnings };
+  }
+
+  const matcherEvents = ['PreToolUse', 'PostToolUse'] as const;
+  const directEvents = ['Notification', 'Stop', 'SubagentStop'] as const;
+
+  // Validate events with matchers
+  for (const event of matcherEvents) {
+    const matchers = hooks[event];
+    if (!matchers || !Array.isArray(matchers)) continue;
+
+    for (const matcher of matchers as HookMatcher[]) {
+      if (matcher.matcher) {
+        try {
+          new RegExp(matcher.matcher);
+        } catch (e) {
+          errors.push({
+            event,
+            matcher: matcher.matcher,
+            message: `Invalid regex pattern: ${e instanceof Error ? e.message : 'Unknown error'}`
+          });
+        }
+      }
+
+      // Validate commands
+      if (!matcher.hooks || !Array.isArray(matcher.hooks) || matcher.hooks.length === 0) {
+        errors.push({
+          event,
+          matcher: matcher.matcher || '(empty matcher)',
+          message: 'Matcher must have at least one command'
+        });
+      } else {
+        for (const hook of matcher.hooks) {
+          if (!hook.command || !hook.command.trim()) {
+            errors.push({
+              event,
+              matcher: matcher.matcher || '(empty matcher)',
+              message: 'Command cannot be empty'
+            });
+          } else {
+            const dangerousPatterns = checkDangerousPatterns(hook.command);
+            if (dangerousPatterns.length > 0) {
+              warnings.push({
+                event,
+                matcher: matcher.matcher || '(empty matcher)',
+                command: hook.command,
+                message: dangerousPatterns.join(', ')
+              });
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Validate direct events
+  for (const event of directEvents) {
+    const commands = hooks[event];
+    if (!commands || !Array.isArray(commands)) continue;
+
+    for (const hook of commands as HookCommand[]) {
+      if (!hook.command || !hook.command.trim()) {
+        errors.push({
+          event,
+          message: 'Command cannot be empty'
+        });
+      } else {
+        const dangerousPatterns = checkDangerousPatterns(hook.command);
+        if (dangerousPatterns.length > 0) {
+          warnings.push({
+            event,
+            command: hook.command,
+            message: dangerousPatterns.join(', ')
+          });
+        }
+      }
+    }
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors,
+    warnings
+  };
+};
 
 interface HooksEditorProps {
   projectPath?: string;
@@ -147,34 +268,34 @@ export const HooksEditor: React.FC<HooksEditorProps> = ({
       Stop: [],
       SubagentStop: []
     } as any;
-    
+
     // Initialize matcher events
     matcherEvents.forEach(event => {
       const matchers = hooks?.[event] as HookMatcher[] | undefined;
       if (matchers && Array.isArray(matchers)) {
         result[event] = matchers.map(matcher => ({
           ...matcher,
-          id: HooksManager.generateId(),
+          id: generateId(),
           expanded: false,
           hooks: (matcher.hooks || []).map(hook => ({
             ...hook,
-            id: HooksManager.generateId()
+            id: generateId()
           }))
         }));
       }
     });
-    
+
     // Initialize direct events
     directEvents.forEach(event => {
       const commands = hooks?.[event] as HookCommand[] | undefined;
       if (commands && Array.isArray(commands)) {
         result[event] = commands.map(hook => ({
           ...hook,
-          id: HooksManager.generateId()
+          id: generateId()
         }));
       }
     });
-    
+
     return result;
   });
 
@@ -216,34 +337,34 @@ export const HooksEditor: React.FC<HooksEditorProps> = ({
       Stop: [],
       SubagentStop: []
     } as any;
-    
+
     // Initialize matcher events
     matcherEvents.forEach(event => {
       const matchers = hooks?.[event] as HookMatcher[] | undefined;
       if (matchers && Array.isArray(matchers)) {
         result[event] = matchers.map(matcher => ({
           ...matcher,
-          id: HooksManager.generateId(),
+          id: generateId(),
           expanded: false,
           hooks: (matcher.hooks || []).map(hook => ({
             ...hook,
-            id: HooksManager.generateId()
+            id: generateId()
           }))
         }));
       }
     });
-    
+
     // Initialize direct events
     directEvents.forEach(event => {
       const commands = hooks?.[event] as HookCommand[] | undefined;
       if (commands && Array.isArray(commands)) {
         result[event] = commands.map(hook => ({
           ...hook,
-          id: HooksManager.generateId()
+          id: generateId()
         }));
       }
     });
-    
+
     setEditableHooks(result);
   }, [hooks]);
 
@@ -330,9 +451,9 @@ export const HooksEditor: React.FC<HooksEditorProps> = ({
   const addMatcher = (event: HookEvent) => {
     // Only for events with matchers
     if (!matcherEvents.includes(event as any)) return;
-    
+
     const newMatcher: EditableHookMatcher = {
-      id: HooksManager.generateId(),
+      id: generateId(),
       matcher: '',
       hooks: [],
       expanded: true
@@ -347,9 +468,9 @@ export const HooksEditor: React.FC<HooksEditorProps> = ({
   const addDirectCommand = (event: HookEvent) => {
     // Only for events without matchers
     if (!directEvents.includes(event as any)) return;
-    
+
     const newCommand: EditableHookCommand = {
-      id: HooksManager.generateId(),
+      id: generateId(),
       type: 'command',
       command: ''
     };
@@ -404,16 +525,16 @@ export const HooksEditor: React.FC<HooksEditorProps> = ({
     if (matcherEvents.includes(template.event as any)) {
       // For events with matchers
       const newMatcher: EditableHookMatcher = {
-        id: HooksManager.generateId(),
+        id: generateId(),
         matcher: template.matcher,
         hooks: template.commands.map(cmd => ({
-          id: HooksManager.generateId(),
+          id: generateId(),
           type: 'command' as const,
           command: cmd
         })),
         expanded: true
       };
-      
+
       setEditableHooks(prev => ({
         ...prev,
         [template.event]: [...(prev[template.event as 'PreToolUse' | 'PostToolUse'] as EditableHookMatcher[]), newMatcher]
@@ -421,7 +542,7 @@ export const HooksEditor: React.FC<HooksEditorProps> = ({
     } else {
       // For direct events
       const newCommands: EditableHookCommand[] = template.commands.map(cmd => ({
-        id: HooksManager.generateId(),
+        id: generateId(),
         type: 'command' as const,
         command: cmd
       }));
@@ -442,8 +563,8 @@ export const HooksEditor: React.FC<HooksEditorProps> = ({
       setValidationWarnings([]);
       return;
     }
-    
-    const result = await HooksManager.validateConfig(hooks);
+
+    const result = await validateConfig(hooks);
     setValidationErrors(result.errors.map(e => e.message));
     setValidationWarnings(result.warnings.map(w => `${w.message} in command: ${(w.command || '').substring(0, 50)}...`));
   };
@@ -454,9 +575,9 @@ export const HooksEditor: React.FC<HooksEditorProps> = ({
 
   const addCommand = (event: HookEvent, matcherId: string) => {
     if (!matcherEvents.includes(event as any)) return;
-    
+
     const newCommand: EditableHookCommand = {
-      id: HooksManager.generateId(),
+      id: generateId(),
       type: 'command',
       command: ''
     };
@@ -647,7 +768,7 @@ export const HooksEditor: React.FC<HooksEditorProps> = ({
                       
                       {/* Show warnings for this command */}
                       {(() => {
-                        const warnings = HooksManager.checkDangerousPatterns(hook.command || '');
+                        const warnings = checkDangerousPatterns(hook.command || '');
                         return warnings.length > 0 && (
                           <div className="flex items-start gap-2 p-2 bg-yellow-500/10 rounded-md">
                             <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5" />
@@ -713,7 +834,7 @@ export const HooksEditor: React.FC<HooksEditorProps> = ({
       
       {/* Show warnings for this command */}
       {(() => {
-        const warnings = HooksManager.checkDangerousPatterns(command.command || '');
+        const warnings = checkDangerousPatterns(command.command || '');
         return warnings.length > 0 && (
           <div className="flex items-start gap-2 p-2 bg-yellow-500/10 rounded-md">
             <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5" />
