@@ -31,10 +31,12 @@ import { StreamMessage } from "./StreamMessage";
 import { ExecutionControlBar } from "./ExecutionControlBar";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { HooksEditor } from "./HooksEditor";
 import { useTrackEvent, useComponentMetrics, useFeatureAdoptionTracking } from "@/hooks";
 import { useTabState } from "@/hooks/useTabState";
 import type { ClaudeStreamMessage } from "@/types/messages";
+
+// Dynamic import for HooksEditor to avoid code splitting conflicts
+const HooksEditor = React.lazy(() => import("./HooksEditor").then(m => ({ default: m.HooksEditor })));
 
 interface AgentExecutionProps {
   /**
@@ -958,31 +960,35 @@ export const AgentExecution: React.FC<AgentExecutionProps> = ({
               <div className="space-y-4 pt-4">
                 <div className="rounded-lg bg-muted/50 p-3">
                   <p className="text-caption text-muted-foreground">
-                    Project hooks are stored in <code className="font-mono text-xs bg-background px-1.5 py-0.5 rounded">.claude/settings.json</code> and 
+                    Project hooks are stored in <code className="font-mono text-xs bg-background px-1.5 py-0.5 rounded">.claude/settings.json</code> and
                     are committed to version control, allowing team members to share configurations.
                   </p>
                 </div>
-                <HooksEditor
-                  projectPath={projectPath}
-                  scope="project"
-                  className="border-0"
-                />
+                <React.Suspense fallback={<div className="text-sm text-muted-foreground">Loading...</div>}>
+                  <HooksEditor
+                    projectPath={projectPath}
+                    scope="project"
+                    className="border-0"
+                  />
+                </React.Suspense>
               </div>
             </TabsContent>
-            
+
             <TabsContent value="local" className="flex-1 overflow-auto px-6 pb-6 mt-0">
               <div className="space-y-4 pt-4">
                 <div className="rounded-lg bg-muted/50 p-3">
                   <p className="text-caption text-muted-foreground">
-                    Local hooks are stored in <code className="font-mono text-xs bg-background px-1.5 py-0.5 rounded">.claude/settings.local.json</code> and 
+                    Local hooks are stored in <code className="font-mono text-xs bg-background px-1.5 py-0.5 rounded">.claude/settings.local.json</code> and
                     are not committed to version control, perfect for personal preferences.
                   </p>
                 </div>
-                <HooksEditor
-                  projectPath={projectPath}
-                  scope="local"
-                  className="border-0"
-                />
+                <React.Suspense fallback={<div className="text-sm text-muted-foreground">Loading...</div>}>
+                  <HooksEditor
+                    projectPath={projectPath}
+                    scope="local"
+                    className="border-0"
+                  />
+                </React.Suspense>
               </div>
             </TabsContent>
           </Tabs>

@@ -2,7 +2,7 @@
  * Hooks configuration manager for Claude Code hooks
  */
 
-import {
+import type {
   HooksConfiguration,
   HookMatcher,
   HookValidationResult,
