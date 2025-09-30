@@ -73,10 +73,10 @@ export const CodeRadio: React.FC<CodeRadioProps> = ({
     },
     {
       id: 'dronezone',
-      name: 'Drone Zone',
-      url: 'https://ice1.somafm.com/dronezone-128-aac',
+      name: 'Groove Salad',
+      url: 'https://ice1.somafm.com/groovesalad-128-aac',
       icon: <Waveform className="h-4 w-4" weight="duotone" />,
-      description: 'Ambient soundscapes for deep focus'
+      description: 'Downtempo chill beats for coding'
     },
     {
       id: 'rain',
