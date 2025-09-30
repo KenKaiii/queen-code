@@ -110,7 +110,6 @@ export const Settings: React.FC<SettingsProps> = ({
       const path = await api.getClaudeBinaryPath();
       setCurrentBinaryPath(path);
     } catch (err) {
-      console.error("Failed to load Claude binary path:", err);
     }
   };
 
@@ -123,7 +122,6 @@ export const Settings: React.FC<SettingsProps> = ({
       const perms = await api.checkPermissions();
       setPermissions(perms);
     } catch (err) {
-      console.error("Failed to load permissions:", err);
       setToast({ message: "Failed to check permissions", type: "error" });
     } finally {
       setPermissionsLoading(false);
@@ -138,7 +136,6 @@ export const Settings: React.FC<SettingsProps> = ({
       await api.openSystemPermissions(permissionType);
       setToast({ message: "Opening System Settings...", type: "success" });
     } catch (err) {
-      console.error("Failed to open System Settings:", err);
       setToast({ message: "Failed to open System Settings", type: "error" });
     }
   };
@@ -155,7 +152,6 @@ export const Settings: React.FC<SettingsProps> = ({
       await api.openSystemPermissions("full_disk_access");
       setToast({ message: "Opening System Settings - please enable Full Disk Access for Queen Code", type: "success" });
     } catch (err) {
-      console.error("Failed to open System Settings:", err);
       setToast({ message: "Failed to open System Settings", type: "error" });
     }
   };
@@ -188,7 +184,6 @@ export const Settings: React.FC<SettingsProps> = ({
         );
       }
     } catch (err) {
-      console.error("Failed to load settings:", err);
       setError("Failed to load settings. Please ensure ~/.claude directory exists.");
       setSettings({});
     } finally {
@@ -229,7 +224,6 @@ export const Settings: React.FC<SettingsProps> = ({
 
       setToast({ message: "Your royal preferences applied!", type: "success" });
     } catch (err) {
-      console.error("Failed to apply changes:", err);
       setError("Couldn't apply your changes.");
       setToast({ message: "Couldn't apply your changes", type: "error" });
     } finally {

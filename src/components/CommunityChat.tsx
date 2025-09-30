@@ -61,7 +61,6 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({ className }) => {
       .limit(50);
 
     if (error) {
-      console.error('Failed to load messages:', error);
       return;
     }
 
@@ -86,7 +85,6 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({ className }) => {
 
           // Play notification sound if message is from another user
           if (message.username !== username && audioRef.current) {
-            audioRef.current.play().catch(err => console.error('Failed to play notification:', err));
           }
 
           return [...prev, message];
@@ -152,11 +150,11 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({ className }) => {
           payload: data,
         });
       } else {
+        // No channel available - message still stored in database
       }
 
       textareaRef.current?.focus();
     } catch (err) {
-      console.error('Failed to send message:', err);
       setInputValue(messageText); // Restore input on error
     } finally {
       setIsLoading(false);

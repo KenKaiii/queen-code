@@ -61,7 +61,6 @@ export const AgentsModal: React.FC<AgentsModalProps> = ({ open, onOpenChange }) 
       const agentList = await api.listAgents();
       setAgents(agentList);
     } catch (error) {
-      console.error('Failed to load agents:', error);
     } finally {
       setLoading(false);
     }
@@ -83,7 +82,6 @@ export const AgentsModal: React.FC<AgentsModalProps> = ({ open, onOpenChange }) 
       
       setRunningAgents(agentRuns);
     } catch (error) {
-      console.error('Failed to load running agents:', error);
     }
   };
 
@@ -114,7 +112,6 @@ export const AgentsModal: React.FC<AgentsModalProps> = ({ open, onOpenChange }) 
         detail: { agent, tabId, projectPath } 
       }));
     } catch (error) {
-      console.error('Failed to run agent:', error);
       setToast({ message: `Failed to run agent: ${agent.name}`, type: 'error' });
     }
   };
@@ -132,7 +129,6 @@ export const AgentsModal: React.FC<AgentsModalProps> = ({ open, onOpenChange }) 
       setShowDeleteDialog(false);
       setAgentToDelete(null);
     } catch (error) {
-      console.error('Failed to delete agent:', error);
     }
   };
 
@@ -159,7 +155,6 @@ export const AgentsModal: React.FC<AgentsModalProps> = ({ open, onOpenChange }) 
         setToast({ message: "Agent exported successfully", type: "success" });
       }
     } catch (error) {
-      console.error('Failed to export agent:', error);
       setToast({ message: "Failed to export agent", type: "error" });
     }
   };

@@ -307,12 +307,10 @@ export const AgentExecution: React.FC<AgentExecutionProps> = ({
           const message = JSON.parse(event.payload) as ClaudeStreamMessage;
           setMessages(prev => [...prev, message]);
         } catch (err) {
-          console.error("Failed to parse message:", err, event.payload);
         }
       });
 
       const errorUnlisten = await listen<string>(`agent-error:${executionRunId}`, (event) => {
-        console.error("Agent error:", event.payload);
         setError(event.payload);
         
         // Track agent error
@@ -363,7 +361,6 @@ export const AgentExecution: React.FC<AgentExecutionProps> = ({
 
       unlistenRefs.current = [outputUnlisten, errorUnlisten, completeUnlisten, cancelUnlisten];
     } catch (err) {
-      console.error("Failed to execute agent:", err);
       setIsRunning(false);
       setExecutionStartTime(null);
       setRunId(null);
@@ -389,18 +386,13 @@ export const AgentExecution: React.FC<AgentExecutionProps> = ({
   const handleStop = async () => {
     try {
       if (!runId) {
-        console.error("No run ID available to stop");
         return;
       }
 
       // Call the API to kill the agent session
-      const success = await api.killAgentSession(runId);
-      
-      if (success) {
-      } else {
-      }
-      
-      // Update UI state
+      await api.killAgentSession(runId);
+
+      // Update UI state regardless of API response
       setIsRunning(false);
       setExecutionStartTime(null);
       // Update tab status to idle when stopped
@@ -425,7 +417,6 @@ export const AgentExecution: React.FC<AgentExecutionProps> = ({
         }
       }]);
     } catch (err) {
-      console.error("Failed to stop agent:", err);
       // Still update UI state even if the backend call failed
       setIsRunning(false);
       setExecutionStartTime(null);

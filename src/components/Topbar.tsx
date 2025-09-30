@@ -72,7 +72,6 @@ export const Topbar: React.FC<TopbarProps> = ({
         window.dispatchEvent(new CustomEvent('claude-not-found'));
       }
     } catch (err) {
-      console.error("Failed to check Claude version:", err);
       setVersionStatus({
         is_installed: false,
         output: "Failed to check version",

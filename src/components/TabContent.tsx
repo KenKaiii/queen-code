@@ -59,7 +59,6 @@ const TabPanel: React.FC<TabPanelProps> = ({ tab, isActive }) => {
       const projectList = await api.listProjects();
       setProjects(projectList);
     } catch (err) {
-      console.error("Failed to load projects:", err);
       setError("Failed to load projects. Please ensure ~/.claude directory exists.");
     } finally {
       setLoading(false);
@@ -80,7 +79,6 @@ const TabPanel: React.FC<TabPanelProps> = ({ tab, isActive }) => {
         title: projectName
       });
     } catch (err) {
-      console.error("Failed to load sessions:", err);
       setError("Failed to load sessions for this project.");
     } finally {
       setLoading(false);
@@ -106,7 +104,6 @@ const TabPanel: React.FC<TabPanelProps> = ({ tab, isActive }) => {
         await handleProjectClick(project);
       }
     } catch (err) {
-      console.error('Failed to open folder picker:', err);
       setError('Failed to open folder picker');
     }
   };
@@ -298,6 +295,13 @@ const TabPanel: React.FC<TabPanelProps> = ({ tab, isActive }) => {
                 const dirName = path.split('/').pop() || path.split('\\').pop() || 'Session';
                 updateTab(tab.id, {
                   title: dirName
+                });
+              }}
+              onSessionCreated={(session) => {
+                // Update tab with session data for persistence
+                updateTab(tab.id, {
+                  sessionId: session.id,
+                  sessionData: session
                 });
               }}
             />

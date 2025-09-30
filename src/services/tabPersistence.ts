@@ -91,7 +91,7 @@ export class TabPersistenceService {
         localStorage.setItem(ACTIVE_TAB_KEY, activeTabId);
       }
     } catch (error) {
-      console.error('Failed to save tabs:', error);
+      // localStorage errors are non-critical
     }
   }
 
@@ -163,7 +163,6 @@ export class TabPersistenceService {
 
       return { tabs: orderedTabs, activeTabId };
     } catch (error) {
-      console.error('Failed to load tabs:', error);
       // Clear corrupted data
       localStorage.removeItem(STORAGE_KEY);
       localStorage.removeItem(ACTIVE_TAB_KEY);
@@ -193,7 +192,7 @@ export class TabPersistenceService {
         localStorage.removeItem(oldKey);
       }
     } catch (error) {
-      console.error('Failed to migrate old tab data:', error);
+      // localStorage migration errors are non-critical
     }
   }
 }

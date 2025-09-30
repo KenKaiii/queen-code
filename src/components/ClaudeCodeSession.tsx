@@ -54,6 +54,10 @@ interface ClaudeCodeSessionProps {
    * Callback when project path changes
    */
   onProjectPathChange?: (path: string) => void;
+  /**
+   * Callback when session is created (for tab persistence)
+   */
+  onSessionCreated?: (session: Session) => void;
 }
 
 /**
@@ -68,6 +72,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
   className,
   onStreamingChange,
   onProjectPathChange,
+  onSessionCreated,
 }) => {
   const [projectPath] = useState(initialProjectPath || session?.project_path || "");
   const [messages, setMessages] = useState<ClaudeStreamMessage[]>([]);
@@ -312,7 +317,6 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
         }
       }, 100);
     } catch (err) {
-      console.error("Failed to load session history:", err);
       setError("Failed to load session history");
     } finally {
       setIsLoading(false);
@@ -343,7 +347,6 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
           reconnectToSession(session.id);
         }
       } catch (err) {
-        console.error('Failed to check for active sessions:', err);
       }
     }
   };
@@ -378,12 +381,10 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
         const message = JSON.parse(event.payload) as ClaudeStreamMessage;
         setMessages(prev => [...prev, message]);
       } catch (err) {
-        console.error("Failed to parse message:", err, event.payload);
       }
     });
 
     const errorUnlisten = await listen<string>(`claude-error:${sessionId}`, (event) => {
-      console.error("Claude error:", event.payload);
       if (isMountedRef.current) {
         setError(event.payload);
       }
@@ -468,7 +469,6 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
           });
 
           const specificErrorUnlisten = await listen<string>(`claude-error:${sid}`, (evt) => {
-            console.error('Claude error (scoped):', evt.payload);
             setError(evt.payload);
           });
 
@@ -497,7 +497,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
                 if (!extractedSessionInfo) {
                   const projectId = projectPath.replace(/[^a-zA-Z0-9]/g, '-');
                   setExtractedSessionInfo({ sessionId: msg.session_id, projectId });
-                  
+
                   // Save session data for restoration
                   SessionPersistenceService.saveSession(
                     msg.session_id,
@@ -505,6 +505,17 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
                     projectPath,
                     messages.length
                   );
+
+                  // Notify parent that session was created (for tab persistence)
+                  if (onSessionCreated) {
+                    onSessionCreated({
+                      id: msg.session_id,
+                      project_id: projectId,
+                      project_path: projectPath,
+                      created_at: Date.now() / 1000,
+                      first_message: "New session"
+                    });
+                  }
                 }
 
                 // Switch to session-specific listeners
@@ -583,7 +594,6 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
             
             setMessages((prev) => [...prev, message]);
           } catch (err) {
-            console.error('Failed to parse message:', err, payload);
           }
         }
 
@@ -608,7 +618,6 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
         };
 
         const genericErrorUnlisten = await listen<string>('claude-error', (evt) => {
-          console.error('Claude error:', evt.payload);
           setError(evt.payload);
         });
 
@@ -670,7 +679,6 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
         }
       }
     } catch (err) {
-      console.error("Failed to send prompt:", err);
       setError("Failed to send prompt");
       setIsLoading(false);
       hasActiveSessionRef.current = false;
@@ -786,7 +794,6 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
       };
       setMessages(prev => [...prev, cancelMessage]);
     } catch (err) {
-      console.error("Failed to cancel execution:", err);
       
       // Even if backend fails, we should update UI to reflect stopped state
       // Add error message but still stop the UI loading state
@@ -835,7 +842,6 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
       setForkCheckpointId(null);
       setForkSessionName("");
     } catch (err) {
-      console.error("Failed to fork checkpoint:", err);
       setError("Failed to fork checkpoint");
     } finally {
       setIsLoading(false);
@@ -888,8 +894,8 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
       
       // Clear checkpoint manager when session ends
       if (effectiveSession) {
-        api.clearCheckpointManager(effectiveSession.id).catch(err => {
-          console.error("Failed to clear checkpoint manager:", err);
+        api.clearCheckpointManager(effectiveSession.id).catch((_err) => {
+          // Ignore cleanup errors
         });
       }
     };

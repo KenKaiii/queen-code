@@ -100,7 +100,6 @@ export const CodeRadio: React.FC<CodeRadioProps> = ({
       await play();
       setToast({ message: `${currentSource.name} is now playing`, type: "success" });
     } catch (error) {
-      console.error('Failed to play audio:', error);
       setError('Failed to start radio');
       setToast({ message: "Failed to start radio", type: "error" });
     }

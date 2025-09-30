@@ -47,7 +47,6 @@ export function ProxySettings({ setToast, onChange }: ProxySettingsProps) {
         type: 'success',
       });
     } catch (error) {
-      console.error('Failed to save proxy settings:', error);
       setToast({
         message: 'Failed to save proxy settings',
         type: 'error',
@@ -70,7 +69,6 @@ export function ProxySettings({ setToast, onChange }: ProxySettingsProps) {
       setSettings(loadedSettings);
       setOriginalSettings(loadedSettings);
     } catch (error) {
-      console.error('Failed to load proxy settings:', error);
       setToast({
         message: 'Failed to load proxy settings',
         type: 'error',

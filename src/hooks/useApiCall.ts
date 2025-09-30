@@ -81,7 +81,6 @@ export function useApiCall<T>(
 
         if (showErrorToast) {
           // TODO: Implement toast notification
-          console.error('Error:', errorMessage || error.message);
         }
 
         onError?.(error);

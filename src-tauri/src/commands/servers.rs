@@ -104,6 +104,12 @@ async fn scan_dev_servers_macos() -> Result<Vec<DevServer>, String> {
             };
 
             if let Ok(port) = port_str.split_whitespace().next().unwrap_or("").parse::<u16>() {
+                // Only include common dev server port ranges (1000-10000)
+                // This excludes system services on high ports (50000+)
+                if port < 1000 || port > 10000 {
+                    continue;
+                }
+
                 let service = detect_service(port, process_name);
 
                 servers.push(DevServer {
@@ -184,6 +190,12 @@ async fn scan_dev_servers_linux() -> Result<Vec<DevServer>, String> {
             };
 
             if let Ok(port) = port_str.split_whitespace().next().unwrap_or("").parse::<u16>() {
+                // Only include common dev server port ranges (1000-10000)
+                // This excludes system services on high ports (50000+)
+                if port < 1000 || port > 10000 {
+                    continue;
+                }
+
                 let service = detect_service(port, process_name);
 
                 servers.push(DevServer {
@@ -247,6 +259,12 @@ async fn scan_dev_servers_windows() -> Result<Vec<DevServer>, String> {
         if let Some(addr) = parts.get(1) {
             if let Some(port_str) = addr.split(':').last() {
                 if let Ok(port) = port_str.parse::<u16>() {
+                    // Only include common dev server port ranges (1000-10000)
+                    // This excludes system services on high ports (50000+)
+                    if port < 1000 || port > 10000 {
+                        continue;
+                    }
+
                     if let Some(pid_str) = parts.get(4) {
                         if let Ok(pid) = pid_str.parse::<u32>() {
                             if let Ok(process_name) = get_process_name_windows(pid) {

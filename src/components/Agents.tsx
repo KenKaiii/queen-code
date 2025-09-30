@@ -53,7 +53,6 @@ export const Agents: React.FC = () => {
       const agents = await api.listAgents();
       setAgents(agents);
     } catch (error) {
-      console.error('Failed to load agents:', error);
       setToast({ message: 'Failed to load agents', type: 'error' });
     } finally {
       setLoading(false);
@@ -65,7 +64,6 @@ export const Agents: React.FC = () => {
       const runs = await api.listAgentRunsWithMetrics();
       setRunningAgents(runs);
     } catch (error) {
-      console.error('Failed to load running agents:', error);
     }
   };
 
@@ -99,7 +97,6 @@ export const Agents: React.FC = () => {
       
       setToast({ message: `Opening agent: ${agent.name}`, type: 'success' });
     } catch (error) {
-      console.error('Failed to open agent:', error);
       setToast({ message: `Failed to open agent: ${agent.name}`, type: 'error' });
     }
   };
@@ -114,7 +111,6 @@ export const Agents: React.FC = () => {
       setShowDeleteDialog(false);
       setAgentToDelete(null);
     } catch (error) {
-      console.error('Failed to delete agent:', error);
       setToast({ message: `Failed to delete agent: ${agentToDelete.name}`, type: 'error' });
     }
   };
@@ -134,7 +130,6 @@ export const Agents: React.FC = () => {
         setToast({ message: `Exported agent: ${agent.name}`, type: 'success' });
       }
     } catch (error) {
-      console.error('Failed to export agent:', error);
       setToast({ message: 'Failed to export agent', type: 'error' });
     }
   };

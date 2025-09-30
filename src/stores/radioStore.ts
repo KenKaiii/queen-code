@@ -89,10 +89,9 @@ export const useRadioStore = create<RadioState>((set, get) => ({
       const handlePlay = () => set({ isPlaying: true });
       const handlePause = () => set({ isPlaying: false });
       const handleEnded = () => set({ isPlaying: false });
-      const handleError = (e: Event) => {
+      const handleError = (_e: Event) => {
         const state = get();
         const wasPlaying = state.isPlaying || state.isLoading;
-        console.error('Radio stream error:', e, 'Station:', state.activeStation, 'URL:', RADIO_SOURCES[state.activeStation]);
 
         set({ isPlaying: false, isLoading: false, wasPlayingBeforeError: wasPlaying });
 
@@ -106,7 +105,7 @@ export const useRadioStore = create<RadioState>((set, get) => ({
               try {
                 await currentState.play();
               } catch (error) {
-                console.error('Reconnection attempt failed:', error);
+                // Audio reconnect errors are non-critical
               }
             }
           }, delay);
@@ -139,7 +138,6 @@ export const useRadioStore = create<RadioState>((set, get) => ({
       set({ isLoading: true });
       await audio.play();
     } catch (error) {
-      console.error('Failed to play audio:', error);
       set({ isLoading: false });
       throw error;
     }

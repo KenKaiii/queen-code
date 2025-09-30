@@ -45,7 +45,6 @@ export function useCheckpoints({ sessionId, projectId, projectPath, onToast }: U
       setCheckpoints(mappedCheckpoints);
       setTimelineVersion(prev => prev + 1);
     } catch (error) {
-      console.error("Failed to load checkpoints:", error);
       showToast("Failed to load checkpoints", 'error');
     } finally {
       setIsLoadingCheckpoints(false);
@@ -60,7 +59,6 @@ export function useCheckpoints({ sessionId, projectId, projectPath, onToast }: U
       await loadCheckpoints();
       showToast("Checkpoint created successfully", 'success');
     } catch (error) {
-      console.error("Failed to create checkpoint:", error);
       showToast("Failed to create checkpoint", 'error');
       throw error;
     }
@@ -75,7 +73,6 @@ export function useCheckpoints({ sessionId, projectId, projectPath, onToast }: U
       // Return true to indicate success
       return true;
     } catch (error) {
-      console.error("Failed to restore checkpoint:", error);
       showToast("Failed to restore checkpoint", 'error');
       return false;
     }
@@ -89,7 +86,6 @@ export function useCheckpoints({ sessionId, projectId, projectPath, onToast }: U
       await loadCheckpoints();
       showToast("Checkpoint deleted successfully", 'success');
     } catch (error) {
-      console.error("Failed to delete checkpoint:", error);
       showToast("Failed to delete checkpoint", 'error');
     }
   }, [sessionId, loadCheckpoints, showToast]);
@@ -102,7 +98,6 @@ export function useCheckpoints({ sessionId, projectId, projectPath, onToast }: U
       showToast("Session forked successfully", 'success');
       return forkedSession;
     } catch (error) {
-      console.error("Failed to fork checkpoint:", error);
       showToast("Failed to fork session", 'error');
       return null;
     }

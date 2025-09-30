@@ -42,7 +42,7 @@ export class SessionPersistenceService {
         localStorage.setItem(SESSION_INDEX_KEY, JSON.stringify(index));
       }
     } catch (error) {
-      console.error('Failed to save session data:', error);
+      // localStorage errors are non-critical
     }
   }
 
@@ -63,7 +63,6 @@ export class SessionPersistenceService {
 
       return sessionData;
     } catch (error) {
-      console.error('Failed to load session data:', error);
       return null;
     }
   }
@@ -81,7 +80,7 @@ export class SessionPersistenceService {
       const newIndex = index.filter(id => id !== sessionId);
       localStorage.setItem(SESSION_INDEX_KEY, JSON.stringify(newIndex));
     } catch (error) {
-      console.error('Failed to remove session data:', error);
+      // localStorage errors are non-critical
     }
   }
 
@@ -93,7 +92,6 @@ export class SessionPersistenceService {
       const index = localStorage.getItem(SESSION_INDEX_KEY);
       return index ? JSON.parse(index) : [];
     } catch (error) {
-      console.error('Failed to get session index:', error);
       return [];
     }
   }
@@ -113,7 +111,7 @@ export class SessionPersistenceService {
       // Clear the index
       localStorage.removeItem(SESSION_INDEX_KEY);
     } catch (error) {
-      console.error('Failed to clear session data:', error);
+      // localStorage errors are non-critical
     }
   }
 
@@ -137,7 +135,7 @@ export class SessionPersistenceService {
 
       localStorage.setItem(SESSION_INDEX_KEY, JSON.stringify(activeIndex));
     } catch (error) {
-      console.error('Failed to cleanup old sessions:', error);
+      // localStorage errors are non-critical
     }
   }
 
@@ -154,7 +152,6 @@ export class SessionPersistenceService {
       const history = await api.loadSessionHistory(sessionId, projectId);
       return history && history.length > 0;
     } catch (error) {
-      console.error('Failed to check session restorability:', error);
       return false;
     }
   }

@@ -73,7 +73,6 @@ export const ProjectSettings: React.FC<ProjectSettingsProps> = ({
         setToast({ message: 'Added to .gitignore', type: 'success' });
       }
     } catch (err) {
-      console.error('Failed to update .gitignore:', err);
       setToast({ message: 'Failed to update .gitignore', type: 'error' });
     }
   };

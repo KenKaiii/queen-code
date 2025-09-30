@@ -158,7 +158,6 @@ export const UsageDashboard: React.FC<UsageDashboardProps> = ({ }) => {
       setCachedData(`${cacheKey}-stats`, statsData);
       setCachedData(`${cacheKey}-sessions`, sessionData);
     } catch (err: any) {
-      console.error("Failed to load usage stats:", err);
       setError("Failed to load usage statistics. Please try again.");
     } finally {
       setLoading(false);
@@ -171,7 +170,7 @@ export const UsageDashboard: React.FC<UsageDashboardProps> = ({ }) => {
     setProjectsPage(1);
     setSessionsPage(1);
     loadUsageStats();
-  }, [loadUsageStats])
+  }, [loadUsageStats]);
 
   // Preload adjacent tabs when idle
   useEffect(() => {
@@ -198,7 +197,7 @@ export const UsageDashboard: React.FC<UsageDashboardProps> = ({ }) => {
         setHasLoadedTabs(prev => new Set([...prev, tabOrder[currentIndex + 1]]));
       }
     });
-  }, [activeTab, stats, loading])
+  }, [activeTab, stats, loading]);
 
   // Memoize expensive computations
   const summaryCards = useMemo(() => {

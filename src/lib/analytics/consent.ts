@@ -45,7 +45,6 @@ export class ConsentManager {
         hasConsented: true,
       };
     } catch (error) {
-      console.error('Failed to initialize consent manager:', error);
       // Return default settings on error
       return {
         enabled: true,
@@ -117,7 +116,6 @@ export class ConsentManager {
     try {
       localStorage.setItem(ANALYTICS_STORAGE_KEY, JSON.stringify(this.settings));
     } catch (error) {
-      console.error('Failed to save analytics settings:', error);
     }
   }
   

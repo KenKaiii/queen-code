@@ -46,7 +46,6 @@ const ITEMS_PER_PAGE = 12;
  *   sessions={sessions}
  *   projectPath="/Users/example/project"
  *   onBack={() => setSelectedProject(null)}
- *   onSessionClick={(session) => console.log('Selected session:', session)}
  * />
  */
 export const SessionList: React.FC<SessionListProps> = ({

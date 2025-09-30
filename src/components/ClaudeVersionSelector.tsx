@@ -104,7 +104,6 @@ export const ClaudeVersionSelector: React.FC<ClaudeVersionSelectorProps> = ({
     } catch (err) {
       // Only log error if we're in Tauri (not browser)
       if (typeof window !== 'undefined' && (window as any).__TAURI__) {
-        console.error("Failed to load Claude installations:", err);
         setError(err instanceof Error ? err.message : "Failed to load Claude installations");
       }
     } finally {

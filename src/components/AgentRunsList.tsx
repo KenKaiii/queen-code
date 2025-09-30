@@ -7,7 +7,7 @@ import { Pagination } from "@/components/ui/pagination";
 import { cn } from "@/lib/utils";
 import { formatISOTimestamp } from "@/lib/date-utils";
 import type { AgentRunWithMetrics } from "@/lib/api";
-import { AGENT_ICONS } from "./CCAgents";
+import { AGENT_ICONS } from "@/types/agents";
 import { useTabState } from "@/hooks/useTabState";
 
 interface AgentRunsListProps {
@@ -33,7 +33,6 @@ const ITEMS_PER_PAGE = 5;
  * @example
  * <AgentRunsList
  *   runs={runs}
- *   onRunClick={(run) => console.log('Selected:', run)}
  * />
  */
 export const AgentRunsList: React.FC<AgentRunsListProps> = ({

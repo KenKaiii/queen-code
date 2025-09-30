@@ -85,8 +85,6 @@ const getDisplayPath = (path: string, maxLength: number = 30): string => {
  * @example
  * <ProjectList
  *   projects={projects}
- *   onProjectClick={(project) => console.log('Selected:', project)}
- *   onOpenProject={() => console.log('Open project')}
  * />
  */
 export const ProjectList: React.FC<ProjectListProps> = ({

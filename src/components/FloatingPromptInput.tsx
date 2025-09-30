@@ -195,7 +195,6 @@ const MODELS: Model[] = [
  * const promptRef = useRef<FloatingPromptInputRef>(null);
  * <FloatingPromptInput
  *   ref={promptRef}
- *   onSend={(prompt, model) => console.log('Send:', prompt, model)}
  *   isLoading={false}
  * />
  */
@@ -400,7 +399,6 @@ const FloatingPromptInputInner = (
           }
         });
       } catch (error) {
-        console.error('Failed to set up Tauri drag-drop listener:', error);
       }
     };
 
@@ -547,7 +545,6 @@ const FloatingPromptInputInner = (
 
       if (atPosition === -1) {
         // @ not found, this shouldn't happen but handle gracefully
-        console.error('[FloatingPromptInput] @ position not found');
         return;
       }
 
@@ -600,7 +597,6 @@ const FloatingPromptInputInner = (
     }
 
     if (slashPosition === -1) {
-      console.error('[FloatingPromptInput] / position not found');
       return;
     }
 
@@ -712,7 +708,6 @@ const FloatingPromptInputInner = (
           
           reader.readAsDataURL(blob);
         } catch (error) {
-          console.error('Failed to paste image:', error);
         }
       }
     }

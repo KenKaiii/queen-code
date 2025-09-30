@@ -49,7 +49,6 @@ export function ClaudeBinaryDialog({ open, onOpenChange, onSuccess, onError }: C
       onSuccess();
       onOpenChange(false);
     } catch (error) {
-      console.error("Failed to save Claude binary path:", error);
       onError(error instanceof Error ? error.message : "Failed to save Claude binary path");
     } finally {
       setIsValidating(false);

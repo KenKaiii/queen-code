@@ -91,7 +91,6 @@ export const MCPServerList: React.FC<MCPServerListProps> = ({
       setCopiedServer(serverName);
       setTimeout(() => setCopiedServer(null), 2000);
     } catch (error) {
-      console.error("Failed to copy command:", error);
     }
   };
 
@@ -115,7 +114,6 @@ export const MCPServerList: React.FC<MCPServerListProps> = ({
       
       onServerRemoved(name);
     } catch (error) {
-      console.error("Failed to remove server:", error);
     } finally {
       setRemovingServer(null);
     }
@@ -135,7 +133,6 @@ export const MCPServerList: React.FC<MCPServerListProps> = ({
       
       // TODO: Show result in a toast or modal
     } catch (error) {
-      console.error("Failed to test connection:", error);
       
       trackEvent.mcpConnectionError({
         server_name: name,

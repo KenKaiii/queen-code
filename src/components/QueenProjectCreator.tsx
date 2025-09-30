@@ -56,7 +56,6 @@ export const QueenProjectCreator: React.FC<QueenProjectCreatorProps> = ({
       const status = await invoke<QueenCliStatus>("check_queen_cli_status");
       setCliStatus(status);
     } catch (err) {
-      console.error("Failed to check CLI status:", err);
       setError("Failed to check Queen CLI status");
     }
   };
@@ -66,7 +65,6 @@ export const QueenProjectCreator: React.FC<QueenProjectCreatorProps> = ({
       const templateList = await invoke<TemplateInfo[]>("get_queen_templates");
       setTemplates(templateList);
     } catch (err) {
-      console.error("Failed to load templates:", err);
       setError("Failed to load templates");
     }
   };
@@ -76,7 +74,6 @@ export const QueenProjectCreator: React.FC<QueenProjectCreatorProps> = ({
       const dir = await invoke<string>("get_queen_projects_directory");
       setProjectsDirectory(dir);
     } catch (err) {
-      console.error("Failed to load projects directory:", err);
     }
   };
 
@@ -87,7 +84,6 @@ export const QueenProjectCreator: React.FC<QueenProjectCreatorProps> = ({
       await invoke("install_queen_cli");
       await loadCliStatus();
     } catch (err) {
-      console.error("Failed to install CLI:", err);
       setError(err as string || "Failed to install Queen CLI. Try running: npm install -g @kenkaiiii/queen-claude");
     } finally {
       setInstalling(false);
@@ -145,7 +141,6 @@ export const QueenProjectCreator: React.FC<QueenProjectCreatorProps> = ({
 
       onProjectCreated(projectPath);
     } catch (err) {
-      console.error("Failed to create project:", err);
       setError(err as string || "Failed to create project");
       setStep("name");
     } finally {

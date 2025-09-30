@@ -60,7 +60,6 @@ class AnalyticsService {
       
       this.initialized = true;
     } catch (error) {
-      console.error('Failed to initialize analytics:', error);
     }
   }
   
@@ -100,7 +99,6 @@ class AnalyticsService {
         },
       });
     } catch (error) {
-      console.error('Failed to initialize PostHog:', error);
     }
   }
   

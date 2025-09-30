@@ -108,7 +108,6 @@ export class ResourceMonitor {
         analytics.track(event.event, event.properties);
       }
     } catch (error) {
-      console.error('Failed to collect resource metrics:', error);
     }
   }
   

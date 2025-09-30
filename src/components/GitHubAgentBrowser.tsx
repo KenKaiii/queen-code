@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { api, type GitHubAgentFile, type AgentExport, type Agent } from "@/lib/api";
-import { type AgentIconName } from "./CCAgents";
+import { type AgentIconName } from "@/types/agents";
 import { ICON_MAP } from "./IconPicker";
 import { open } from "@tauri-apps/plugin-shell";
 
@@ -58,7 +58,6 @@ export const GitHubAgentBrowser: React.FC<GitHubAgentBrowserProps> = ({
       const agents = await api.listAgents();
       setExistingAgents(agents);
     } catch (err) {
-      console.error("Failed to fetch existing agents:", err);
     }
   };
 
@@ -69,7 +68,6 @@ export const GitHubAgentBrowser: React.FC<GitHubAgentBrowserProps> = ({
       const agentFiles = await api.fetchGitHubAgents();
       setAgents(agentFiles);
     } catch (err) {
-      console.error("Failed to fetch GitHub agents:", err);
       setError("Failed to fetch agents from GitHub. Please check your internet connection.");
     } finally {
       setLoading(false);
@@ -93,7 +91,6 @@ export const GitHubAgentBrowser: React.FC<GitHubAgentBrowserProps> = ({
         error: null,
       });
     } catch (err) {
-      console.error("Failed to fetch agent content:", err);
       setSelectedAgent({
         file,
         data: null,
@@ -126,7 +123,6 @@ export const GitHubAgentBrowser: React.FC<GitHubAgentBrowserProps> = ({
       // Notify parent
       onImportSuccess();
     } catch (err) {
-      console.error("Failed to import agent:", err);
       alert(`Failed to import agent: ${err instanceof Error ? err.message : "Unknown error"}`);
     } finally {
       setImporting(false);
@@ -154,7 +150,6 @@ export const GitHubAgentBrowser: React.FC<GitHubAgentBrowserProps> = ({
     try {
       await open("https://github.com/KenKaiii/queen-code/tree/main/cc_agents");
     } catch (error) {
-      console.error('Failed to open GitHub link:', error);
     }
   };
 

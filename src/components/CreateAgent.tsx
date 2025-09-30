@@ -9,7 +9,7 @@ import { Toast, ToastContainer } from "@/components/ui/toast";
 import { api, type Agent } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import MDEditor from "@uiw/react-md-editor";
-import { type AgentIconName } from "./CCAgents";
+import { type AgentIconName } from "@/types/agents";
 import { IconPicker, ICON_MAP } from "./IconPicker";
 
 
@@ -92,7 +92,6 @@ export const CreateAgent: React.FC<CreateAgentProps> = ({
       
       onAgentCreated();
     } catch (err) {
-      console.error("Failed to save agent:", err);
       setError(isEditMode ? "Failed to update agent" : "Failed to create agent");
       setToast({ 
         message: isEditMode ? "Failed to update agent" : "Failed to create agent", 

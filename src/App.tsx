@@ -10,12 +10,8 @@ import { ProjectList } from "@/components/ProjectList";
 import { FilePicker } from "@/components/FilePicker";
 import { SessionList } from "@/components/SessionList";
 import { CustomTitlebar } from "@/components/CustomTitlebar";
-import { MarkdownEditor } from "@/components/MarkdownEditor";
 import { ClaudeFileEditor } from "@/components/ClaudeFileEditor";
-import { Settings } from "@/components/Settings";
 import { CCAgents } from "@/components/CCAgents";
-import { UsageDashboard } from "@/components/UsageDashboard";
-import { MCPManager } from "@/components/MCPManager";
 import { NFOCredits } from "@/components/NFOCredits";
 import { ClaudeBinaryDialog } from "@/components/ClaudeBinaryDialog";
 import { Toast, ToastContainer } from "@/components/ui/toast";
@@ -145,7 +141,6 @@ function AppContent() {
       const projectList = await api.listProjects();
       setProjects(projectList);
     } catch (err) {
-      console.error("Failed to load projects:", err);
       setError("Failed to load projects. Please ensure ~/.claude directory exists.");
     } finally {
       setLoading(false);
@@ -163,7 +158,6 @@ function AppContent() {
       setSessions(sessionList);
       setSelectedProject(project);
     } catch (err) {
-      console.error("Failed to load sessions:", err);
       setError("Failed to load sessions for this project.");
     } finally {
       setLoading(false);
@@ -282,16 +276,6 @@ function AppContent() {
           />
         );
 
-      case "editor":
-        return (
-          <div className="flex-1 overflow-hidden">
-            <MarkdownEditor onBack={() => handleViewChange("welcome")} />
-          </div>
-        );
-      
-      case "settings":
-        return <Settings onBack={() => handleViewChange("welcome")} />;
-      
       case "projects":
         if (selectedProject) {
           return (
@@ -327,16 +311,6 @@ function AppContent() {
               <TabContent />
             </div>
           </div>
-        );
-      
-      case "usage-dashboard":
-        return (
-          <UsageDashboard onBack={() => handleViewChange("welcome")} />
-        );
-      
-      case "mcp":
-        return (
-          <MCPManager onBack={() => handleViewChange("welcome")} />
         );
       
       case "project-settings":
@@ -416,7 +390,6 @@ function AppContent() {
                     await loadProjects();
                     await handleProjectClick(project);
                   } catch (err) {
-                    console.error('Failed to create project:', err);
                     setError('Failed to create project for the selected directory.');
                   }
                 }
@@ -454,7 +427,6 @@ function AppContent() {
                     // Load sessions for the selected project
                     await handleProjectClick(project);
                   } catch (err) {
-                    console.error('Failed to create project:', err);
                     setError('Failed to create project for the selected directory.');
                   }
                 }

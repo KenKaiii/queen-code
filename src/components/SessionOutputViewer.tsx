@@ -139,11 +139,13 @@ export function SessionOutputViewer({ session, onClose, className }: SessionOutp
             try {
               await api.streamSessionOutput(session.id);
             } catch (streamError) {
+              // Stream errors are non-critical - live listeners will still work
             }
           }
-          
+
           return;
         } catch (err) {
+          // JSONL loading failed - fall back to legacy method
         }
       }
 
@@ -160,7 +162,6 @@ export function SessionOutputViewer({ session, onClose, className }: SessionOutp
           const message = JSON.parse(line) as ClaudeStreamMessage;
           parsedMessages.push(message);
         } catch (err) {
-          console.error("Failed to parse message:", err, line);
         }
       }
       setMessages(parsedMessages);
@@ -180,10 +181,10 @@ export function SessionOutputViewer({ session, onClose, className }: SessionOutp
         try {
           await api.streamSessionOutput(session.id);
         } catch (streamError) {
+          // Stream errors are non-critical - live listeners will still work
         }
       }
     } catch (error) {
-      console.error('Failed to load session output:', error);
       setToast({ message: 'Failed to load session output', type: 'error' });
     } finally {
       setLoading(false);
@@ -208,12 +209,10 @@ export function SessionOutputViewer({ session, onClose, className }: SessionOutp
           const message = JSON.parse(event.payload) as ClaudeStreamMessage;
           setMessages(prev => [...prev, message]);
         } catch (err) {
-          console.error("Failed to parse message:", err, event.payload);
         }
       });
 
       const errorUnlisten = await listen<string>(`agent-error:${session.id}`, (event) => {
-        console.error("Agent error:", event.payload);
         setToast({ message: event.payload, type: 'error' });
       });
 
@@ -228,7 +227,6 @@ export function SessionOutputViewer({ session, onClose, className }: SessionOutp
 
       unlistenRefs.current = [outputUnlisten, errorUnlisten, completeUnlisten, cancelUnlisten];
     } catch (error) {
-      console.error('Failed to set up live event listeners:', error);
     }
   };
 
@@ -302,7 +300,6 @@ export function SessionOutputViewer({ session, onClose, className }: SessionOutp
       await loadOutput(true); // Skip cache when manually refreshing
       setToast({ message: 'Output refreshed', type: 'success' });
     } catch (error) {
-      console.error('Failed to refresh output:', error);
       setToast({ message: 'Failed to refresh output', type: 'error' });
     } finally {
       setRefreshing(false);

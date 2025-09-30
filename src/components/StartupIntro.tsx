@@ -19,7 +19,6 @@ export function StartupIntro({ visible }: { visible: boolean }) {
       // Play startup sound
       const audio = new Audio(openSound);
       audio.volume = 0.3; // Gentle volume
-      audio.play().catch(console.error);
 
       // Reveal content after brief delay
       const contentTimer = setTimeout(() => setShowContent(true), 100);

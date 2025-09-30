@@ -153,7 +153,6 @@ export const MCPAddServer: React.FC<MCPAddServerProps> = ({
       }
     } catch (error) {
       onError("Failed to add server");
-      console.error("Failed to add stdio server:", error);
     } finally {
       setSaving(false);
     }
@@ -212,7 +211,6 @@ export const MCPAddServer: React.FC<MCPAddServerProps> = ({
       }
     } catch (error) {
       onError("Failed to add server");
-      console.error("Failed to add SSE server:", error);
     } finally {
       setSaving(false);
     }

@@ -28,7 +28,7 @@ interface ServerDashboardProps {
 
 /**
  * Server Dashboard - Track and manage running development servers
- * Scans ports 3000-9000 for active servers with Open/Kill actions
+ * Scans ports 1000-10000 for active dev servers (excludes system services on high ports)
  */
 export const ServerDashboard: React.FC<ServerDashboardProps> = ({
   className,
@@ -45,7 +45,6 @@ export const ServerDashboard: React.FC<ServerDashboardProps> = ({
       const foundServers = await invoke<ServerInfo[]>('scan_dev_servers');
       setServers(foundServers);
     } catch (error) {
-      console.error('Failed to scan dev servers:', error);
       setToast({ message: 'Failed to scan servers', type: 'error' });
       setServers([]);
     }
@@ -66,7 +65,6 @@ export const ServerDashboard: React.FC<ServerDashboardProps> = ({
         setToast({ message: `URL copied: ${url}`, type: 'error' });
       }
     } catch (error) {
-      console.error('Failed to open server:', error);
       setToast({ message: 'Failed to open server', type: 'error' });
     }
   };
@@ -77,7 +75,6 @@ export const ServerDashboard: React.FC<ServerDashboardProps> = ({
       setServers(prev => prev.filter(s => s.port !== server.port));
       setToast({ message: `Killed ${server.service} on port ${server.port}`, type: 'success' });
     } catch (error) {
-      console.error('Failed to kill server:', error);
       setToast({ message: 'Failed to kill server', type: 'error' });
     }
   };

@@ -82,7 +82,6 @@ export function useClaudeMessages(options: UseClaudeMessagesOptions = {}) {
               loadedMessages.push(msg);
               loadedRawJsonl.push(line);
             } catch (e) {
-              console.error("Failed to parse JSONL:", e);
             }
           });
         }
@@ -91,7 +90,6 @@ export function useClaudeMessages(options: UseClaudeMessagesOptions = {}) {
       setMessages(loadedMessages);
       setRawJsonlOutput(loadedRawJsonl);
     } catch (error) {
-      console.error("Failed to load session outputs:", error);
       throw error;
     }
   }, []);
@@ -108,7 +106,6 @@ export function useClaudeMessages(options: UseClaudeMessagesOptions = {}) {
           const message = JSON.parse(event.payload) as ClaudeStreamMessage;
           handleMessage(message);
         } catch (error) {
-          console.error("Failed to parse Claude stream message:", error);
         }
       });
     };

@@ -98,7 +98,6 @@ export function OutputCacheProvider({ children }: OutputCacheProviderProps) {
         const message = JSON.parse(line) as ClaudeStreamMessage;
         parsedMessages.push(message);
       } catch (err) {
-        console.error("Failed to parse message:", err, line);
         // Add a fallback message for unparseable content
         parsedMessages.push({
           type: 'result',
@@ -129,6 +128,7 @@ export function OutputCacheProvider({ children }: OutputCacheProviderProps) {
         status
       });
     } catch (error) {
+      // Cache update errors are non-critical
     }
   }, [parseOutput, setCachedOutput]);
 
@@ -160,6 +160,7 @@ export function OutputCacheProvider({ children }: OutputCacheProviderProps) {
         return updated;
       });
     } catch (error) {
+      // Polling errors are non-critical
     }
   }, [updateSessionCache]);
 

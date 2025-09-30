@@ -39,8 +39,8 @@ export const NFOCredits: React.FC<NFOCreditsProps> = ({ onClose }) => {
     audio.play().then(() => {
       // Unmute after autoplay
       audio.muted = false;
-    }).catch(err => {
-      console.error("Audio autoplay failed:", err);
+    }).catch((_err) => {
+      // Ignore autoplay errors
     });
     return () => {
       if (audioRef.current) {

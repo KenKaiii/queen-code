@@ -24,7 +24,7 @@ import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 import { StreamMessage } from './StreamMessage';
 import { ErrorBoundary } from './ErrorBoundary';
 import { formatISOTimestamp } from '@/lib/date-utils';
-import { AGENT_ICONS } from './CCAgents';
+import { AGENT_ICONS } from '@/types/agents';
 import type { ClaudeStreamMessage } from '@/types/messages';
 import { useTabState } from '@/hooks/useTabState';
 
@@ -109,7 +109,6 @@ export function AgentRunOutputViewer({
         updateTabTitle(tabId, `Agent: ${agentRun.agent_name || 'Unknown'}`);
         updateTabStatus(tabId, agentRun.status === 'running' ? 'running' : agentRun.status === 'failed' ? 'error' : 'complete');
       } catch (error) {
-        console.error('Failed to load agent run:', error);
         updateTabStatus(tabId, 'error');
       } finally {
         setLoading(false);
@@ -192,8 +191,8 @@ export function AgentRunOutputViewer({
           
           return;
         } catch (err) {
+          // JSONL loading failed - fall back to legacy method
         }
-      } else {
       }
 
       // Fallback to the original method if JSONL loading fails or no session_id
@@ -209,7 +208,6 @@ export function AgentRunOutputViewer({
           const message = JSON.parse(line) as ClaudeStreamMessage;
           parsedMessages.push(message);
         } catch (err) {
-          console.error("[AgentRunOutputViewer] Failed to parse message:", err, line);
         }
       }
       setMessages(parsedMessages);
@@ -229,10 +227,10 @@ export function AgentRunOutputViewer({
         try {
           await api.streamSessionOutput(run.id);
         } catch (streamError) {
+          // Stream errors are non-critical - live listeners will still work
         }
       }
     } catch (error) {
-      console.error('Failed to load agent output:', error);
       setToast({ message: 'Failed to load agent output', type: 'error' });
     } finally {
       setLoading(false);
@@ -272,12 +270,10 @@ export function AgentRunOutputViewer({
           const message = JSON.parse(event.payload) as ClaudeStreamMessage;
           setMessages(prev => [...prev, message]);
         } catch (err) {
-          console.error("[AgentRunOutputViewer] Failed to parse message:", err, event.payload);
         }
       });
 
       const errorUnlisten = await listen<string>(`agent-error:${run!.id}`, (event) => {
-        console.error("[AgentRunOutputViewer] Agent error:", event.payload);
         setToast({ message: event.payload, type: 'error' });
       });
 
@@ -292,7 +288,6 @@ export function AgentRunOutputViewer({
 
       unlistenRefs.current = [outputUnlisten, errorUnlisten, completeUnlisten, cancelUnlisten];
     } catch (error) {
-      console.error('[AgentRunOutputViewer] Failed to set up live event listeners:', error);
     }
   };
 
@@ -370,7 +365,6 @@ export function AgentRunOutputViewer({
 
   const handleStop = async () => {
     if (!run?.id) {
-      console.error('[AgentRunOutputViewer] No run ID available to stop');
       return;
     }
 
@@ -409,7 +403,6 @@ export function AgentRunOutputViewer({
         setToast({ message: 'Failed to stop agent - it may have already finished', type: 'error' });
       }
     } catch (err) {
-      console.error('[AgentRunOutputViewer] Failed to stop agent:', err);
       setToast({ 
         message: `Failed to stop execution: ${err instanceof Error ? err.message : 'Unknown error'}`, 
         type: 'error' 
