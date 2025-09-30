@@ -155,12 +155,13 @@ fn source_preference(installation: &ClaudeInstallation) -> u8 {
         "local-bin" => 5,
         "claude-local" => 6,
         "npm-global" => 7,
-        "yarn" | "yarn-global" => 8,
-        "bun" => 9,
-        "node-modules" => 10,
-        "home-bin" => 11,
-        "PATH" => 12,
-        _ => 13,
+        "pnpm" => 8,
+        "yarn" | "yarn-global" => 9,
+        "bun" => 10,
+        "node-modules" => 11,
+        "home-bin" => 12,
+        "PATH" => 13,
+        _ => 14,
     }
 }
 
@@ -346,6 +347,19 @@ fn find_standard_installations() -> Vec<ClaudeInstallation> {
                 "yarn-global".to_string(),
             ),
         ]);
+
+        // pnpm global paths (platform-specific)
+        #[cfg(target_os = "macos")]
+        paths_to_check.push((
+            format!("{}/Library/pnpm/claude", home),
+            "pnpm".to_string(),
+        ));
+
+        #[cfg(not(target_os = "macos"))]
+        paths_to_check.push((
+            format!("{}/.local/share/pnpm/claude", home),
+            "pnpm".to_string(),
+        ));
     }
 
     // Check each path
