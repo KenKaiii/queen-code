@@ -30,6 +30,24 @@ pub struct ClaudeInstallation {
     pub installation_type: InstallationType,
 }
 
+/// Expand relative and tilde paths to absolute paths
+fn expand_path(path: &str) -> Option<String> {
+    if path.starts_with("~/") {
+        // Expand ~ to HOME
+        std::env::var("HOME").ok().map(|home| {
+            path.replacen("~/", &format!("{}/", home), 1)
+        })
+    } else if path.starts_with('.') {
+        // Expand relative paths like .nvm/... to $HOME/.nvm/...
+        std::env::var("HOME").ok().map(|home| {
+            format!("{}/{}", home, path)
+        })
+    } else {
+        // Already absolute
+        Some(path.to_string())
+    }
+}
+
 /// Main function to find the Claude binary
 /// Checks database first for stored path and preference, then prioritizes accordingly
 pub fn find_claude_binary(app_handle: &tauri::AppHandle) -> Result<String, String> {
@@ -47,13 +65,17 @@ pub fn find_claude_binary(app_handle: &tauri::AppHandle) -> Result<String, Strin
                     |row| row.get::<_, String>(0),
                 ) {
                     info!("Found stored claude path in database: {}", stored_path);
-                    
-                    // Check if the path still exists
-                    let path_buf = PathBuf::from(&stored_path);
-                    if path_buf.exists() && path_buf.is_file() {
-                        return Ok(stored_path);
+
+                    // Expand relative/tilde paths
+                    if let Some(expanded) = expand_path(&stored_path) {
+                        let path_buf = PathBuf::from(&expanded);
+                        if path_buf.exists() && path_buf.is_file() {
+                            return Ok(expanded);
+                        } else {
+                            warn!("Stored claude path no longer exists: {}", expanded);
+                        }
                     } else {
-                        warn!("Stored claude path no longer exists: {}", stored_path);
+                        warn!("Could not expand stored path: {}", stored_path);
                     }
                 }
                 
@@ -188,17 +210,36 @@ fn try_which_command() -> Option<ClaudeInstallation> {
 
             debug!("'which' found claude at: {}", path);
 
-            // Verify the path exists
-            if !PathBuf::from(&path).exists() {
-                warn!("Path from 'which' does not exist: {}", path);
+            // Expand relative paths (e.g., .nvm/... or ~/.../...) to absolute paths
+            let expanded_path = match expand_path(&path) {
+                Some(p) => {
+                    debug!("Expanded path: {}", p);
+                    p
+                }
+                None => {
+                    warn!("Cannot expand path from 'which': {} - HOME not set", path);
+                    return None;
+                }
+            };
+
+            // Verify the expanded path exists
+            let path_buf = PathBuf::from(&expanded_path);
+            if !path_buf.exists() {
+                warn!("Path from 'which' does not exist: {}", expanded_path);
                 return None;
             }
 
-            // Get version
-            let version = get_claude_version(&path).ok().flatten();
+            // Verify it's a file, not a directory
+            if !path_buf.is_file() {
+                warn!("Path from 'which' is not a file: {}", expanded_path);
+                return None;
+            }
+
+            // Get version using the expanded path
+            let version = get_claude_version(&expanded_path).ok().flatten();
 
             Some(ClaudeInstallation {
-                path,
+                path: expanded_path,
                 version,
                 source: "which".to_string(),
                 installation_type: InstallationType::System,
