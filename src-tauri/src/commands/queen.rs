@@ -22,10 +22,41 @@ fn get_extended_path() -> String {
     #[cfg(not(target_os = "windows"))]
     {
         let home = std::env::var("HOME").unwrap_or_default();
-        format!(
-            "{}:/usr/local/bin:/opt/homebrew/bin:{}/.npm-global/bin:{}/.nvm/versions/node/*/bin",
-            current_path, home, home
-        )
+        let mut paths = vec![
+            current_path.clone(),
+            "/usr/local/bin".to_string(),
+            "/opt/homebrew/bin".to_string(),
+            format!("{}/.npm-global/bin", home),
+            format!("{}/.local/bin", home),
+            format!("{}/.yarn/bin", home),
+            format!("{}/.bun/bin", home),
+        ];
+
+        // Add pnpm paths
+        #[cfg(target_os = "macos")]
+        paths.push(format!("{}/Library/pnpm", home));
+
+        #[cfg(not(target_os = "macos"))]
+        paths.push(format!("{}/.local/share/pnpm", home));
+
+        // Enumerate NVM node versions instead of using wildcard
+        let nvm_dir = std::path::PathBuf::from(&home)
+            .join(".nvm")
+            .join("versions")
+            .join("node");
+
+        if let Ok(entries) = std::fs::read_dir(&nvm_dir) {
+            for entry in entries.flatten() {
+                if entry.file_type().map(|t| t.is_dir()).unwrap_or(false) {
+                    let bin_path = entry.path().join("bin");
+                    if bin_path.exists() {
+                        paths.push(bin_path.to_string_lossy().to_string());
+                    }
+                }
+            }
+        }
+
+        paths.join(":")
     }
 }
 
