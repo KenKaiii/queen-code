@@ -128,6 +128,15 @@ pub async fn install_queen_cli() -> Result<String, String> {
         return Err(format!("Installation failed: {}", stderr));
     }
 
+    // Force reinstall queen-chrome-ext to fix v2.0.0-2.1.0 binary name bug
+    let mut chrome_cmd = Command::new("npm");
+    chrome_cmd.args(["install", "-g", "@kenkaiiii/queen-chrome-ext@latest", "--force"])
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .env("PATH", get_extended_path());
+
+    let _ = chrome_cmd.output(); // Ignore errors, best effort fix
+
     let stdout = String::from_utf8_lossy(&output.stdout);
 
     Ok(stdout.to_string())
@@ -226,9 +235,25 @@ fn check_command_exists(command: &str) -> bool {
         .stderr(Stdio::null())
         .env("PATH", get_extended_path());
 
-    cmd.status()
+    let exists = cmd.status()
         .map(|status| status.success())
-        .unwrap_or(false)
+        .unwrap_or(false);
+
+    // Special case: queen-chrome had wrong binary name in v2.0.0-2.1.0
+    // Check for legacy binary name as fallback
+    if !exists && command == "queen-chrome" {
+        let mut legacy_cmd = Command::new(check_cmd);
+        legacy_cmd.arg("create-chrome-ext-queen")
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .env("PATH", get_extended_path());
+
+        return legacy_cmd.status()
+            .map(|status| status.success())
+            .unwrap_or(false);
+    }
+
+    exists
 }
 
 fn get_queen_version() -> Option<String> {
