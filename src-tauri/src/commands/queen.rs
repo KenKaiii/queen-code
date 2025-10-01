@@ -74,6 +74,7 @@ pub struct CommandsAvailable {
     pub queen_tauri: bool,
     pub queen_init: bool,
     pub queen_chrome: bool,
+    pub queen_saas: bool,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -90,8 +91,9 @@ pub async fn check_queen_cli_status() -> Result<QueenCliStatus, String> {
     let queen_tauri = check_command_exists("queen-tauri");
     let queen_init = check_command_exists("queen-init");
     let queen_chrome = check_command_exists("queen-chrome");
+    let queen_saas = check_command_exists("queen-saas");
 
-    let all_installed = queen_rag && queen_nextjs && queen_tauri && queen_init && queen_chrome;
+    let all_installed = queen_rag && queen_nextjs && queen_tauri && queen_init && queen_chrome && queen_saas;
 
     let version = if all_installed {
         get_queen_version()
@@ -108,6 +110,7 @@ pub async fn check_queen_cli_status() -> Result<QueenCliStatus, String> {
             queen_tauri,
             queen_init,
             queen_chrome,
+            queen_saas,
         },
     })
 }
@@ -164,6 +167,11 @@ pub fn get_queen_templates() -> Vec<TemplateInfo> {
             id: "queen-chrome".to_string(),
             name: "Queen Chrome".to_string(),
             description: "Chrome extension with TypeScript and Queen architecture".to_string(),
+        },
+        TemplateInfo {
+            id: "queen-saas".to_string(),
+            name: "Queen SaaS".to_string(),
+            description: "Full-stack SaaS application with authentication and billing".to_string(),
         },
     ]
 }
