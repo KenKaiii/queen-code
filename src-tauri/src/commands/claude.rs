@@ -883,7 +883,8 @@ pub async fn load_session_history(
         .join(format!("{}.jsonl", session_id));
 
     if !session_path.exists() {
-        return Err(format!("Session file not found: {}", session_id));
+        // Return empty history for new sessions - file will be created on first prompt
+        return Ok(vec![]);
     }
 
     let file =
@@ -1806,7 +1807,7 @@ pub async fn get_checkpoint_diff(
                     path: path.clone(),
                     additions,
                     deletions,
-                    diff_content: None, // TODO: Generate actual diff
+                    diff_content: None,
                 });
             }
         } else {
