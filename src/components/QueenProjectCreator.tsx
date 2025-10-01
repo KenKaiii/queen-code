@@ -84,6 +84,8 @@ export const QueenProjectCreator: React.FC<QueenProjectCreatorProps> = ({
     setError(null);
     try {
       await invoke("install_queen_cli");
+      // Wait for PATH to update after npm install
+      await new Promise(resolve => setTimeout(resolve, 1000));
       await loadCliStatus();
     } catch (err) {
       setError(err as string || "Failed to install Queen CLI. Try running: npm install -g @kenkaiiii/queen-claude");

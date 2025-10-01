@@ -117,8 +117,19 @@ pub async fn check_queen_cli_status() -> Result<QueenCliStatus, String> {
 
 #[tauri::command]
 pub async fn install_queen_cli() -> Result<String, String> {
+    // Install all Queen CLI packages with @latest to ensure they're all installed
     let mut cmd = Command::new("npm");
-    cmd.args(["install", "-g", "@kenkaiiii/queen-claude"])
+    cmd.args([
+            "install",
+            "-g",
+            "@kenkaiiii/queen-claude@latest",
+            "@kenkaiiii/queen-rag@latest",
+            "@kenkaiiii/queen-nextjs@latest",
+            "@kenkaiiii/queen-tauri@latest",
+            "@kenkaiiii/queen-init@latest",
+            "@kenkaiiii/queen-chrome-ext@latest",
+            "@kenkaiiii/queen-saas@latest"
+        ])
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .env("PATH", get_extended_path());
@@ -130,15 +141,6 @@ pub async fn install_queen_cli() -> Result<String, String> {
         let stderr = String::from_utf8_lossy(&output.stderr);
         return Err(format!("Installation failed: {}", stderr));
     }
-
-    // Force reinstall queen-chrome-ext to fix v2.0.0-2.1.0 binary name bug
-    let mut chrome_cmd = Command::new("npm");
-    chrome_cmd.args(["install", "-g", "@kenkaiiii/queen-chrome-ext@latest", "--force"])
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .env("PATH", get_extended_path());
-
-    let _ = chrome_cmd.output(); // Ignore errors, best effort fix
 
     let stdout = String::from_utf8_lossy(&output.stdout);
 
