@@ -73,7 +73,7 @@ jobs:
       - name: Build native
         env:
           CI: true
-        run: bun run tauri build
+        run: bun run tauri build --bundles app
 
       - name: Sign app bundle
         if: ${{ env.APPLE_SIGNING_IDENTITY != '' }}
